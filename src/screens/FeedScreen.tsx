@@ -7,7 +7,7 @@ const FeedScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View>
-        <Text style={styles.title}>FeedScreen</Text>
+        <Text style={styles.title}>Coming Soon</Text>
       </View>
     </SafeAreaView>
   );

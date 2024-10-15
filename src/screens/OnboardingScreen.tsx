@@ -64,8 +64,8 @@ const OnBoardingScreen: React.FC<OnboardingScreenProps> = ({navigation}) => {
                   Have fun discovering music in multiple ways!
                 </Text>
                 <Text style={[Typography.size1, Typography.text3]}>
-                  Through gamified streaming of unheard songs, top charts, and
-                  even other users.
+                  Through gamified discovery streaming, rating charts, and even
+                  other users.
                 </Text>
               </View>
               <View style={styles.buttonWrapper}>
@@ -92,11 +92,11 @@ const OnBoardingScreen: React.FC<OnboardingScreenProps> = ({navigation}) => {
             <View style={styles.section}>
               <View style={styles.wrapper}>
                 <Text style={[Typography.h1, Typography.highlight]}>
-                  Help new artists rise on the charts.
+                  Help artists rise on the charts.
                 </Text>
                 <Text style={[Typography.size1, Typography.text3]}>
-                  Your song ratings not only help your score, but also artists
-                  that need to be heard.
+                  Your song ratings not only help your score, but also helps
+                  unknown, talented artists get exposure.
                 </Text>
               </View>
               <View style={styles.buttonWrapper}>

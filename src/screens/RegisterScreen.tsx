@@ -62,7 +62,7 @@ const RegisterScreen: React.FC<Props> = ({navigation}) => {
           <View>
             <Image
               source={require('../assets/images/songsavior-logo.png')}
-              resizeMode={'center'}
+              resizeMode="contain"
               style={styles.logo}
             />
             <Text
