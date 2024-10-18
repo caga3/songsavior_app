@@ -18,23 +18,25 @@ const LeaderboardScreen: React.FC<Props> = ({navigation}) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   return (
-    <SafeAreaView>
-      <ProfileNav />
-      <View style={Typography.container}>
-        <TouchableOpacity
-          style={styles.filterBtn}
-          onPress={() => {
-            setModalVisible(true);
-          }}>
-          <IconSvg width="24" height="24" path="M4 6H12M4 12H20M4 18H16" />
-        </TouchableOpacity>
-        <View style={Typography.headerWrapper}>
-          <Text style={[Typography.h3, Typography.textCenter]}>
-            LEADERBOARD
-          </Text>
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={{ flexGrow: 1 }}>
+        <ProfileNav />
+        <View style={Typography.container}>
+          <TouchableOpacity
+            style={styles.filterBtn}
+            onPress={() => {
+              setModalVisible(true);
+            }}>
+            <IconSvg width="24" height="24" path="M4 6H12M4 12H20M4 18H16" />
+          </TouchableOpacity>
+          <View style={Typography.headerWrapper}>
+            <Text style={[Typography.h3, Typography.textCenter]}>
+              LEADERBOARD
+            </Text>
+          </View>
+          <FiltersChart />
+          <OverallLeader nav={navigation} />
         </View>
-        <FiltersChart />
-        <OverallLeader nav={navigation} />
       </View>
       <Modal
         transparent={true}
@@ -84,11 +86,7 @@ const LeaderboardScreen: React.FC<Props> = ({navigation}) => {
   );
 };
 
-const styles = StyleSheet.create({
-  offset: {
-    position: 'relative',
-    top: -8,
-  },
+const styles = StyleSheet.create({ 
   filterBtn: {
     position: 'absolute',
     zIndex: 1,

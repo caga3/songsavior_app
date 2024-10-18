@@ -1,5 +1,5 @@
 import React from 'react';
-import {ScrollView} from 'react-native';
+import {SafeAreaView, ScrollView} from 'react-native';
 
 import {Text, View} from '../components/Themed';
 import {FiltersCategory} from '../components/FiltersCategory';
@@ -16,23 +16,25 @@ interface Props {
 }
 
 const PlayerScreen: React.FC<Props> = ({navigation}) => {
-  return (
-    <FilterCategoryProvider>
-      <ScrollView>
-        <ProfileNav />
-        <View style={Typography.container}>
-          <View style={Typography.headerWrapper}>
-            <Text style={[Typography.h3, Typography.textCenter]}>
-              CREATE STREAM
-            </Text>
-          </View>
-          <FiltersCategory />
-          <Categories />
-        </View>
-      </ScrollView>
-      <StreamPlayer nav={navigation} />
-    </FilterCategoryProvider>
+  return ( 
+      <FilterCategoryProvider > 
+        <SafeAreaView style={{ flex: 1 }}>
+          <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+            <ProfileNav />
+            <View style={Typography.container}>
+              <View style={Typography.headerWrapper}>
+                <Text style={[Typography.h3, Typography.textCenter]}>
+                  CREATE STREAM
+                </Text>
+              </View>
+              <FiltersCategory />
+              <Categories />
+            </View>
+          </ScrollView>  
+        </SafeAreaView> 
+        <StreamPlayer nav={navigation} />  
+      </FilterCategoryProvider> 
   );
-};
+}; 
 
 export default PlayerScreen;

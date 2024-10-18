@@ -55,7 +55,8 @@ const ProfileNav: React.FC<ProfileProp> = ({show = true}) => {
 
 const styles = StyleSheet.create({
   offSet: {
-    marginTop: -8,
+    position: 'relative',
+    marginTop: -7,
   },
   wrapper: {
     height: 40,

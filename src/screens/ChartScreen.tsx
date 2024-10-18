@@ -23,8 +23,8 @@ interface Props {
 const ChartScreen: React.FC<Props> = ({navigation}) => {
   const [modalVisible, setModalVisible] = useState(false);
   return (
-    <SafeAreaView>
-      <ScrollView>
+    <SafeAreaView style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <ProfileNav />
         <View style={Typography.container}>
           <TouchableOpacity

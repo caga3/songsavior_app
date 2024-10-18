@@ -61,7 +61,8 @@ const Typography = StyleSheet.create({
   },
   containerTrans: {
     position: 'relative',
-    padding: 20,
+    paddingRight: 20,
+    paddingLeft: 20,
   },
   fluid: {
     backgroundColor: Colors[colorScheme].background,
