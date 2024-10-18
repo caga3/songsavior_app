@@ -19,8 +19,8 @@ const FeedScreen: React.FC = () => {
               <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>  
                 <View style={styles.wrapper}>
                   <Text
-                    style={[Typography.h1, Typography.textCenter, Typography.highlight]}>
-                    Feature Not Available ... Yet
+                    style={[Typography.h2, Typography.textCenter, Typography.highlight]}>
+                    Feature Not Available {'\n'}... Yet
                   </Text>
                   <Text style={styles.title}>
                     Update feed is unavailable during the beta phase.
@@ -40,11 +40,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   wrapper: {
-    width: 200,
+    width: 260,
   },
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 15, 
+    textAlign: 'center'
   },
   separator: {
     marginVertical: 30,
