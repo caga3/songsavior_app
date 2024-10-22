@@ -4,8 +4,8 @@ import {StyleSheet, TouchableOpacity} from 'react-native';
 import {Button, View, TextInput} from './Themed';
 import IconSvg from './IconsSvg';
 import {useFilter} from '../context/FilterCategoryContext';
-import Typography from '../constants/Typography'; 
-import ModalBottom from './ModalBottom'; 
+import Typography from '../constants/Typography';
+import ModalBottom from './ModalBottom';
 
 export function FiltersCategory() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -71,7 +71,9 @@ export function FiltersCategory() {
         />
       )}
 
-      <ModalBottom isVisible={modalVisible} onClose={() => setModalVisible(false)}>
+      <ModalBottom
+        isVisible={modalVisible}
+        onClose={() => setModalVisible(false)}>
         Update feed is unavailable during the beta phase.
       </ModalBottom>
     </View>
