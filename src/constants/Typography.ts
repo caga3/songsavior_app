@@ -89,7 +89,7 @@ const Typography = StyleSheet.create({
   flexAroundStart: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-  },
+  }, 
   flexEvenly: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
@@ -108,6 +108,10 @@ const Typography = StyleSheet.create({
   flexStart: {
     justifyContent: 'flex-start',
   },
+  flexEnd: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
   flexTop: {
     alignItems: 'flex-start',
   },
@@ -116,6 +120,9 @@ const Typography = StyleSheet.create({
   },
   flexBottom: {
     alignItems: 'flex-end',
+  },
+  flexHalf: {
+    flex: 5, 
   },
   textCenter: {
     textAlign: 'center',

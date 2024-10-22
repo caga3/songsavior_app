@@ -5,7 +5,7 @@ import {Button, View, TextInput, Text, SelectOption} from './Themed';
 import IconSvg from './IconsSvg';
 import {useFilter} from '../context/FilterCategoryContext';
 import Typography from '../constants/Typography'; 
-import ModalNotYet from './ModalNotYet'; 
+import ModalBottom from './ModalBottom'; 
 
 export function FiltersCategory() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -71,9 +71,9 @@ export function FiltersCategory() {
         />
       )}
 
-      <ModalNotYet isVisible={modalVisible} onClose={() => setModalVisible(false)}>
+      <ModalBottom isVisible={modalVisible} onClose={() => setModalVisible(false)}>
         Update feed is unavailable during the beta phase.
-      </ModalNotYet>
+      </ModalBottom>
     </View>
   );
 }
