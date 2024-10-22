@@ -3,8 +3,8 @@ import axios from 'axios';
 import RestApiServer from './RestApiServer';
 
 const config = {
-  clientId: 'a06f05905e164816805f67e22c52348c',
-  clientSecret: 'c20c2088ae3d4b8bbf3f3fd34dc6fd15',
+  clientId: '3880adb61bc74d7d9588d80e0d203427',
+  clientSecret: '66b79b58b3f74d4b8add92e11f120a55',
   clientUrl: 'https://api.spotify.com/v1',
   clientAccountUrl: 'https://accounts.spotify.com',
 };

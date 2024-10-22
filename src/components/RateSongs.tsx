@@ -248,7 +248,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
       TrackPlayer.reset();
       queueEndedListener.remove();
     };
-  }, [item]);
+  }, [filter, getUserInfo.id, isVoteReady, item, userToken]);
 
   useFocusEffect(
     React.useCallback(() => {

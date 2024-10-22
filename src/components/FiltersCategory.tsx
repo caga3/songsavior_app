@@ -1,11 +1,11 @@
 import React, {useState} from 'react';
-import {Modal, StyleSheet, TouchableOpacity} from 'react-native';
+import {StyleSheet, TouchableOpacity} from 'react-native';
 
-import {Button, View, TextInput, Text, SelectOption} from './Themed';
+import {Button, View, TextInput} from './Themed';
 import IconSvg from './IconsSvg';
 import {useFilter} from '../context/FilterCategoryContext';
-import Typography from '../constants/Typography'; 
-import ModalNotYet from './ModalNotYet'; 
+import Typography from '../constants/Typography';
+import ModalNotYet from './ModalNotYet';
 
 export function FiltersCategory() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -71,7 +71,9 @@ export function FiltersCategory() {
         />
       )}
 
-      <ModalNotYet isVisible={modalVisible} onClose={() => setModalVisible(false)}>
+      <ModalNotYet
+        isVisible={modalVisible}
+        onClose={() => setModalVisible(false)}>
         Update feed is unavailable during the beta phase.
       </ModalNotYet>
     </View>
@@ -85,7 +87,7 @@ const styles = StyleSheet.create({
   containerGroup: {
     marginLeft: 10,
     width: '9%',
-  }, 
+  },
   buttonContainer: {
     flexDirection: 'row',
     borderRadius: 6,
