@@ -52,7 +52,8 @@ export type ViewProps = ThemeProps & DefaultView['props'];
 export type TextInputProps = ThemeProps & DefaultTextInput['props'];
 export type TextInputIconProps = ThemeInputIconProps &
   DefaultTextInput['props'];
-export type ButtonProps = ThemeButtonProps & DefaultButton['props'];
+export type ButtonProps = ThemeButtonProps &
+  React.ComponentProps<typeof DefaultButton>;
 export type CheckBoxProps = ThemeCheckBoxProps;
 export type SelectProps = ThemeSelectProps;
 

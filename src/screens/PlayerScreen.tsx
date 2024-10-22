@@ -16,25 +16,25 @@ interface Props {
 }
 
 const PlayerScreen: React.FC<Props> = ({navigation}) => {
-  return ( 
-      <FilterCategoryProvider > 
-        <SafeAreaView style={{ flex: 1 }}>
-          <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-            <ProfileNav />
-            <View style={Typography.container}>
-              <View style={Typography.headerWrapper}>
-                <Text style={[Typography.h3, Typography.textCenter]}>
-                  CREATE STREAM
-                </Text>
-              </View>
-              <FiltersCategory />
-              <Categories />
+  return (
+    <FilterCategoryProvider>
+      <SafeAreaView style={{flex: 1}}>
+        <ScrollView contentContainerStyle={{flexGrow: 1}}>
+          <ProfileNav />
+          <View style={Typography.container}>
+            <View style={Typography.headerWrapper}>
+              <Text style={[Typography.h3, Typography.textCenter]}>
+                CREATE STREAM
+              </Text>
             </View>
-          </ScrollView>  
-        </SafeAreaView> 
-        <StreamPlayer nav={navigation} />  
-      </FilterCategoryProvider> 
+            <FiltersCategory />
+            <Categories />
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+      <StreamPlayer nav={navigation} />
+    </FilterCategoryProvider>
   );
-}; 
+};
 
 export default PlayerScreen;

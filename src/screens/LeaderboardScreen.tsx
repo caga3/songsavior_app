@@ -1,13 +1,13 @@
 import React, {useState} from 'react';
-import {Modal, SafeAreaView, StyleSheet, TouchableOpacity} from 'react-native';
+import {SafeAreaView, StyleSheet, TouchableOpacity} from 'react-native';
 
-import {Button, SelectOption, Text, View} from '../components/Themed';
+import {Text, View} from '../components/Themed';
 import OverallLeader from '../components/OverallLeader';
 import ProfileNav from '../components/ProfileNav';
 import Typography from '../constants/Typography';
 import IconSvg from '../components/IconsSvg';
 import {FiltersChart} from '../components/FiltersChart';
-import ModalNotYet from '../components/ModalNotYet'; 
+import ModalBottom from '../components/ModalBottom';
 
 interface Props {
   navigation: {
@@ -19,8 +19,8 @@ const LeaderboardScreen: React.FC<Props> = ({navigation}) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View style={{ flexGrow: 1 }}>
+    <SafeAreaView style={{flex: 1}}>
+      <View style={{flexGrow: 1}}>
         <ProfileNav />
         <View style={Typography.container}>
           <TouchableOpacity
@@ -39,20 +39,22 @@ const LeaderboardScreen: React.FC<Props> = ({navigation}) => {
           <OverallLeader nav={navigation} />
         </View>
       </View>
-      <ModalNotYet isVisible={modalVisible} onClose={() => setModalVisible(false)}>
-          Update feed is unavailable during the beta phase.
-      </ModalNotYet>
+      <ModalBottom
+        isVisible={modalVisible}
+        onClose={() => setModalVisible(false)}>
+        Update feed is unavailable during the beta phase.
+      </ModalBottom>
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({ 
+const styles = StyleSheet.create({
   filterBtn: {
     position: 'absolute',
     zIndex: 1,
     top: 28,
     left: 20,
-  }, 
+  },
 });
 
 export default LeaderboardScreen;

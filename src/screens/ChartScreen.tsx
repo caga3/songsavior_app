@@ -13,7 +13,7 @@ import ProfileNav from '../components/ProfileNav';
 import Typography from '../constants/Typography';
 import IconSvg from '../components/IconsSvg';
 import {FiltersChart} from '../components/FiltersChart';
-import ModalNotYet from '../components/ModalNotYet'; 
+import ModalBottom from '../components/ModalBottom'; 
 
 interface Props {
   navigation: {
@@ -41,9 +41,9 @@ const ChartScreen: React.FC<Props> = ({navigation}) => {
           <FiltersChart />
           <OverallChart nav={navigation} />
         </View>
-        <ModalNotYet isVisible={modalVisible} onClose={() => setModalVisible(false)}>
+        <ModalBottom isVisible={modalVisible} onClose={() => setModalVisible(false)}>
           Update feed is unavailable during the beta phase.
-        </ModalNotYet>
+        </ModalBottom>
       </ScrollView>
     </SafeAreaView>
   );

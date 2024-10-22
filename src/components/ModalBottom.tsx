@@ -10,7 +10,7 @@ interface ModalProp {
   children: React.ReactNode;
 }
 
-const ModalNotYet: React.FC<ModalProp> = ({isVisible, onClose, children}) => {
+const ModalBottom: React.FC<ModalProp> = ({isVisible, onClose, children}) => {
   return (
     <Modal transparent={true} visible={isVisible} onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={onClose}>
@@ -69,4 +69,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ModalNotYet;
+export default ModalBottom;

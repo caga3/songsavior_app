@@ -51,17 +51,6 @@ const MessageScreen: React.FC<Props> = ({navigation}) => {
     navigation.navigate('ChatScreen');
   };
 
-  const fetchConversations = async () => {
-    if (getUserInfo.id && userToken) {
-      const msg = await RestApiServer.fetchConversations(
-        getUserInfo.id,
-        userToken,
-      );
-      setConversations(msg);
-      setLoading(false);
-    }
-  };
-
   const searchMessages = async (text: string) => {
     try {
       setSearch(text);
@@ -85,8 +74,18 @@ const MessageScreen: React.FC<Props> = ({navigation}) => {
   };
 
   useEffect(() => {
+    const fetchConversations = async () => {
+      if (getUserInfo.id && userToken) {
+        const msg = await RestApiServer.fetchConversations(
+          getUserInfo.id,
+          userToken,
+        );
+        setConversations(msg);
+        setLoading(false);
+      }
+    };
     fetchConversations();
-  }, []);
+  }, [getUserInfo.id, userToken]);
 
   const renderItem = ({item}: {item: DataItem}) => (
     <Pressable

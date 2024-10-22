@@ -105,7 +105,7 @@ const ChatScreen: React.FC = () => {
       socket.disconnect();
       setMessages([]);
     };
-  }, []);
+  }, [route.params, socket, userToken]);
 
   const renderItem = ({item}: {item: DataItem}) => (
     <View style={styles.message}>
