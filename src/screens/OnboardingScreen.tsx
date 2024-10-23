@@ -37,7 +37,7 @@ const OnBoardingScreen: React.FC<OnboardingScreenProps> = ({navigation}) => {
       }
     };
     checkScreen();
-  }, [navigation]);
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>

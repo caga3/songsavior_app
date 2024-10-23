@@ -85,7 +85,7 @@ const MessageScreen: React.FC<Props> = ({navigation}) => {
       }
     };
     fetchConversations();
-  }, [getUserInfo.id, userToken]);
+  }, []);
 
   const renderItem = ({item}: {item: DataItem}) => (
     <Pressable

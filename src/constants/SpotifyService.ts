@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import RestApiServer from './RestApiServer';
+import {slugText} from './Helper';
 
 const config = {
   clientId: '3880adb61bc74d7d9588d80e0d203427',
@@ -8,6 +9,41 @@ const config = {
   clientUrl: 'https://api.spotify.com/v1',
   clientAccountUrl: 'https://accounts.spotify.com',
 };
+
+interface Genres {
+  rock: string;
+  jazz: string;
+  pop: string;
+  country: string;
+  rb: string;
+  hiphop: string;
+  danceelectronic: string;
+}
+
+const Catgories: Genres = {
+  rock: '6djfYlkE61kBMZtxBKyX3R',
+  jazz: '6djfYlkE61kBMZtxBKyX3R',
+  pop: '6djfYlkE61kBMZtxBKyX3R',
+  country: '6djfYlkE61kBMZtxBKyX3R',
+  rb: '6djfYlkE61kBMZtxBKyX3R',
+  hiphop: '6djfYlkE61kBMZtxBKyX3R',
+  danceelectronic: '6djfYlkE61kBMZtxBKyX3R',
+};
+
+interface Track {
+  id: string; // Assuming id is a string
+  name: string;
+  artists: [];
+  album: {
+    images: [];
+  };
+  preview_url: string | null; // Preview URL can be a string or null
+}
+
+// Define the structure of each item containing a track
+interface Item {
+  track: Track; // Each item has a track
+}
 
 const getRandomCharacter = () => {
   const characters = 'abcdefghijklmnopqrstuvwxyz';
@@ -167,24 +203,54 @@ const searchRandomTrack = async (
 };
 
 // Function to get a random track by category
-const searchRandomTrackByCategory = async (token: string, category: string) => {
+const searchRandomTrackByCategory = async (
+  token: string,
+  category: keyof Genres,
+) => {
   try {
+    const cleanCatagory: string = slugText(category);
     // Search for tracks based on the category
-    const response = await axios.get(`${config.clientUrl}/search`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
+    const response = await axios.get(
+      `${config.clientUrl}/playlists/${
+        Catgories[cleanCatagory as keyof Genres]
+      }`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          limit: 50,
+        },
       },
-      params: {
-        q: `genre:${category}`,
-        type: 'track',
-        limit: 20,
-      },
-    });
+    );
     const data = response.data ?? {};
-    const tracks = data ? data.tracks.items : data;
+    const tracks = data.tracks ? data.tracks.items : data;
     if (tracks) {
-      const randomIndex = getRandomNumber(tracks.length);
-      const randomTrack = tracks[randomIndex];
+      const revisedTracks = data.tracks.items.map(
+        ({
+          track: {
+            id,
+            name,
+            artists,
+            preview_url,
+            album: {images},
+          },
+        }: Item) => ({
+          id,
+          name,
+          artists,
+          preview_url,
+          album: {
+            images,
+          },
+        }),
+      );
+      // Filter Out all Blank Preview
+      const filteredTracks = revisedTracks.filter(
+        (item: {preview_url: string | null}) => item.preview_url !== null,
+      );
+      const randomIndex = getRandomNumber(filteredTracks.length);
+      const randomTrack = filteredTracks[randomIndex];
       return randomTrack;
     } else {
       return data;

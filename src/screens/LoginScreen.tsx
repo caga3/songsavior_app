@@ -44,7 +44,7 @@ const LoginScreen: React.FC<Props> = ({navigation}) => {
       }
     };
     checkScreen();
-  }, [userToken]);
+  }, []);
 
   return (
     <>

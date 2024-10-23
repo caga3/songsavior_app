@@ -21,6 +21,16 @@ export const cleanText = (input: string): string => {
   return input;
 };
 
+export const slugText = (input: string): string => {
+  if (input) {
+    return input
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-zA-Z0-9]/g, '');
+  }
+  return input;
+};
+
 export const trimString = (input: string, maxLength: number = 49): string => {
   if (input) {
     if (input.length <= maxLength) {

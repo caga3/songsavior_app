@@ -1,19 +1,18 @@
 import React, {useState} from 'react';
 import {
-  Modal,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
 
-import {Button, SelectOption, Text, View} from '../components/Themed';
+import {Text, View} from '../components/Themed';
 import OverallChart from '../components/OverallChart';
 import ProfileNav from '../components/ProfileNav';
 import Typography from '../constants/Typography';
 import IconSvg from '../components/IconsSvg';
 import {FiltersChart} from '../components/FiltersChart';
-import ModalBottom from '../components/ModalBottom'; 
+import ModalBottom from '../components/ModalBottom';
 
 interface Props {
   navigation: {
@@ -24,8 +23,8 @@ interface Props {
 const ChartScreen: React.FC<Props> = ({navigation}) => {
   const [modalVisible, setModalVisible] = useState(false);
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+    <SafeAreaView style={{flex: 1}}>
+      <ScrollView contentContainerStyle={{flexGrow: 1}}>
         <ProfileNav />
         <View style={Typography.container}>
           <TouchableOpacity
@@ -41,7 +40,9 @@ const ChartScreen: React.FC<Props> = ({navigation}) => {
           <FiltersChart />
           <OverallChart nav={navigation} />
         </View>
-        <ModalBottom isVisible={modalVisible} onClose={() => setModalVisible(false)}>
+        <ModalBottom
+          isVisible={modalVisible}
+          onClose={() => setModalVisible(false)}>
           Update feed is unavailable during the beta phase.
         </ModalBottom>
       </ScrollView>
@@ -55,7 +56,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
     top: 28,
     left: 20,
-  }, 
+  },
 });
 
 export default ChartScreen;

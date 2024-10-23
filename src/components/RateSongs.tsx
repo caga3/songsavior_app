@@ -43,6 +43,16 @@ interface VoteData {
   avg: number;
 }
 
+interface Genres {
+  rock: string;
+  jazz: string;
+  pop: string;
+  country: string;
+  rb: string;
+  hiphop: string;
+  danceelectronic: string;
+}
+
 const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
   const progress = useProgress();
   const [duration, setDuration] = useState(0);
@@ -155,15 +165,14 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
   useEffect(() => {
     const playerSetup = async (trackData: any) => {
       await setupPlayer();
-      const artworkUrl = trackData?.album?.images?.[0]?.url;
-      const previewUrl = trackData?.preview_url;
       const options = {
         id: 1,
-        url: previewUrl,
-        title: trackData?.name,
-        artist: trackData?.artists?.[0]?.name,
-        artwork: artworkUrl,
+        url: trackData.preview_url,
+        title: trackData.name,
+        artist: trackData.artists?.[0]?.name,
+        artwork: trackData.album.images?.[0]?.url,
       };
+      // console.log(options);
       //setDuration(trackData?.duration_ms); // Real full Songs
       setDuration(29000); // Preview Songs
       TrackPlayer.add(options);
@@ -180,9 +189,9 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
             if (filter === 'genres') {
               playerData = await SpotifyService.searchRandomTrackByCategory(
                 tokenObj,
-                item,
+                item as keyof Genres,
               );
-              playerId = playerData?.album?.id;
+              playerId = playerData.id;
             } else if (filter === 'artists') {
               playerData = await SpotifyService.searchRandomTrackByArtist(
                 tokenObj,
@@ -190,7 +199,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
                 getUserInfo.id,
                 userToken,
               );
-              playerId = playerData?.album?.id;
+              playerId = playerData.id;
             } else {
               playerData = await SpotifyService.searchTrack(tokenObj, item);
               playerId = item;
@@ -248,12 +257,11 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
       TrackPlayer.reset();
       queueEndedListener.remove();
     };
-  }, [filter, getUserInfo.id, isVoteReady, item, userToken]);
+  }, []);
 
   useFocusEffect(
     React.useCallback(() => {
       return async () => {
-        setIsPlaying(false);
         await TrackPlayer.pause();
         setIsPlaying(false);
       };
@@ -342,7 +350,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
                 <Text style={Typography.size2}>{songPlayer.name}</Text>
                 <Text
                   style={[Typography.size1, Typography.text3, Typography.mb]}>
-                  {songPlayer.album.artists[0].name}
+                  {songPlayer.artists[0].name}
                 </Text>
 
                 <TouchableOpacity style={styles.like} onPress={handleLikes}>

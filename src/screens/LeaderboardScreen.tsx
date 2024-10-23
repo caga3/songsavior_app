@@ -19,7 +19,7 @@ const LeaderboardScreen: React.FC<Props> = ({navigation}) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   return (
-    <SafeAreaView style={{flex: 1}}>
+    <SafeAreaView style={{flex: 1, flexGrow: 1}}>
       <View style={{flexGrow: 1}}>
         <ProfileNav />
         <View style={Typography.container}>
@@ -38,12 +38,12 @@ const LeaderboardScreen: React.FC<Props> = ({navigation}) => {
           <FiltersChart />
           <OverallLeader nav={navigation} />
         </View>
+        <ModalBottom
+          isVisible={modalVisible}
+          onClose={() => setModalVisible(false)}>
+          Update feed is unavailable during the beta phase.
+        </ModalBottom>
       </View>
-      <ModalBottom
-        isVisible={modalVisible}
-        onClose={() => setModalVisible(false)}>
-        Update feed is unavailable during the beta phase.
-      </ModalBottom>
     </SafeAreaView>
   );
 };
