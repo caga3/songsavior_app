@@ -7,6 +7,7 @@ import {
   FlatList,
   Pressable,
   ListRenderItem,
+  ScrollView,
 } from 'react-native';
 
 import {View, Text} from './Themed';
@@ -215,14 +216,16 @@ const OverallLeader: React.FC<Props> = ({nav}) => {
           {renderItemRanked()}
         </View>
       </View>
-      <View style={styles.containerWrapper}>
+      <ScrollView>
+      <View style={{marginBottom: 680, ...styles.containerWrapper}}>
+      
         <FlatList
-          scrollEnabled={true}
+          scrollEnabled={false}
           data={showLeaderboard}
           renderItem={renderItem}
           keyExtractor={(item, index) => index.toString()}
         />
-      </View>
+      </View></ScrollView>
     </>
   );
 };
