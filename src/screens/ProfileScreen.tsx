@@ -12,20 +12,26 @@ import {
 
 import {useRoute, RouteProp} from '@react-navigation/native';
 import {Text, View} from '../components/Themed';
-
+import ModalFull from '../components/ModalFull';
 import ProfileNav from '../components/ProfileNav';
 import Typography from '../constants/Typography';
 import GoBack from '../components/GoBack';
 import LinearGradient from 'react-native-linear-gradient';
 import LocationIcon from '../constants/icons/LocationIcon';
+import HBars from '../constants/icons/HBarIcon';
 import IconSvg from '../components/IconsSvg';
 import VBarIcon from '../constants/icons/VBarIcon';
 import {useAuth} from '../context/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RestApiServer from '../constants/RestApiServer';
-import {cleanText} from '../constants/Helper';
+import {cleanText, slugText} from '../constants/Helper';
 
 interface DataItem {
+  id: number;
+  city: string;
+  country: string;
+  user_level: string;
+  user_badges: string;
   avatar_url: string;
   user_display_name: string;
   votes: {
@@ -70,11 +76,71 @@ const ProfileScreen: React.FC = () => {
   const [showGenres, setShowGenres] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalRated, setTotalRated] = useState(0);
+  const [modalLevelVisible, setModalLevelVisible] = useState(false);
+  const [modalBadgesVisible, setModalBadgesVisible] = useState(false);
   const getUserInfo =
     typeof userInfo === 'string' ? JSON.parse(userInfo) : null;
   const user_id = routes && routes.item ? routes.item : getUserInfo.id;
   const default_avatar =
     'https://www.songsavior.com/wp-content/uploads/2024/07/default_avatar.jpg';
+
+  const handleEdit = () => {};
+
+  const badgeImages: {[key: string]: any} = {
+    default: {
+      name: 'Fan',
+      img: require('../assets/images/badges/fan.png'),
+      range: 0,
+    },
+    superfan: {
+      name: 'Super Fan',
+      img: require('../assets/images/badges/superfan.png'),
+      range: 25,
+    },
+    roadie: {
+      name: 'Roadie',
+      img: require('../assets/images/badges/roadie.png'),
+      range: 50,
+    },
+    streetteamleader: {
+      name: 'Street Team Leader',
+      img: require('../assets/images/badges/streetteamleader.png'),
+      range: 100,
+    },
+    promoter: {
+      name: 'Promoter',
+      img: require('../assets/images/badges/promoter.png'),
+      range: 200,
+    },
+  };
+
+  const levelImages: {[key: string]: any} = {
+    default: {
+      name: 'Beginner Record',
+      img: require('../assets/images/levels/beginner.png'),
+      range: [0, 69.9],
+    },
+    silver: {
+      name: 'Silver Record',
+      img: require('../assets/images/levels/silver.png'),
+      range: [70, 79.9],
+    },
+    gold: {
+      name: 'Gold Record',
+      img: require('../assets/images/levels/gold.png'),
+      range: [80, 89.9],
+    },
+    platinum: {
+      name: 'Platinum Record',
+      img: require('../assets/images/levels/platinum.png'),
+      range: [90, 94.9],
+    },
+    diamond: {
+      name: 'Diamond Record',
+      img: require('../assets/images/levels/diamond.png'),
+      range: [95, 100],
+    },
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -98,7 +164,7 @@ const ProfileScreen: React.FC = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [showProfile]);
 
   const groupGenres = (data: DataItem['votes']): string[] => {
     const genreSet = new Set<string>();
@@ -187,26 +253,52 @@ const ProfileScreen: React.FC = () => {
                       ? showProfile.user_display_name
                       : ''}
                   </Text>
-                  <View style={Typography.flex}>
-                    <LocationIcon />
-                    <Text style={[Typography.ms, Typography.text4]}>
-                      Redditch, UK
-                    </Text>
-                    <TouchableOpacity onPress={setLogout}>
-                      <Text style={[Typography.ms, Typography.text4]}>
-                        Logout
-                      </Text>
-                    </TouchableOpacity>
+                  <View>
+                    {showProfile.city && (
+                      <View style={Typography.flex}>
+                        <LocationIcon />
+                        <Text style={[Typography.ms, Typography.text4]}>
+                          {showProfile.city}
+                          {showProfile.country
+                            ? `, ${showProfile.country}`
+                            : ''}
+                        </Text>
+                      </View>
+                    )}
                   </View>
                   <View style={Typography.flex}>
-                    <Image
-                      source={require('../assets/images/badges/promoter.png')}
-                      style={styles.badges}
-                    />
-                    <Image
-                      source={require('../assets/images/levels/platinum.png')}
-                      style={styles.level}
-                    />
+                    {showProfile.id === Number(getUserInfo.id) && (
+                      <>
+                        <TouchableOpacity onPress={handleEdit}>
+                          <Text style={Typography.text4}>Edit</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={setLogout}>
+                          <Text style={[Typography.ms15, Typography.text4]}>
+                            Logout
+                          </Text>
+                        </TouchableOpacity>
+                      </>
+                    )}
+                  </View>
+                  <View style={Typography.flex}>
+                    <TouchableOpacity
+                      onPress={() => setModalBadgesVisible(true)}>
+                      <Image
+                        source={
+                          badgeImages[slugText(showProfile.user_badges)].img
+                        }
+                        style={styles.badges}
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => setModalLevelVisible(true)}>
+                      <Image
+                        source={
+                          levelImages[slugText(showProfile.user_level)].img
+                        }
+                        style={styles.level}
+                      />
+                    </TouchableOpacity>
                   </View>
                 </View>
               </View>
@@ -324,7 +416,7 @@ const ProfileScreen: React.FC = () => {
                           Typography.textCenter,
                           Typography.text,
                         ]}>
-                        Raing Accuracy
+                        Rating Accuracy
                       </Text>
                     </View>
                     <View style={[Typography.tintBkgGreen, styles.accuracy]}>
@@ -350,8 +442,161 @@ const ProfileScreen: React.FC = () => {
                 <Text style={[Typography.h2, Typography.semibold]}>
                   Related Songs
                 </Text>
-                <View style={Typography.card}></View>
               </ScrollView>
+              <ModalFull
+                isVisible={modalLevelVisible}
+                onClose={() => setModalLevelVisible(false)}>
+                <View>
+                  <Text style={[Typography.h2, Typography.semibold]}>
+                    Your Current Level
+                  </Text>
+                  <View style={{marginBottom: 10}}>
+                    {levelImages[slugText(showProfile.user_level)] && (
+                      <View style={{marginLeft: -10, ...Typography.flex}}>
+                        <Image
+                          source={
+                            levelImages[slugText(showProfile.user_level)].img
+                          }
+                          style={styles.level}
+                        />
+                        <View style={{marginLeft: 5}}>
+                          <Text style={styles.badgeText}>
+                            {levelImages[slugText(showProfile.user_level)].name}
+                          </Text>
+                          <Text style={styles.badgeText2}>
+                            {
+                              levelImages[slugText(showProfile.user_level)]
+                                .range[0]
+                            }
+                            % -{' '}
+                            {
+                              levelImages[slugText(showProfile.user_level)]
+                                .range[1]
+                            }
+                            %
+                          </Text>
+                        </View>
+                      </View>
+                    )}
+                    <View style={{marginBottom: 15, ...Typography.flexBetween}}>
+                      <View style={Typography.flex}>
+                        <IconSvg
+                          width="24"
+                          height="24"
+                          color="#FDF15D"
+                          path="M6 18L18 6M18 17C18 17.5523 17.5523 18 17 18C16.4477 18 16 17.5523 16 17C16 16.4477 16.4477 16 17 16C17.5523 16 18 16.4477 18 17ZM8 7C8 7.55228 7.55228 8 7 8C6.44772 8 6 7.55228 6 7C6 6.44772 6.44772 6 7 6C7.55228 6 8 6.44772 8 7Z"
+                        />
+                        <Text
+                          style={[
+                            Typography.semibold,
+                            Typography.size,
+                            Typography.ms,
+                            Typography.textCenter,
+                            Typography.text,
+                          ]}>
+                          Rating Accuracy
+                        </Text>
+                      </View>
+                      <View style={[Typography.tintBkgGreen, styles.accuracy]}>
+                        <Text style={[Typography.semibold, Typography.green]}>
+                          92% Accuracy
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                  <HBars />
+                  <View style={{marginTop: 30}}>
+                    <Text style={[Typography.h2, Typography.semibold]}>
+                      Levels
+                    </Text>
+                  </View>
+                  <View>
+                    {Object.keys(levelImages).map(key => {
+                      const level = levelImages[key];
+                      return (
+                        <View
+                          key={key}
+                          style={{marginLeft: -10, ...Typography.flex}}>
+                          <Image source={level.img} style={styles.level} />
+                          <View style={{marginLeft: 5}}>
+                            <Text style={styles.badgeText}>{level.name}</Text>
+                            <Text style={styles.badgeText2}>
+                              {level.range[0]}% - {level.range[1]}%
+                            </Text>
+                          </View>
+                        </View>
+                      );
+                    })}
+                  </View>
+                </View>
+              </ModalFull>
+              <ModalFull
+                isVisible={modalBadgesVisible}
+                onClose={() => setModalBadgesVisible(false)}>
+                <Text style={[Typography.h2, Typography.semibold]}>
+                  Your Current Status
+                </Text>
+                <View style={{marginBottom: 10}}>
+                  {badgeImages[slugText(showProfile.user_level)] && (
+                    <View style={Typography.flexBetween}>
+                      <Image
+                        source={
+                          badgeImages[slugText(showProfile.user_badges)].img
+                        }
+                        style={styles.badges}
+                      />
+                      <View>
+                        <Text style={{textAlign: 'right', ...styles.badgeText}}>
+                          0/
+                          {badgeImages[slugText(showProfile.user_level)].range}
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+                </View>
+                <HBars />
+                <View
+                  style={{
+                    marginTop: 30,
+                    ...Typography.flexBetween,
+                    ...Typography.ms,
+                  }}>
+                  <Text style={[Typography.h2, Typography.semibold]}>
+                    Status
+                  </Text>
+                  <Text style={[Typography.h2, Typography.semibold]}>
+                    Ratings
+                  </Text>
+                </View>
+                <View>
+                  {Object.keys(badgeImages).map(key => {
+                    const badge = badgeImages[key];
+                    return (
+                      <View
+                        key={key}
+                        style={{marginVertical: 8, ...Typography.flexBetween}}>
+                        <Image source={badge.img} style={styles.badges} />
+                        <View>
+                          <Text
+                            style={{textAlign: 'right', ...styles.badgeText}}>
+                            {badge.range}
+                          </Text>
+                          <Text style={styles.badgeText3}>
+                            <IconSvg
+                              width="16"
+                              height="12"
+                              stroke={true}
+                              color="#FDF15D"
+                              path="M3.3335 7.99996L6.66683 11.3333L13.3335 4.66663"
+                            />{' '}
+                            Completed!
+                          </Text>
+                        </View>
+                      </View>
+                    );
+                  })}
+                </View>
+              </ModalFull>
             </View>
           </ScrollView>
         </SafeAreaView>
@@ -395,12 +640,13 @@ const styles = StyleSheet.create({
   badges: {
     width: 160,
     height: 48,
+    resizeMode: 'contain',
   },
   level: {
     width: 65,
     height: 66,
     position: 'relative',
-    top: 4,
+    resizeMode: 'contain',
   },
   accuracy: {
     borderRadius: 8,
@@ -430,6 +676,19 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     width: 56,
     height: 56,
+  },
+  badgeText: {
+    fontSize: 14,
+  },
+  badgeText2: {
+    fontSize: 14,
+    color: '#afafaf',
+    fontWeight: 300,
+  },
+  badgeText3: {
+    fontSize: 14,
+    fontWeight: 300,
+    color: '#FDF15D',
   },
 });
 

@@ -15,20 +15,20 @@ export const formatTimestamp = (timestamp: number) => {
 };
 
 export const cleanText = (input: string): string => {
-  if (input) {
-    return input.replace(/[^a-zA-Z0-9]/g, '');
+  if (!input) {
+    return 'default'; // Return a default slug if text is empty, null, or undefined
   }
-  return input;
+  return String(input).replace(/[^a-zA-Z0-9]/g, '');
 };
 
 export const slugText = (input: string): string => {
-  if (input) {
-    return input
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-zA-Z0-9]/g, '');
+  if (!input) {
+    return 'default'; // Return a default slug if text is empty, null, or undefined
   }
-  return input;
+  return String(input)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-zA-Z0-9]/g, '');
 };
 
 export const trimString = (input: string, maxLength: number = 49): string => {

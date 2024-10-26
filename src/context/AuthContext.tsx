@@ -51,7 +51,7 @@ export const AuthProvider = ({children}: PropsWithChildren) => {
         setIsLoading(true);
         setUserToken(tokenData);
         setUserInfo(JSON.stringify(userData));
-      } else { 
+      } else {
         Alert.alert(
           'Error',
           'The username, email or password does not match or exist.',
@@ -122,7 +122,7 @@ export const AuthProvider = ({children}: PropsWithChildren) => {
       if (userData) {
         setUserInfo(userData);
       }
-    } catch (e) { 
+    } catch (e) {
       Alert.alert('Error', `Enable to validate your account ${e}`);
     }
   };

@@ -21,13 +21,13 @@ interface Genres {
 }
 
 const Catgories: Genres = {
-  rock: '6djfYlkE61kBMZtxBKyX3R',
+  rock: '6FeCuQED40tO2WiqxdEH4c',
   jazz: '6djfYlkE61kBMZtxBKyX3R',
-  pop: '6djfYlkE61kBMZtxBKyX3R',
-  country: '6djfYlkE61kBMZtxBKyX3R',
-  rb: '6djfYlkE61kBMZtxBKyX3R',
-  hiphop: '6djfYlkE61kBMZtxBKyX3R',
-  danceelectronic: '6djfYlkE61kBMZtxBKyX3R',
+  pop: '5LlpGnSM7pdEWzms5wvfhQ',
+  country: '0VveLoV8y6z3A6UcchqYyU',
+  rb: '73kq7c4ElFXyv2oPDP1rSX',
+  hiphop: '29GzDXX9QGQyyqREIlirnM',
+  danceelectronic: '70D1qqxmkF8UXZtmd8KAwv',
 };
 
 interface Track {
