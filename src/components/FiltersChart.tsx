@@ -1,6 +1,6 @@
 import React from 'react';
 import {StyleSheet, TouchableOpacity} from 'react-native';
-import {Picker} from '@react-native-picker/picker';
+import ModalSelector from 'react-native-modal-selector';
 
 import {Button, View, Text} from './Themed';
 import IconSvg from './IconsSvg';
@@ -24,6 +24,17 @@ const FiltersChart: React.FC<ChartFilterProps> = ({onApplyFilter}) => {
     onApplyFilter({genre});
     setModalVisible(false);
   };
+
+  const genreOptions = [
+    { key: 0, label: 'All', value: '*' },
+    { key: 1, label: 'Pop', value: 'pop' },
+    { key: 2, label: 'Rock', value: 'rock' },
+    { key: 3, label: 'Country', value: 'country' },
+    { key: 4, label: 'R&B', value: 'rb' },
+    { key: 5, label: 'Hip-Hop', value: 'hiphop' },
+    { key: 6, label: 'EDM', value: 'danceelectronic' },
+  ];
+
   return (
     <>
       <View style={Typography.flexBetween}>
@@ -54,20 +65,21 @@ const FiltersChart: React.FC<ChartFilterProps> = ({onApplyFilter}) => {
         <View style={[styles.modalContent]}>
           <Text style={styles.label}>Genre</Text>
           <View style={[styles.pickerContainer]}>
-            <Picker
+            <ModalSelector
+              data={genreOptions}
+              initValue="All"
+              onChange={(option) => setGenre(option.value)}
+              selectedKey={genre} // Optional: for managing initial selection
               style={styles.picker}
-              selectedValue={genre}
-              onValueChange={(itemValue: string | undefined) =>
-                setGenre(itemValue)
-              }>
-              <Picker.Item label="All" value="*" />
-              <Picker.Item label="Pop" value="pop" />
-              <Picker.Item label="Rock" value="rock" />
-              <Picker.Item label="Country" value="country" />
-              <Picker.Item label="R&B" value="rb" />
-              <Picker.Item label="Hip-Hop" value="hiphop" />
-              <Picker.Item label="EDM" value="danceelectronic" />
-            </Picker>
+              selectStyle={{ borderWidth: 0 }}
+              initValueTextStyle={styles.initValueTextStyle}
+              selectTextStyle={styles.selectTextStyle}
+              optionTextStyle={styles.optionTextStyle}
+              optionContainerStyle={styles.optionContainer}
+              optionStyle={styles.optionItems}
+              backdropPressToClose={true}  
+              cancelStyle={{ display: 'none' }}
+            />
             <DownArrow fill="white" style={styles.caretIcon} />
           </View>
           <Button
@@ -125,16 +137,35 @@ const styles = StyleSheet.create({
     position: 'relative',
     borderColor: '#1e1e1f',
     backgroundColor: 'rgba(227, 227, 221, 0.04)',
-  },
+  }, 
   picker: {
-    fontSize: 16,
+    flex: 1, 
+    borderWidth: 0,
+    justifyContent: 'center',
+  },
+  initValueTextStyle: {
+    color: '#E3E3DD',
+
+    textAlign: 'left',
+  },
+  selectTextStyle: { 
     color: '#E3E3DD',
   },
-  selectedValue: {
-    flex: 1,
-    fontSize: 16,
+  optionTextStyle: {
     color: '#E3E3DD',
   },
+
+  optionContainer: { 
+    textAlign: 'left',
+    backgroundColor: '#131314', 
+    borderRadius: 6,
+  },
+  optionItems: {
+    paddingVertical: 10,
+    paddingHorizontal: 20, 
+    borderBottomWidth: 1, 
+    borderBottomColor: 'rgba(227, 227, 221, 0.04)',
+  }, 
   caretIcon: {
     position: 'absolute',
     top: 17,
