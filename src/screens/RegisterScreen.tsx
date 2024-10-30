@@ -59,11 +59,6 @@ const RegisterScreen: React.FC<Props> = ({navigation}) => {
         <ScrollView
           contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}}>
           <View style={Typography.containerTrans}>
-            <View style={Typography.flexCenter}>
-              <Text style={[Typography.h3, Typography.muted, styles.title]}>
-                SONG SAVIOR
-              </Text>
-            </View>
             <View>
               <Image
                 source={require('../assets/images/songsavior-logo.png')}
@@ -147,7 +142,7 @@ const styles = StyleSheet.create({
     opacity: 0,
   },
   backgroundImage: {
-    opacity: 0.037,
+    opacity: 0.08,
   },
   title: {
     textAlign: 'center',

@@ -220,12 +220,14 @@ const OverallLeader: React.FC<Props> = ({nav}) => {
 
   if (loading) {
     return (
-      <View style={Typography.vertCenter}>
-        <ActivityIndicator
-          size={'large'}
-          color="rgba(255,255,255, 0.35)"
-          style={{opacity: 0.35, height: 400}}
-        />
+      <View style={{flexGrow: 1, height: 400}}>
+        <View style={Typography.vertCenter}>
+          <ActivityIndicator
+            size={'large'}
+            color="rgba(255,255,255, 0.35)"
+            style={{opacity: 0.35, height: 400}}
+          />
+        </View>
       </View>
     );
   }

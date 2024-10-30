@@ -91,7 +91,7 @@ export function FiltersCategory() {
           <Button
             style={[Typography.button, styles.buttonModalContainer]}
             onPress={() => setModalVisible(false)}
-            label="Confirm Settings"
+            label="Confirm"
           />
         </View>
       </ModalBottom>

@@ -1,6 +1,6 @@
 import React from 'react';
 import {StyleSheet, TouchableOpacity} from 'react-native';
-import {Picker} from '@react-native-picker/picker';
+import ModalSelector from 'react-native-modal-selector';
 
 import {Button, View, Text} from './Themed';
 import IconSvg from './IconsSvg';
@@ -24,6 +24,12 @@ const FiltersLeader: React.FC<LeaderFilterProps> = ({onApplyFilter}) => {
     onApplyFilter({sort});
     setModalVisible(false);
   };
+
+  const sortOptions = [
+    {key: 0, label: 'Accuracy', value: 'accuracy'},
+    {key: 1, label: 'Votes', value: 'votes'},
+  ];
+
   return (
     <>
       <View style={Typography.flexBetween}>
@@ -54,15 +60,23 @@ const FiltersLeader: React.FC<LeaderFilterProps> = ({onApplyFilter}) => {
         <View style={[styles.modalContent]}>
           <Text style={styles.label}>Sort By</Text>
           <View style={[styles.pickerContainer]}>
-            <Picker
+            <ModalSelector
+              data={sortOptions}
+              initValue="All"
+              onChange={option => setSort(option.value)}
+              selectedKey={
+                sortOptions.find(option => option.value === sort)?.key
+              }
               style={styles.picker}
-              selectedValue={sort}
-              onValueChange={(itemValue: string | undefined) =>
-                setSort(itemValue)
-              }>
-              <Picker.Item label="Accuracy" value="accuracy" />
-              <Picker.Item label="Votes" value="votes" />
-            </Picker>
+              selectStyle={{borderWidth: 0}}
+              initValueTextStyle={styles.initValueTextStyle}
+              selectTextStyle={styles.selectTextStyle}
+              optionTextStyle={styles.optionTextStyle}
+              optionContainerStyle={styles.optionContainer}
+              optionStyle={styles.optionItems}
+              backdropPressToClose={true}
+              cancelStyle={{display: 'none'}}
+            />
             <DownArrow fill="white" style={styles.caretIcon} />
           </View>
           <Button
@@ -122,13 +136,32 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(227, 227, 221, 0.04)',
   },
   picker: {
-    fontSize: 16,
+    flex: 1,
+    borderWidth: 0,
+    justifyContent: 'center',
+  },
+  initValueTextStyle: {
+    color: '#E3E3DD',
+
+    textAlign: 'left',
+  },
+  selectTextStyle: {
+    color: '#E3E3DD',
+    textAlign: 'left',
+  },
+  optionTextStyle: {
     color: '#E3E3DD',
   },
-  selectedValue: {
-    flex: 1,
-    fontSize: 16,
-    color: '#E3E3DD',
+  optionContainer: {
+    textAlign: 'left',
+    backgroundColor: '#131314',
+    borderRadius: 6,
+  },
+  optionItems: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(227, 227, 221, 0.04)',
   },
   caretIcon: {
     position: 'absolute',

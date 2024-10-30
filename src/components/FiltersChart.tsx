@@ -26,13 +26,13 @@ const FiltersChart: React.FC<ChartFilterProps> = ({onApplyFilter}) => {
   };
 
   const genreOptions = [
-    { key: 0, label: 'All', value: '*' },
-    { key: 1, label: 'Pop', value: 'pop' },
-    { key: 2, label: 'Rock', value: 'rock' },
-    { key: 3, label: 'Country', value: 'country' },
-    { key: 4, label: 'R&B', value: 'rb' },
-    { key: 5, label: 'Hip-Hop', value: 'hiphop' },
-    { key: 6, label: 'EDM', value: 'danceelectronic' },
+    {key: 0, label: 'All', value: '*'},
+    {key: 1, label: 'Pop', value: 'pop'},
+    {key: 2, label: 'Rock', value: 'rock'},
+    {key: 3, label: 'Country', value: 'country'},
+    {key: 4, label: 'R&B', value: 'rb'},
+    {key: 5, label: 'Hip-Hop', value: 'hiphop'},
+    {key: 6, label: 'EDM', value: 'danceelectronic'},
   ];
 
   return (
@@ -68,17 +68,19 @@ const FiltersChart: React.FC<ChartFilterProps> = ({onApplyFilter}) => {
             <ModalSelector
               data={genreOptions}
               initValue="All"
-              onChange={(option) => setGenre(option.value)}
-              selectedKey={genre} // Optional: for managing initial selection
+              onChange={option => setGenre(option.value)}
+              selectedKey={
+                genreOptions.find(option => option.value === genre)?.key
+              }
               style={styles.picker}
-              selectStyle={{ borderWidth: 0 }}
+              selectStyle={{borderWidth: 0}}
               initValueTextStyle={styles.initValueTextStyle}
               selectTextStyle={styles.selectTextStyle}
               optionTextStyle={styles.optionTextStyle}
               optionContainerStyle={styles.optionContainer}
               optionStyle={styles.optionItems}
-              backdropPressToClose={true}  
-              cancelStyle={{ display: 'none' }}
+              backdropPressToClose={true}
+              cancelStyle={{display: 'none'}}
             />
             <DownArrow fill="white" style={styles.caretIcon} />
           </View>
@@ -137,9 +139,9 @@ const styles = StyleSheet.create({
     position: 'relative',
     borderColor: '#1e1e1f',
     backgroundColor: 'rgba(227, 227, 221, 0.04)',
-  }, 
+  },
   picker: {
-    flex: 1, 
+    flex: 1,
     borderWidth: 0,
     justifyContent: 'center',
   },
@@ -148,24 +150,24 @@ const styles = StyleSheet.create({
 
     textAlign: 'left',
   },
-  selectTextStyle: { 
+  selectTextStyle: {
     color: '#E3E3DD',
+    textAlign: 'left',
   },
   optionTextStyle: {
     color: '#E3E3DD',
   },
-
-  optionContainer: { 
+  optionContainer: {
     textAlign: 'left',
-    backgroundColor: '#131314', 
+    backgroundColor: '#131314',
     borderRadius: 6,
   },
   optionItems: {
     paddingVertical: 10,
-    paddingHorizontal: 20, 
-    borderBottomWidth: 1, 
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
     borderBottomColor: 'rgba(227, 227, 221, 0.04)',
-  }, 
+  },
   caretIcon: {
     position: 'absolute',
     top: 17,

@@ -3,6 +3,11 @@ import Colors from './Colors';
 const colorScheme = 'dark';
 
 const Typography = StyleSheet.create({
+  sizeSm: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '400',
+  },
   size: {
     fontSize: 14,
     lineHeight: 20,
@@ -154,6 +159,9 @@ const Typography = StyleSheet.create({
   ms: {
     marginLeft: 7,
   },
+  ms1: {
+    marginLeft: 4,
+  },
   ms15: {
     marginLeft: 15,
   },
@@ -193,6 +201,9 @@ const Typography = StyleSheet.create({
   buttonMuted: {backgroundColor: Colors[colorScheme].text2},
   highlight: {
     color: Colors[colorScheme].highlight,
+  },
+  col3: {
+    width: '33.33333%',
   },
   text: {
     color: Colors[colorScheme].text,
