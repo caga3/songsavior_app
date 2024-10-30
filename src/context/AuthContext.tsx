@@ -4,7 +4,7 @@ import {
   PropsWithChildren,
   createContext,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useState,
 } from 'react';
 
@@ -127,7 +127,7 @@ export const AuthProvider = ({children}: PropsWithChildren) => {
     }
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     isLoggedIn();
   }, []);
 

@@ -5,17 +5,25 @@ import {View} from './Themed';
 
 interface ModalProp {
   isVisible: boolean;
+  height: number;
   onClose: () => void;
   children: React.ReactNode;
 }
 
-const ModalCenter: React.FC<ModalProp> = ({isVisible, onClose, children}) => {
+const ModalCenter: React.FC<ModalProp> = ({
+  isVisible,
+  height,
+  onClose,
+  children,
+}) => {
   return (
     <Modal transparent={true} visible={isVisible} onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.modalBackground}>
           <TouchableWithoutFeedback onPress={() => {}}>
-            <View style={[styles.modalContent]}>{children}</View>
+            <View style={{height: height, ...styles.modalContent}}>
+              {children}
+            </View>
           </TouchableWithoutFeedback>
         </View>
       </TouchableWithoutFeedback>

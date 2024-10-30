@@ -45,14 +45,7 @@ interface DataItem {
     total: number;
   };
 }
-type Genre =
-  | 'rock'
-  | 'jazz'
-  | 'pop'
-  | 'country'
-  | 'rb'
-  | 'hiphop'
-  | 'danceelectronic';
+type Genre = 'rock' | 'pop' | 'country' | 'rb' | 'hiphop' | 'danceelectronic';
 
 type RootStackParamList = {
   Profile: {item?: string};
@@ -60,7 +53,6 @@ type RootStackParamList = {
 
 const genreImages: Record<Genre, ImageSourcePropType> = {
   rock: require('../assets/images/genres/genre_rock.png'),
-  jazz: require('../assets/images/genres/genre_jazz.png'),
   pop: require('../assets/images/genres/genre_pop.png'),
   country: require('../assets/images/genres/genre_country.png'),
   rb: require('../assets/images/genres/genre_rb.png'),

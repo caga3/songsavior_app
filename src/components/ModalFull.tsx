@@ -39,7 +39,6 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 10,
     borderRadius: 10,
-    fontSize: 14,
     backgroundColor: '#131314',
   },
   buttonModalContainer: {

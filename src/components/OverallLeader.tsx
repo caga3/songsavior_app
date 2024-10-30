@@ -12,15 +12,17 @@ import {
 import {View, Text} from './Themed';
 import Typography from '../constants/Typography';
 import HbarIcon from '../constants/icons/HBarIcon';
-import LocationIcon from '../constants/icons/LocationIcon';
 import DownArrow from '../constants/icons/DownArrow';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RestApiServer from '../constants/RestApiServer';
 import {sortWithMiddleFirst} from '../constants/Helper';
+import StarsIcon from '../constants/icons/StarsIcon';
+import AccuracyIcon from '../constants/icons/AccuracyIcon';
+import FiltersLeader from '../components/FiltersLeader';
 
 interface DataItem {
   user_id: string;
-  cnt: number;
+  cnt: string;
   total_avg_vote: string;
   user_display_name: string;
   avatar_url: string;
@@ -41,6 +43,8 @@ const OverallLeader: React.FC<Props> = ({nav}) => {
   const [screenWidth, setScreenWidth] = useState(Dimensions.get('window'));
   const [showLeaderboard, setShowLeaderboard] = useState<DataItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filteredBoard, setFilteredBoard] = useState<DataItem[]>([]);
+
   const orderPosition = ['2nd', '1st', '3rd'];
   const default_avatar =
     'https://www.songsavior.com/wp-content/uploads/2024/07/default_avatar.jpg';
@@ -49,6 +53,18 @@ const OverallLeader: React.FC<Props> = ({nav}) => {
     nav.navigate('Profile', {
       item: $item,
     });
+  };
+
+  const applyFilter = (filter: {sort?: string}) => {
+    const {sort} = filter;
+    const filteredData = showLeaderboard.sort((a, b) => {
+      if (sort === 'accuracy') {
+        return parseFloat(b.total_avg_vote) - parseFloat(a.total_avg_vote);
+      } else {
+        return Number(b.cnt) - Number(a.cnt);
+      }
+    });
+    setFilteredBoard([...filteredData]);
   };
 
   useEffect(() => {
@@ -66,6 +82,7 @@ const OverallLeader: React.FC<Props> = ({nav}) => {
           const responds = await RestApiServer.fetchLeaderBoard(tokenData);
           if (responds) {
             setShowLeaderboard(responds);
+            setFilteredBoard(responds);
             setLoading(false);
           }
         }
@@ -80,65 +97,63 @@ const OverallLeader: React.FC<Props> = ({nav}) => {
   }, []);
 
   const renderItemRanked = () => {
-    const reSort = sortWithMiddleFirst(showLeaderboard);
+    const reSort = sortWithMiddleFirst(filteredBoard);
     return reSort.map((item: DataItem, index: number) => {
-      if (index < 3) {
-        const totalAvgVote = parseFloat(item.total_avg_vote);
-        const votePercentage = totalAvgVote.toFixed(2);
-        return (
-          <Pressable
-            key={index}
-            onPress={() => handleProfileScreen(item.user_id)}>
-            <View id={`place-${orderPosition[index]}`}>
-              {index === 1 && (
-                <Image
-                  source={require('../assets/images/wings.png')}
-                  style={styles.wings}
-                />
-              )}
-
+      const totalAvgVote = parseFloat(item.total_avg_vote);
+      const votePercentage = totalAvgVote.toFixed(2);
+      return (
+        <Pressable
+          key={index}
+          onPress={() => handleProfileScreen(item.user_id)}>
+          <View id={`place-${orderPosition[index]}`}>
+            {index === 1 && (
               <Image
-                source={{uri: item.avatar_url || default_avatar}}
-                style={[styles.rankImage, index === 1 ? styles.firstPlace : {}]}
+                source={require('../assets/images/wings.png')}
+                style={styles.wings}
               />
+            )}
+
+            <Image
+              source={{uri: item.avatar_url || default_avatar}}
+              style={[styles.rankImage, index === 1 ? styles.firstPlace : {}]}
+            />
+            <Text
+              style={[
+                Typography.size2,
+                Typography.bold,
+                Typography.highlight,
+                Typography.textCenter,
+              ]}>
+              {orderPosition[index]}
+            </Text>
+            <Text
+              style={[Typography.h3, Typography.textCenter, Typography.mb0]}>
+              {item.user_display_name}
+            </Text>
+            <View style={Typography.flexCenter}>
+              <StarsIcon width="20" height="20" fill="#FFBF00" />
               <Text
                 style={[
-                  Typography.size2,
-                  Typography.bold,
+                  Typography.semibold,
+                  Typography.size,
                   Typography.highlight,
-                  Typography.textCenter,
+                  Typography.ms,
                 ]}>
-                {orderPosition[index]}
-              </Text>
-              <Text
-                style={[Typography.h3, Typography.textCenter, Typography.mb0]}>
-                {item.user_display_name}
+                {item.cnt}
               </Text>
             </View>
             <View
-              style={[
-                Typography.mt3,
-                Typography.tintBkgGreen,
-                styles.accuracy,
-                styles.accuracyRank,
-              ]}>
-              <View style={[Typography.flex, Typography.marginAuto]}>
-                <Text style={[Typography.semibold, Typography.green]}>
+              style={[Typography.mt3, Typography.tintBkgBlue, styles.accuracy]}>
+              <View style={Typography.flex}>
+                <AccuracyIcon width="20" height="20" fill="#FFFFFF" />
+                <Text style={[Typography.semibold, Typography.size]}>
                   {votePercentage}%
-                </Text>
-                <Text
-                  style={[
-                    Typography.semibold,
-                    Typography.text4,
-                    Typography.ms,
-                  ]}>
-                  ({item.cnt})
                 </Text>
               </View>
             </View>
-          </Pressable>
-        );
-      }
+          </View>
+        </Pressable>
+      );
     });
   };
 
@@ -161,27 +176,38 @@ const OverallLeader: React.FC<Props> = ({nav}) => {
               </View>
             </View>
             <View style={{width: screenWidth.width - (40 + 118)}}>
-              <View style={[Typography.flexBetween, Typography.flexTop]}>
+              <View style={[Typography.flexBetween]}>
                 <Text style={[Typography.h3, Typography.mb0]}>
                   {item.user_display_name}
+                  {item.user_id}
                 </Text>
-                <View style={[Typography.tintBkgGreen, styles.accuracy]}>
-                  <Text style={[Typography.semibold, Typography.green]}>
-                    {parseFloat(item.total_avg_vote).toFixed(2)} Accuracy
-                  </Text>
+                <View>
+                  <View style={Typography.flexCenter}>
+                    <StarsIcon width="20" height="20" fill="#FFBF00" />
+                    <Text
+                      style={[
+                        Typography.semibold,
+                        Typography.size,
+                        Typography.highlight,
+                        Typography.ms,
+                      ]}>
+                      {item.cnt}
+                    </Text>
+                  </View>
+                  <View
+                    style={[
+                      Typography.mt3,
+                      Typography.tintBkgBlue,
+                      styles.accuracy,
+                    ]}>
+                    <View style={Typography.flex}>
+                      <AccuracyIcon width="20" height="20" fill="#FFFFFF" />
+                      <Text style={[Typography.semibold, Typography.size]}>
+                        {parseFloat(item.total_avg_vote).toFixed(2)}%
+                      </Text>
+                    </View>
+                  </View>
                 </View>
-              </View>
-              <View style={Typography.flexBetween}>
-                <View style={[Typography.hide, Typography.flex]}>
-                  <LocationIcon />
-                  <Text
-                    style={[Typography.text4, Typography.ms, Typography.tight]}>
-                    ---
-                  </Text>
-                </View>
-                <Text style={[Typography.text4, Typography.ms]}>
-                  {item.cnt} Songs Rated
-                </Text>
               </View>
             </View>
           </View>
@@ -205,6 +231,7 @@ const OverallLeader: React.FC<Props> = ({nav}) => {
 
   return (
     <>
+      <FiltersLeader onApplyFilter={applyFilter} />
       <View style={styles.containerWrapper}>
         <View
           style={[
@@ -218,7 +245,7 @@ const OverallLeader: React.FC<Props> = ({nav}) => {
       <View style={styles.containerWrapper}>
         <FlatList
           scrollEnabled={true}
-          data={showLeaderboard}
+          data={filteredBoard}
           renderItem={renderItem}
           keyExtractor={(item, index) => index.toString()}
         />
@@ -279,12 +306,11 @@ const styles = StyleSheet.create({
     height: 48,
   },
   accuracy: {
+    width: 80,
     borderRadius: 8,
-    paddingHorizontal: 8,
-    height: 24,
-  },
-  accuracyRank: {
-    height: 28,
+    padding: 4,
+    margin: 'auto',
+    alignItems: 'center',
   },
 });
 

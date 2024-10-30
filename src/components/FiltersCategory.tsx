@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {StyleSheet, TouchableOpacity} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity} from 'react-native';
 
 import {Button, View, TextInput} from './Themed';
 import IconSvg from './IconsSvg';
@@ -30,7 +30,7 @@ export function FiltersCategory() {
               }
               styleText={styles.buttonText}
               onPress={() => handleSelection('genres')}
-              label="By Genras"
+              label="By Genres"
             />
           </View>
           <View style={styles.buttonWrapper}>
@@ -74,7 +74,26 @@ export function FiltersCategory() {
       <ModalBottom
         isVisible={modalVisible}
         onClose={() => setModalVisible(false)}>
-        Update feed is unavailable during the beta phase.
+        <View style={[styles.modalContent]}>
+          <View style={styles.modalWrapper}>
+            <Text
+              style={[
+                Typography.h2,
+                Typography.textCenter,
+                Typography.highlight,
+              ]}>
+              Feature Not Available {'\n'}... Yet
+            </Text>
+            <Text style={[styles.modalTitle, Typography.text]}>
+              Update feed is unavailable during the beta phase
+            </Text>
+          </View>
+          <Button
+            style={[Typography.button, styles.buttonModalContainer]}
+            onPress={() => setModalVisible(false)}
+            label="Confirm Settings"
+          />
+        </View>
       </ModalBottom>
     </View>
   );
@@ -121,7 +140,24 @@ const styles = StyleSheet.create({
     fontWeight: 600,
     marginBottom: 15,
   },
-  label2: {
-    marginBottom: 4,
+  modalWrapper: {
+    margin: 'auto',
+    width: 260,
+  },
+  modalTitle: {
+    fontSize: 15,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalContent: {
+    height: '28%',
+    width: '100%',
+    padding: 20,
+    marginBottom: 10,
+    borderRadius: 10,
+    backgroundColor: '#131314',
+  },
+  buttonModalContainer: {
+    marginVertical: 0,
   },
 });

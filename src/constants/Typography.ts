@@ -212,6 +212,9 @@ const Typography = StyleSheet.create({
   tintBkgGreen: {
     backgroundColor: '#151f12',
   },
+  tintBkgBlue: {
+    backgroundColor: '#204976',
+  },
   green: {
     color: '#26A300',
   },

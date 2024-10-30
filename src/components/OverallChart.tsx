@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useLayoutEffect, useState} from 'react';
 import {
   StyleSheet,
   Image,
@@ -9,19 +9,16 @@ import {
   Pressable,
 } from 'react-native';
 
-import TrackPlayer from 'react-native-track-player';
-
 import {View, Text} from './Themed';
 import Typography from '../constants/Typography';
 import HbarIcon from '../constants/icons/HBarIcon';
 import IconSvg from './IconsSvg';
-import {setupPlayer} from '../constants/Player';
-import PauseMiniIcon from '../constants/icons/PauseMiniIcon';
 import DownArrow from '../constants/icons/DownArrow';
 import StarsIcon from '../constants/icons/StarsIcon';
 import RestApiServer from '../constants/RestApiServer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {trimString} from '../constants/Helper';
+import FiltersChart from '../components/FiltersChart';
 
 interface DataItem {
   id: number;
@@ -48,53 +45,36 @@ interface Props {
     ) => void;
   };
 }
-const OverallChart: React.FC<Props> = () => {
+const OverallChart: React.FC<Props> = ({nav}) => {
   const [screenWidth, setScreenWidth] = useState(Dimensions.get('window'));
   const [loading, setLoading] = useState(true);
   const [showChart, setShowChart] = useState<DataItem[]>([]);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [_, setDuration] = useState(0);
-  const [currentTrackId, setCurrentTrackId] = useState<number | null>(null);
+  const [filteredChart, setFilteredChart] = useState<DataItem[]>([]);
 
-  const handlePlay = async ($item: any) => {
-    if (currentTrackId !== $item.id) {
-      if (isPlaying) {
-        setIsPlaying(false);
-        await TrackPlayer.stop();
-      }
-      setCurrentTrackId($item.id);
-      setIsPlaying(true);
-      await playerSetup($item);
-    } else {
-      if (isPlaying) {
-        setIsPlaying(false);
-        await TrackPlayer.pause();
-      } else {
-        setIsPlaying(true);
-        await TrackPlayer.play();
-      }
-    }
+  const handlePlayerScreen = ($item: string) => {
+    nav.navigate('PlayerRating', {
+      allow: false,
+      item: $item,
+      filter: 'track',
+      redirect: 'Charts',
+    });
   };
 
-  const playerSetup = async (trackData: any) => {
-    await TrackPlayer.reset();
-    const artworkUrl = trackData?.image;
-    const previewUrl = trackData?.track;
-    const options = {
-      id: 1,
-      url: previewUrl,
-      title: trackData?.title,
-      artist: trackData?.artist,
-      artwork: artworkUrl,
-    };
-    //setDuration(trackData?.duration_ms); // Real full Songs
-    setDuration(29000); // Preview Songs
-    TrackPlayer.add(options);
-    await TrackPlayer.play();
+  const applyFilter = (filter: {genre?: string; search?: string}) => {
+    const {genre, search} = filter;
+    const filteredData = showChart.filter(item => {
+      return (
+        (genre === '*' ? true : item.genre === genre) &&
+        (search && search.length >= 3
+          ? item.artist.toLowerCase().startsWith(search.toLowerCase()) ||
+            item.title.toLowerCase().startsWith(search.toLowerCase())
+          : true)
+      );
+    });
+    setFilteredChart(filteredData);
   };
 
-  useEffect(() => {
-    setupPlayer();
+  useLayoutEffect(() => {
     const handleOrientationChange = () => {
       setScreenWidth(Dimensions.get('window'));
     };
@@ -110,6 +90,7 @@ const OverallChart: React.FC<Props> = () => {
           const responds = await RestApiServer.fetchSongs(tokenData);
           if (responds) {
             setShowChart(responds);
+            setFilteredChart(responds);
             setLoading(false);
           }
         }
@@ -124,7 +105,7 @@ const OverallChart: React.FC<Props> = () => {
   }, []);
 
   const renderItem: ListRenderItem<DataItem> = ({item, index}) => (
-    <Pressable onPress={() => handlePlay(item)}>
+    <Pressable onPress={() => handlePlayerScreen(item.song_id)}>
       <View style={styles.grid}>
         <View style={styles.group}>
           <View style={Typography.flex}>
@@ -151,10 +132,10 @@ const OverallChart: React.FC<Props> = () => {
                     Typography.highlight,
                     Typography.uppercase,
                   ]}>
-                  {item.genre}
+                  {item.genre === 'danceelectronic' ? 'EDM' : item.genre}
                 </Text>
               </View>
-              <View style={styles.rating}>
+              <View style={[Typography.flex, styles.rating]}>
                 <StarsIcon width="16" height="16" fill="#FFBF00" />
                 <Text
                   style={[Typography.semibold, Typography.orange, styles.rate]}>
@@ -167,16 +148,12 @@ const OverallChart: React.FC<Props> = () => {
             <Text style={Typography.tight}>{item.artist}</Text>
             <View style={Typography.flexBetween}>
               <View style={Typography.flex}>
-                {currentTrackId === item.id && isPlaying ? (
-                  <PauseMiniIcon />
-                ) : (
-                  <IconSvg
-                    width="16"
-                    height="16"
-                    color="#FDF15D"
-                    path="M4 2.66666V13.3333L12.6667 7.99999L4 2.66666Z"
-                  />
-                )}
+                <IconSvg
+                  width="16"
+                  height="16"
+                  color="#FDF15D"
+                  path="M4 2.66666V13.3333L12.6667 7.99999L4 2.66666Z"
+                />
                 <Text style={Typography.ms}>{item.total}</Text>
               </View>
             </View>
@@ -201,10 +178,11 @@ const OverallChart: React.FC<Props> = () => {
 
   return (
     <>
+      <FiltersChart onApplyFilter={applyFilter} />
       <View style={styles.containerWrapper}>
         <FlatList
           scrollEnabled={false}
-          data={showChart}
+          data={filteredChart}
           renderItem={renderItem}
           keyExtractor={(item, index) => index.toString()}
         />
@@ -260,6 +238,7 @@ const styles = StyleSheet.create({
   rating: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
+    alignItems: 'center',
     borderRadius: 8,
     paddingHorizontal: 8,
     backgroundColor: '#262112',

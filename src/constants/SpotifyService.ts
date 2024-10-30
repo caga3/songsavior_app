@@ -12,7 +12,6 @@ const config = {
 
 interface Genres {
   rock: string;
-  jazz: string;
   pop: string;
   country: string;
   rb: string;
@@ -22,7 +21,6 @@ interface Genres {
 
 const Catgories: Genres = {
   rock: '6FeCuQED40tO2WiqxdEH4c',
-  jazz: '6djfYlkE61kBMZtxBKyX3R',
   pop: '5LlpGnSM7pdEWzms5wvfhQ',
   country: '0VveLoV8y6z3A6UcchqYyU',
   rb: '73kq7c4ElFXyv2oPDP1rSX',

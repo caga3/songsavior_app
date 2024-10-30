@@ -55,16 +55,7 @@ export const sortWithMiddleFirst = (arr: any) => {
   if (arr.length === 0) {
     return arr;
   }
-
-  // Determine the middle index
-  const middleIndex = Math.floor(arr.length / 2);
-
-  // Create a new array with the middle element first
-  const reorderedArray = [
-    arr[middleIndex], // Middle element first
-    ...arr.slice(0, middleIndex), // Elements before the middle element
-    ...arr.slice(middleIndex + 1), // Elements after the middle element
-  ];
-
-  return reorderedArray;
+  const firstThree = arr.slice(0, 3);
+  const reordered = [firstThree[1], firstThree[0], firstThree[2]];
+  return reordered;
 };

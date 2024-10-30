@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useLayoutEffect, useState} from 'react';
 import {
   Image,
   StyleSheet,
@@ -11,6 +11,7 @@ import TrackPlayer, {
   useProgress,
   Event,
 } from 'react-native-track-player';
+import Swiper from 'react-native-swiper';
 
 import {Text, View} from './Themed';
 import IconSvg from './IconsSvg';
@@ -45,7 +46,6 @@ interface VoteData {
 
 interface Genres {
   rock: string;
-  jazz: string;
   pop: string;
   country: string;
   rb: string;
@@ -117,7 +117,6 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
   const handleHelpModal = () => {
     setModalVisible(true);
   };
-
   const handleLikes = async () => {
     if (getUserInfo && songPlayer) {
       const setLike = isLikes === 1 ? 0 : 1;
@@ -162,7 +161,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
     }
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const playerSetup = async (trackData: any) => {
       await setupPlayer();
       const options = {
@@ -257,13 +256,16 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
       TrackPlayer.reset();
       queueEndedListener.remove();
     };
-  }, []);
+  }, [item]);
 
   useFocusEffect(
     React.useCallback(() => {
+      if (redirect === 'Charts') {
+        handlePlay();
+      }
       return async () => {
-        await TrackPlayer.pause();
         setIsPlaying(false);
+        await TrackPlayer.pause();
       };
     }, []),
   );
@@ -285,14 +287,25 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
       {songPlayer && songPlayer.album && (
         <View style={styles.container}>
           <View style={styles.cardWraper}>
-            <Image
-              source={
-                hasVoted && imageUrl
-                  ? {uri: imageUrl}
-                  : require('../assets/images/card-image.jpg')
-              }
-              style={styles.cardImage}
-            />
+            {redirect === 'Charts' ? (
+              <Image
+                source={
+                  imageUrl
+                    ? {uri: imageUrl}
+                    : require('../assets/images/card-image.jpg')
+                }
+                style={styles.cardImage}
+              />
+            ) : (
+              <Image
+                source={
+                  hasVoted && imageUrl
+                    ? {uri: imageUrl}
+                    : require('../assets/images/card-image.jpg')
+                }
+                style={styles.cardImage}
+              />
+            )}
           </View>
 
           {!hasVoted && redirect !== 'Charts' ? (
@@ -503,37 +516,80 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
               />
             </TouchableOpacity>
           </View>
+
           <ModalCenter
             isVisible={modalVisible}
+            height={300}
             onClose={() => setModalVisible(false)}>
-            <View>
-              <Text
-                style={[
-                  Typography.size2,
-                  Typography.highlight,
-                  Typography.textCenter,
-                  Typography.mb,
-                ]}>
-                Song Savior Game
-              </Text>
-              <HBars />
-              <Text
-                style={[
-                  Typography.size1,
-                  Typography.highlight,
-                  Typography.mb,
-                  Typography.mt,
-                ]}>
-                Rating Songs
-              </Text>
-              <Text style={[Typography.mb, Typography.text3]}>
-                To get placed on the leaderboard, all you have to do is rate
-                songs when you hear them on the player. However, to eliminate an
-                unfair advantage, you will only get to rate songs you have
-                accessed through the randomized stream and not through charts or
-                profiles.
-              </Text>
-            </View>
+            <Text
+              style={[
+                Typography.size2,
+                Typography.highlight,
+                Typography.textCenter,
+                Typography.mb,
+              ]}>
+              Song Savior Game
+            </Text>
+            <HBars />
+            <Swiper
+              dotStyle={styles.dot}
+              activeDotStyle={styles.dotActive}
+              loop={true}>
+              <View style={styles.slide}>
+                <Text
+                  style={[
+                    Typography.size1,
+                    Typography.highlight,
+                    Typography.mb,
+                    Typography.mt,
+                  ]}>
+                  Rating Songs
+                </Text>
+                <Text style={[Typography.mb, Typography.text3]}>
+                  To get placed on the leaderboard, all you have to do is rate
+                  songs when you hear them on the player. However, to eliminate
+                  an unfair advantage, you will only get to rate songs you have
+                  accessed through the randomized stream and not through charts
+                  or profiles.
+                </Text>
+              </View>
+              <View style={styles.slide}>
+                <Text
+                  style={[
+                    Typography.size1,
+                    Typography.highlight,
+                    Typography.mb,
+                    Typography.mt,
+                  ]}>
+                  Liking Songs
+                </Text>
+                <Text style={[Typography.mb, Typography.text3]}>
+                  To get placed on the leaderboard, all you have to do is rate
+                  songs when you hear them on the player. However, to eliminate
+                  an unfair advantage, you will only get to rate songs you have
+                  accessed through the randomized stream and not through charts
+                  or profiles.
+                </Text>
+              </View>
+              <View style={styles.slide}>
+                <Text
+                  style={[
+                    Typography.size1,
+                    Typography.highlight,
+                    Typography.mb,
+                    Typography.mt,
+                  ]}>
+                  Accuracy
+                </Text>
+                <Text style={[Typography.mb, Typography.text3]}>
+                  To get placed on the leaderboard, all you have to do is rate
+                  songs when you hear them on the player. However, to eliminate
+                  an unfair advantage, you will only get to rate songs you have
+                  accessed through the randomized stream and not through charts
+                  or profiles.
+                </Text>
+              </View>
+            </Swiper>
           </ModalCenter>
         </View>
       )}
@@ -634,6 +690,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
+  },
+  slide: {
+    flex: 1,
+  },
+  dotActive: {
+    backgroundColor: '#fdf15d',
+  },
+  dot: {
+    backgroundColor: 'rgba(253, 240, 93, 0.40)',
   },
 });
 
