@@ -1,15 +1,13 @@
 import React from 'react';
 import {StyleSheet, TouchableOpacity} from 'react-native';
-import ModalSelector from 'react-native-modal-selector';
-
-import ModalDropdown from 'react-native-modal-dropdown';
+import RNPickerSelect from 'react-native-picker-select';
 
 import {Button, View, Text} from './Themed';
 import IconSvg from './IconsSvg';
 import Typography from '../constants/Typography';
 import {useState} from 'react';
 import ModalBottom from './ModalBottom';
-import DownArrow from '../constants/icons/DownArrow';
+import DownCarret from '../constants/icons/DownCarret';
 
 interface ChartFilterProps {
   onApplyFilter: (filter: FilterOptions) => void;
@@ -26,22 +24,20 @@ const FiltersChart: React.FC<ChartFilterProps> = ({onApplyFilter}) => {
     onApplyFilter({genre});
     setModalVisible(false);
   };
-  
-  let indx = 0;
+
   const genreOptions = [
-    {key: indx++, label: 'All', value: '*'},
-    {key: indx++, label: 'Pop', value: 'pop'},
-    {key: indx++, label: 'Rock', value: 'rock'},
-    {key: indx++, label: 'Country', value: 'country'},
-    {key: indx++, label: 'R&B', value: 'rb'},
-    {key: indx++, label: 'Hip-Hop', value: 'hiphop'},
-    {key: indx++, label: 'EDM', value: 'danceelectronic'},
+    {label: 'All', value: '*'},
+    {label: 'Pop', value: 'pop'},
+    {label: 'Rock', value: 'rock'},
+    {label: 'Country', value: 'country'},
+    {label: 'R&B', value: 'rb'},
+    {label: 'Hip-Hop', value: 'hiphop'},
+    {label: 'EDM', value: 'danceelectronic'},
   ];
 
-  const handleSelect = (index) => {
-    const selectedOption = genreOptions[index];
-    setGenre(selectedOption.value); 
-    console.log(`Selected value: ${selectedOption.value}`);
+  const handleSelect = (index: string) => {
+    //const selectedOption = genreOptions[index];
+    //setGenre(selectedOption.value);
   };
 
   return (
@@ -74,33 +70,12 @@ const FiltersChart: React.FC<ChartFilterProps> = ({onApplyFilter}) => {
         <View style={[styles.modalContent]}>
           <Text style={styles.label}>Genre</Text>
           <View style={[styles.pickerContainer]}>
-          <ModalDropdown
-        options={genreOptions.map(option => option.label)}                 // Options array
-        defaultValue="All"     // Initial display text
-        onSelect={(index) => handleSelect(index)}
-        style={styles.picker}
-        textStyle={styles.selectTextStyle}
-        dropdownTextStyle={styles.optionTextStyle}
-        dropdownStyle={styles.optionContainer}
-      />
-            <ModalSelector
-              data={genreOptions}
-              initValue="All"
-              onChange={option => setGenre(option.value)} 
-              selectedKey={genre}
-              style={styles.picker}
-              selectStyle={{borderWidth: 0}}
-              initValueTextStyle={styles.initValueTextStyle}
-              selectTextStyle={styles.selectTextStyle}
-              optionTextStyle={styles.optionTextStyle}
-              optionContainerStyle={styles.optionContainer}
-              optionStyle={styles.optionItems}
-              backdropPressToClose={true}
-              cancelStyle={{display: 'none'}}
-            /> 
-            <DownArrow fill="white" style={styles.caretIcon} />
+            <RNPickerSelect
+              onValueChange={value => console.log(value)}
+              items={genreOptions}
+            />
+            <DownCarret stroke="white" style={styles.caretIcon} />
           </View>
-          <Text>{genre}</Text>
           <Button
             style={[Typography.button, styles.buttonModalContainer]}
             label="Filter"
@@ -168,8 +143,10 @@ const styles = StyleSheet.create({
     textAlign: 'left',
   },
   selectTextStyle: {
+    fontSize: 15,
     color: '#E3E3DD',
     textAlign: 'left',
+    paddingLeft: 10,
   },
   optionTextStyle: {
     color: '#E3E3DD',
@@ -188,7 +165,7 @@ const styles = StyleSheet.create({
   caretIcon: {
     position: 'absolute',
     top: 17,
-    right: 22,
+    right: 18,
     pointerEvents: 'none',
   },
 });
