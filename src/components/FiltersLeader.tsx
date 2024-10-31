@@ -1,13 +1,13 @@
 import React from 'react';
 import {StyleSheet, TouchableOpacity} from 'react-native';
-import ModalSelector from 'react-native-modal-selector';
+import RNPickerSelect from 'react-native-picker-select';
 
 import {Button, View, Text} from './Themed';
 import IconSvg from './IconsSvg';
 import Typography from '../constants/Typography';
 import {useState} from 'react';
 import ModalBottom from './ModalBottom';
-import DownArrow from '../constants/icons/DownArrow';
+import DownCarret from '../constants/icons/DownCarret';
 
 interface LeaderFilterProps {
   onApplyFilter: (filter: FilterOptions) => void;
@@ -20,14 +20,15 @@ interface FilterOptions {
 const FiltersLeader: React.FC<LeaderFilterProps> = ({onApplyFilter}) => {
   const [sort, setSort] = useState<string | undefined>('accuracy');
   const [modalVisible, setModalVisible] = useState(false);
+  
   const applyFilter = () => {
     onApplyFilter({sort});
     setModalVisible(false);
   };
 
   const sortOptions = [
-    {key: 'accuracy', label: 'Accuracy', value: 'accuracy'},
-    {key: 'votes', label: 'Votes', value: 'votes'},
+    {label: 'Accuracy', value: 'accuracy'},
+    {label: 'Votes', value: 'votes'},
   ];
 
   return (
@@ -60,24 +61,13 @@ const FiltersLeader: React.FC<LeaderFilterProps> = ({onApplyFilter}) => {
         <View style={[styles.modalContent]}>
           <Text style={styles.label}>Sort By</Text>
           <View style={[styles.pickerContainer]}>
-            <ModalSelector
-              data={sortOptions}
-              initValue="*"
-              onChange={option => setSort(option.value)}
-              selectedKey={
-                sortOptions.find(option => option.value === sort)?.key
-              }
-              style={styles.picker}
-              selectStyle={{borderWidth: 0}}
-              initValueTextStyle={styles.initValueTextStyle}
-              selectTextStyle={styles.selectTextStyle}
-              optionTextStyle={styles.optionTextStyle}
-              optionContainerStyle={styles.optionContainer}
-              optionStyle={styles.optionItems}
-              backdropPressToClose={true}
-              cancelStyle={{display: 'none'}}
+            <RNPickerSelect 
+              darkTheme={true}
+              onValueChange={value => setSort(value)}
+              items={sortOptions}
+              style={pickerStyleDocument}
             />
-            <DownArrow fill="white" style={styles.caretIcon} />
+            <DownCarret stroke="white" style={styles.caretIcon} />
           </View>
           <Button
             style={[Typography.button, styles.buttonModalContainer]}
@@ -134,39 +124,35 @@ const styles = StyleSheet.create({
     position: 'relative',
     borderColor: '#1e1e1f',
     backgroundColor: 'rgba(227, 227, 221, 0.04)',
-  },
-  picker: {
-    flex: 1,
-    borderWidth: 0,
-    justifyContent: 'center',
-  },
-  initValueTextStyle: {
-    color: '#E3E3DD',
-
-    textAlign: 'left',
-  },
-  selectTextStyle: {
-    color: '#E3E3DD',
-    textAlign: 'left',
-  },
-  optionTextStyle: {
-    color: '#E3E3DD',
-  },
-  optionContainer: {
-    textAlign: 'left',
-    backgroundColor: '#131314',
-    borderRadius: 6,
-  },
-  optionItems: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(227, 227, 221, 0.04)',
-  },
+  }, 
   caretIcon: {
     position: 'absolute',
     top: 17,
-    right: 22,
+    right: 18,
     pointerEvents: 'none',
   },
 });
+
+const pickerStyleDocument = {
+  inputIOS: {
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+    borderWidth: 0,  
+    color: '#E3E3DD', 
+    fontSize: 15,  
+  },
+  placeholder: {
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+    borderWidth: 0,  
+    color: '#E3E3DD', 
+    fontSize: 15,  
+  },
+  inputAndroid: {
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+    borderWidth: 0,  
+    color: '#E3E3DD', 
+    fontSize: 15,  
+  },
+};

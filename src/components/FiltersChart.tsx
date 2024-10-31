@@ -35,11 +35,6 @@ const FiltersChart: React.FC<ChartFilterProps> = ({onApplyFilter}) => {
     {label: 'EDM', value: 'danceelectronic'},
   ];
 
-  const handleSelect = (index: string) => {
-    //const selectedOption = genreOptions[index];
-    //setGenre(selectedOption.value);
-  };
-
   return (
     <>
       <View style={Typography.flexBetween}>
@@ -70,9 +65,11 @@ const FiltersChart: React.FC<ChartFilterProps> = ({onApplyFilter}) => {
         <View style={[styles.modalContent]}>
           <Text style={styles.label}>Genre</Text>
           <View style={[styles.pickerContainer]}>
-            <RNPickerSelect
-              onValueChange={value => console.log(value)}
+            <RNPickerSelect 
+              darkTheme={true}
+              onValueChange={value => setGenre(value)}
               items={genreOptions}
+              style={pickerStyleDocument}
             />
             <DownCarret stroke="white" style={styles.caretIcon} />
           </View>
@@ -131,37 +128,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     borderColor: '#1e1e1f',
     backgroundColor: 'rgba(227, 227, 221, 0.04)',
-  },
-  picker: {
-    flex: 1,
-    borderWidth: 0,
-    justifyContent: 'center',
-  },
-  initValueTextStyle: {
-    color: '#E3E3DD',
-
-    textAlign: 'left',
-  },
-  selectTextStyle: {
-    fontSize: 15,
-    color: '#E3E3DD',
-    textAlign: 'left',
-    paddingLeft: 10,
-  },
-  optionTextStyle: {
-    color: '#E3E3DD',
-  },
-  optionContainer: {
-    textAlign: 'left',
-    backgroundColor: '#131314',
-    borderRadius: 6,
-  },
-  optionItems: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(227, 227, 221, 0.04)',
-  },
+  }, 
   caretIcon: {
     position: 'absolute',
     top: 17,
@@ -169,3 +136,27 @@ const styles = StyleSheet.create({
     pointerEvents: 'none',
   },
 });
+
+const pickerStyleDocument = {
+  inputIOS: {
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+    borderWidth: 0,  
+    color: '#E3E3DD', 
+    fontSize: 15,  
+  },
+  placeholder: {
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+    borderWidth: 0,  
+    color: '#E3E3DD', 
+    fontSize: 15,  
+  },
+  inputAndroid: {
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+    borderWidth: 0,  
+    color: '#E3E3DD', 
+    fontSize: 15,  
+  },
+};
