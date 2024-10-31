@@ -18,7 +18,7 @@ interface FilterOptions {
 }
 
 const FiltersLeader: React.FC<LeaderFilterProps> = ({onApplyFilter}) => {
-  const [sort, setSort] = useState<string | undefined>(undefined);
+  const [sort, setSort] = useState<string | undefined>('accuracy');
   const [modalVisible, setModalVisible] = useState(false);
   const applyFilter = () => {
     onApplyFilter({sort});
@@ -26,8 +26,8 @@ const FiltersLeader: React.FC<LeaderFilterProps> = ({onApplyFilter}) => {
   };
 
   const sortOptions = [
-    {label: 'Accuracy', key: 'accuracy'},
-    {label: 'Votes', key: 'votes'},
+    {key: 'accuracy', label: 'Accuracy', value: 'accuracy'},
+    {key: 'votes', label: 'Votes', value: 'votes'},
   ];
 
   return (
@@ -62,9 +62,11 @@ const FiltersLeader: React.FC<LeaderFilterProps> = ({onApplyFilter}) => {
           <View style={[styles.pickerContainer]}>
             <ModalSelector
               data={sortOptions}
-              initValue="All"
-              onChange={option => setSort(option.key)}
-              selectedKey={sortOptions.find(option => option.key === sort)?.key}
+              initValue="*"
+              onChange={option => setSort(option.value)}
+              selectedKey={
+                sortOptions.find(option => option.value === sort)?.key
+              }
               style={styles.picker}
               selectStyle={{borderWidth: 0}}
               initValueTextStyle={styles.initValueTextStyle}

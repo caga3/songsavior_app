@@ -2,6 +2,8 @@ import React from 'react';
 import {StyleSheet, TouchableOpacity} from 'react-native';
 import ModalSelector from 'react-native-modal-selector';
 
+import ModalDropdown from 'react-native-modal-dropdown';
+
 import {Button, View, Text} from './Themed';
 import IconSvg from './IconsSvg';
 import Typography from '../constants/Typography';
@@ -24,16 +26,23 @@ const FiltersChart: React.FC<ChartFilterProps> = ({onApplyFilter}) => {
     onApplyFilter({genre});
     setModalVisible(false);
   };
-
+  
+  let indx = 0;
   const genreOptions = [
-    {label: 'All', key: '*'},
-    {label: 'Pop', key: 'pop'},
-    {label: 'Rock', key: 'rock'},
-    {label: 'Country', key: 'country'},
-    {label: 'R&B', key: 'rb'},
-    {label: 'Hip-Hop', key: 'hiphop'},
-    {label: 'EDM', key: 'danceelectronic'},
+    {key: indx++, label: 'All', value: '*'},
+    {key: indx++, label: 'Pop', value: 'pop'},
+    {key: indx++, label: 'Rock', value: 'rock'},
+    {key: indx++, label: 'Country', value: 'country'},
+    {key: indx++, label: 'R&B', value: 'rb'},
+    {key: indx++, label: 'Hip-Hop', value: 'hiphop'},
+    {key: indx++, label: 'EDM', value: 'danceelectronic'},
   ];
+
+  const handleSelect = (index) => {
+    const selectedOption = genreOptions[index];
+    setGenre(selectedOption.value); 
+    console.log(`Selected value: ${selectedOption.value}`);
+  };
 
   return (
     <>
@@ -65,13 +74,20 @@ const FiltersChart: React.FC<ChartFilterProps> = ({onApplyFilter}) => {
         <View style={[styles.modalContent]}>
           <Text style={styles.label}>Genre</Text>
           <View style={[styles.pickerContainer]}>
+          <ModalDropdown
+        options={genreOptions.map(option => option.label)}                 // Options array
+        defaultValue="All"     // Initial display text
+        onSelect={(index) => handleSelect(index)}
+        style={styles.picker}
+        textStyle={styles.selectTextStyle}
+        dropdownTextStyle={styles.optionTextStyle}
+        dropdownStyle={styles.optionContainer}
+      />
             <ModalSelector
               data={genreOptions}
               initValue="All"
-              onChange={option => setGenre(option.key)}
-              selectedKey={
-                genreOptions.find(option => option.key === genre)?.key
-              }
+              onChange={option => setGenre(option.value)} 
+              selectedKey={genre}
               style={styles.picker}
               selectStyle={{borderWidth: 0}}
               initValueTextStyle={styles.initValueTextStyle}
@@ -81,9 +97,10 @@ const FiltersChart: React.FC<ChartFilterProps> = ({onApplyFilter}) => {
               optionStyle={styles.optionItems}
               backdropPressToClose={true}
               cancelStyle={{display: 'none'}}
-            />
+            /> 
             <DownArrow fill="white" style={styles.caretIcon} />
           </View>
+          <Text>{genre}</Text>
           <Button
             style={[Typography.button, styles.buttonModalContainer]}
             label="Filter"
