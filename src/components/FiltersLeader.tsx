@@ -26,8 +26,8 @@ const FiltersLeader: React.FC<LeaderFilterProps> = ({onApplyFilter}) => {
   };
 
   const sortOptions = [
-    {key: 0, label: 'Accuracy', value: 'accuracy'},
-    {key: 1, label: 'Votes', value: 'votes'},
+    {label: 'Accuracy', key: 'accuracy'},
+    {label: 'Votes', key: 'votes'},
   ];
 
   return (
@@ -63,10 +63,8 @@ const FiltersLeader: React.FC<LeaderFilterProps> = ({onApplyFilter}) => {
             <ModalSelector
               data={sortOptions}
               initValue="All"
-              onChange={option => setSort(option.value)}
-              selectedKey={
-                sortOptions.find(option => option.value === sort)?.key
-              }
+              onChange={option => setSort(option.key)}
+              selectedKey={sortOptions.find(option => option.key === sort)?.key}
               style={styles.picker}
               selectStyle={{borderWidth: 0}}
               initValueTextStyle={styles.initValueTextStyle}
