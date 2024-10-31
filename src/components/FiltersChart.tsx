@@ -26,13 +26,13 @@ const FiltersChart: React.FC<ChartFilterProps> = ({onApplyFilter}) => {
   };
 
   const genreOptions = [
-    {key: 0, label: 'All', value: '*'},
-    {key: 1, label: 'Pop', value: 'pop'},
-    {key: 2, label: 'Rock', value: 'rock'},
-    {key: 3, label: 'Country', value: 'country'},
-    {key: 4, label: 'R&B', value: 'rb'},
-    {key: 5, label: 'Hip-Hop', value: 'hiphop'},
-    {key: 6, label: 'EDM', value: 'danceelectronic'},
+    {label: 'All', key: '*'},
+    {label: 'Pop', key: 'pop'},
+    {label: 'Rock', key: 'rock'},
+    {label: 'Country', key: 'country'},
+    {label: 'R&B', key: 'rb'},
+    {label: 'Hip-Hop', key: 'hiphop'},
+    {label: 'EDM', key: 'danceelectronic'},
   ];
 
   return (
@@ -68,9 +68,9 @@ const FiltersChart: React.FC<ChartFilterProps> = ({onApplyFilter}) => {
             <ModalSelector
               data={genreOptions}
               initValue="All"
-              onChange={option => setGenre(option.value)}
+              onChange={option => setGenre(option.key)}
               selectedKey={
-                genreOptions.find(option => option.value === genre)?.key
+                genreOptions.find(option => option.key === genre)?.key
               }
               style={styles.picker}
               selectStyle={{borderWidth: 0}}
