@@ -65,7 +65,7 @@ const FiltersChart: React.FC<ChartFilterProps> = ({onApplyFilter}) => {
         <View style={[styles.modalContent]}>
           <Text style={styles.label}>Genre</Text>
           <View style={[styles.pickerContainer]}>
-            <RNPickerSelect 
+            <RNPickerSelect
               darkTheme={true}
               onValueChange={value => setGenre(value)}
               items={genreOptions}
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     borderColor: '#1e1e1f',
     backgroundColor: 'rgba(227, 227, 221, 0.04)',
-  }, 
+  },
   caretIcon: {
     position: 'absolute',
     top: 17,
@@ -141,22 +141,22 @@ const pickerStyleDocument = {
   inputIOS: {
     paddingVertical: 20,
     paddingHorizontal: 10,
-    borderWidth: 0,  
-    color: '#E3E3DD', 
-    fontSize: 15,  
+    borderWidth: 0,
+    color: '#E3E3DD',
+    fontSize: 15,
   },
   placeholder: {
     paddingVertical: 20,
     paddingHorizontal: 10,
-    borderWidth: 0,  
-    color: '#E3E3DD', 
-    fontSize: 15,  
+    borderWidth: 0,
+    color: '#E3E3DD',
+    fontSize: 15,
   },
   inputAndroid: {
     paddingVertical: 20,
     paddingHorizontal: 10,
-    borderWidth: 0,  
-    color: '#E3E3DD', 
-    fontSize: 15,  
+    borderWidth: 0,
+    color: '#E3E3DD',
+    fontSize: 15,
   },
 };
