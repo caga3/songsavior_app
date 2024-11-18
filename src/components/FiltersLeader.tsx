@@ -20,7 +20,7 @@ interface FilterOptions {
 const FiltersLeader: React.FC<LeaderFilterProps> = ({onApplyFilter}) => {
   const [sort, setSort] = useState<string | undefined>('accuracy');
   const [modalVisible, setModalVisible] = useState(false);
-  
+
   const applyFilter = () => {
     onApplyFilter({sort});
     setModalVisible(false);
@@ -61,7 +61,7 @@ const FiltersLeader: React.FC<LeaderFilterProps> = ({onApplyFilter}) => {
         <View style={[styles.modalContent]}>
           <Text style={styles.label}>Sort By</Text>
           <View style={[styles.pickerContainer]}>
-            <RNPickerSelect 
+            <RNPickerSelect
               darkTheme={true}
               onValueChange={value => setSort(value)}
               items={sortOptions}
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     borderColor: '#1e1e1f',
     backgroundColor: 'rgba(227, 227, 221, 0.04)',
-  }, 
+  },
   caretIcon: {
     position: 'absolute',
     top: 17,
@@ -137,22 +137,22 @@ const pickerStyleDocument = {
   inputIOS: {
     paddingVertical: 20,
     paddingHorizontal: 10,
-    borderWidth: 0,  
-    color: '#E3E3DD', 
-    fontSize: 15,  
+    borderWidth: 0,
+    color: '#E3E3DD',
+    fontSize: 15,
   },
   placeholder: {
     paddingVertical: 20,
     paddingHorizontal: 10,
-    borderWidth: 0,  
-    color: '#E3E3DD', 
-    fontSize: 15,  
+    borderWidth: 0,
+    color: '#E3E3DD',
+    fontSize: 15,
   },
   inputAndroid: {
     paddingVertical: 20,
     paddingHorizontal: 10,
-    borderWidth: 0,  
-    color: '#E3E3DD', 
-    fontSize: 15,  
+    borderWidth: 0,
+    color: '#E3E3DD',
+    fontSize: 15,
   },
 };
