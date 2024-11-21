@@ -12,6 +12,7 @@ import {View, Text, CheckBox} from './Themed';
 import {useFilter} from '../context/FilterCategoryContext';
 import Typography from '../constants/Typography';
 import SpotifyService from '../constants/SpotifyService';
+import {slugText} from '../constants/Helper';
 
 type Category = {
   id: string;
@@ -30,6 +31,7 @@ interface CheckboxState {
 
 // Main component to display Spotify categories
 const Categories: React.FC = () => {
+  const image_path = 'https://www.songsavior.com/wp-content/uploads';
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [checkboxes, setCheckboxes] = useState<{[key: string]: Checkbox}>({});
@@ -117,42 +119,63 @@ const Categories: React.FC = () => {
   }
 
   return (
-    <FlatList
-      data={categories}
-      keyExtractor={item => item.id}
-      numColumns={2}
-      scrollEnabled={false}
-      renderItem={({item}) => (
-        <View style={[styles.grid, {width: calculatedWidth}]} key={item.id}>
-          <Pressable onPress={() => handleCheckboxChange(item, byGenres)}>
-            {item.icons && item.icons.length > 0 && (
-              <Image
-                source={{uri: item.icons[0].url}}
-                style={(Typography.imgFluid, styles.gridImage)}
+    <View style={styles.gridView}>
+      <FlatList
+        data={categories}
+        keyExtractor={item => item.id}
+        numColumns={2}
+        scrollEnabled={false}
+        renderItem={({item}) => (
+          <View style={[styles.grid, {width: calculatedWidth}]} key={item.id}>
+            <Pressable onPress={() => handleCheckboxChange(item, byGenres)}>
+              {byArtists && item.images && item.images.length > 0 && (
+                <Image
+                  source={{uri: item.images[0].url}}
+                  style={(Typography.imgFluid, styles.gridImage)}
+                />
+              )}
+
+              {byGenres && (
+                <Image
+                  source={{
+                    uri: `${image_path}/category/${slugText(item.name)}.png`,
+                  }}
+                  style={(Typography.imgFluid, styles.gridImage)}
+                />
+              )}
+
+              <Text style={styles.gridText}>{item.name}</Text>
+              <CheckBox
+                style={styles.checkbox}
+                checked={checkboxes[item.id]?.checked}
+                onPress={() => handleCheckboxChange(item, byGenres)}
               />
-            )}
-            {item.images && item.images.length > 0 && (
-              <Image
-                source={{uri: item.images[0].url}}
-                style={(Typography.imgFluid, styles.gridImage)}
-              />
-            )}
-            <Text style={styles.gridText}>{item.name}</Text>
-            <CheckBox
-              style={styles.checkbox}
-              checked={checkboxes[item.id]?.checked}
-              onPress={() => handleCheckboxChange(item, byGenres)}
-            />
-          </Pressable>
-        </View>
+            </Pressable>
+          </View>
+        )}
+      />
+      {byGenres && (
+        <Text
+          style={[
+            Typography.h3,
+            Typography.mt,
+            Typography.textCenter,
+            Typography.highlight,
+          ]}>
+          More genres will be available post-beta.
+        </Text>
       )}
-    />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  gridView: {
+    marginVertical: 10,
+  },
   grid: {
-    margin: 10,
+    marginVertical: 6,
+    marginHorizontal: 10,
     borderRadius: 8,
     position: 'relative',
   },

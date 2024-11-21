@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 
 import {useRoute, RouteProp} from '@react-navigation/native';
-import {Text, View} from '../components/Themed';
+import {Button, Text, TextInput, View} from '../components/Themed';
 import ModalFull from '../components/ModalFull';
 import ProfileNav from '../components/ProfileNav';
 import Typography from '../constants/Typography';
@@ -25,6 +25,7 @@ import {useAuth} from '../context/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RestApiServer from '../constants/RestApiServer';
 import {cleanText, slugText} from '../constants/Helper';
+import {launchImageLibrary} from 'react-native-image-picker';
 
 interface DataItem {
   id: number;
@@ -63,20 +64,24 @@ const genreImages: Record<Genre, ImageSourcePropType> = {
 const ProfileScreen: React.FC = () => {
   const route = useRoute<RouteProp<RootStackParamList, 'Profile'>>();
   const routes = route.params;
-  const {userInfo, setLogout} = useAuth();
+  const {userInfo, setLogout, setProfile} = useAuth();
   const [showProfile, setShowProfile] = useState<DataItem>();
   const [showGenres, setShowGenres] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalRated, setTotalRated] = useState(0);
   const [modalLevelVisible, setModalLevelVisible] = useState(false);
   const [modalBadgesVisible, setModalBadgesVisible] = useState(false);
+  const [modalEditVisible, setModalEditVisible] = useState(false);
+  const [displayName, setDisplayName] = useState('');
+  const [password, setPassword] = useState('');
+  const [successProfileMessage, setSuccessProfileMessage] = useState('');
+  const [failedProfileMessage, setFailedProfileMessage] = useState('');
+  const [imageUri, setImageUri] = useState('');
   const getUserInfo =
     typeof userInfo === 'string' ? JSON.parse(userInfo) : null;
   const user_id = routes && routes.item ? routes.item : getUserInfo.id;
   const default_avatar =
     'https://www.songsavior.com/wp-content/uploads/2024/07/default_avatar.jpg';
-
-  const handleEdit = () => {};
 
   const badgeImages: {[key: string]: any} = {
     default: {
@@ -134,6 +139,43 @@ const ProfileScreen: React.FC = () => {
     },
   };
 
+  const pickImage = async () => {
+    launchImageLibrary({mediaType: 'photo'}, response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.errorCode) {
+        console.error('Image picker error:', response.errorMessage);
+      } else if (response.assets && response.assets[0]) {
+        const pickedImage = response.assets[0];
+        if (pickedImage.uri) {
+          setImageUri(pickedImage.uri);
+        }
+      }
+    });
+  };
+
+  const editProfile = () => {
+    setSuccessProfileMessage('');
+    setFailedProfileMessage('');
+    setModalEditVisible(true);
+  };
+
+  const updateProfile = async () => {
+    setSuccessProfileMessage('');
+    setFailedProfileMessage('');
+    await setProfile(user_id, displayName, password, imageUri);
+    const userDataJson = await AsyncStorage.getItem('userInfo');
+    if (showProfile && userDataJson) {
+      const userData = JSON.parse(userDataJson);
+      showProfile.user_display_name = userData.user_display_name;
+      showProfile.avatar_url = userData.avatar;
+      setShowProfile(showProfile);
+      setSuccessProfileMessage('Profile has been updated.');
+    } else {
+      setFailedProfileMessage('Profile failed to updated.');
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -144,9 +186,10 @@ const ProfileScreen: React.FC = () => {
             tokenData,
           );
           if (responds) {
+            const groupedGenres = groupGenres(responds.votes[0]);
             setShowProfile(responds);
             setTotalRated(responds.length);
-            const groupedGenres = groupGenres(responds.votes[0]);
+            setDisplayName(responds.user_display_name);
             setShowGenres(groupedGenres);
             setLoading(false);
           }
@@ -156,14 +199,12 @@ const ProfileScreen: React.FC = () => {
       }
     };
     fetchData();
-  }, [showProfile]);
+  }, [showProfile?.id]);
 
   const groupGenres = (data: DataItem['votes']): string[] => {
     const genreSet = new Set<string>();
-
     // Add genre from single vote object
     genreSet.add(data.genre);
-
     return Array.from(genreSet); // Return an array with the single genre
   };
 
@@ -261,12 +302,19 @@ const ProfileScreen: React.FC = () => {
                   <View style={Typography.flex}>
                     {showProfile.id === Number(getUserInfo.id) && (
                       <>
-                        <TouchableOpacity onPress={handleEdit}>
-                          <Text style={Typography.text4}>Edit</Text>
+                        <TouchableOpacity onPress={editProfile}>
+                          <Text style={(Typography.text4, Typography.bold)}>
+                            EDIT
+                          </Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={setLogout}>
-                          <Text style={[Typography.ms15, Typography.text4]}>
-                            Logout
+                          <Text
+                            style={[
+                              Typography.ms15,
+                              Typography.text4,
+                              Typography.bold,
+                            ]}>
+                            LOGOUT
                           </Text>
                         </TouchableOpacity>
                       </>
@@ -589,6 +637,60 @@ const ProfileScreen: React.FC = () => {
                   })}
                 </View>
               </ModalFull>
+              <ModalFull
+                isVisible={modalEditVisible}
+                onClose={() => setModalEditVisible(false)}>
+                <View>
+                  <Text
+                    style={[
+                      Typography.size2,
+                      Typography.textCenter,
+                      Typography.mb,
+                    ]}>
+                    Update Profile
+                  </Text>
+                  <HBars style={Typography.mb} />
+                  <Text style={modal.label}>Change Display Name</Text>
+                  <TextInput
+                    placeholder="Display Name"
+                    value={displayName}
+                    onChangeText={text => setDisplayName(text)}
+                  />
+                  <Text style={modal.label}>Change Password</Text>
+                  <TextInput
+                    placeholder="Password"
+                    value={password}
+                    onChangeText={text => setPassword(text)}
+                  />
+                  <Text style={modal.label}>Change Bio Image</Text>
+                  <View>
+                    <Button
+                      style={[Typography.button, uploadStyle.button]}
+                      label="Upload Image"
+                      onPress={pickImage}
+                    />
+                    {imageUri && (
+                      <Image
+                        source={{uri: imageUri}}
+                        style={uploadStyle.image}
+                      />
+                    )}
+                  </View>
+                  {successProfileMessage && (
+                    <Text style={modal.alertSuccess}>
+                      {successProfileMessage}
+                    </Text>
+                  )}
+                  {failedProfileMessage && (
+                    <Text style={modal.alertFail}>{failedProfileMessage}</Text>
+                  )}
+                  <Button
+                    style={[Typography.button, modal.buttonModalContainer]}
+                    label="Update Profile"
+                    onPress={updateProfile}
+                  />
+                </View>
+              </ModalFull>
             </View>
           </ScrollView>
         </SafeAreaView>
@@ -681,6 +783,58 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 300,
     color: '#FDF15D',
+  },
+});
+
+const modal = StyleSheet.create({
+  label: {
+    fontSize: 15,
+    fontWeight: 400,
+    marginBottom: 7,
+  },
+  buttonModalContainer: {
+    marginVertical: 0,
+  },
+  alertSuccess: {
+    marginBottom: 20,
+    padding: 10,
+    fontSize: 15,
+    backgroundColor: 'rgba(0, 148, 15, 0.6)',
+    color: '#ffffff',
+    borderRadius: 16,
+    textAlign: 'center',
+    width: '100%',
+  },
+  alertFail: {
+    marginBottom: 20,
+    padding: 10,
+    fontSize: 15,
+    backgroundColor: '#f8d7da', // Light red background
+    color: '#ffffff', // Dark red text
+    borderRadius: 16,
+    textAlign: 'center',
+    width: '100%',
+  },
+});
+
+const uploadStyle = StyleSheet.create({
+  image: {
+    width: 200,
+    height: 200,
+    marginBottom: 20,
+    borderWidth: 2,
+    borderColor: '#303030',
+  },
+  button: {
+    marginBottom: 20,
+    backgroundColor: 'rgba(0, 165, 243, 0.05)',
+    borderWidth: 2,
+    borderColor: '#1277a5',
+    borderStyle: 'dashed',
+  },
+  message: {
+    marginTop: 10,
+    color: 'blue',
   },
 });
 

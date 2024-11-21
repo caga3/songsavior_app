@@ -85,7 +85,7 @@ export function FiltersCategory() {
               Feature Not Available {'\n'}... Yet
             </Text>
             <Text style={[styles.modalTitle, Typography.text]}>
-              Update feed is unavailable during the beta phase
+              Filtering is unavailable during the beta phase
             </Text>
           </View>
           <Button

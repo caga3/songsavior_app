@@ -29,15 +29,6 @@ const PlayerScreen: React.FC<Props> = ({navigation}) => {
             </View>
             <FiltersCategory />
             <Categories />
-            <Text
-              style={[
-                Typography.h3,
-                Typography.mt,
-                Typography.textCenter,
-                Typography.text3,
-              ]}>
-              More genres will be available post-beta.
-            </Text>
           </View>
         </ScrollView>
       </SafeAreaView>

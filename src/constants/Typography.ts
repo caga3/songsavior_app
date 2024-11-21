@@ -174,6 +174,9 @@ const Typography = StyleSheet.create({
   mb0: {
     marginBottom: 0,
   },
+  mb2: {
+    marginBottom: 8,
+  },
   mb3: {
     marginBottom: 3,
   },

@@ -2,7 +2,7 @@ import React from 'react';
 import {StyleSheet, TouchableOpacity} from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 
-import {Button, View, Text} from './Themed';
+import {Button, View, Text, TextInput} from './Themed';
 import IconSvg from './IconsSvg';
 import Typography from '../constants/Typography';
 import {useState} from 'react';
@@ -58,19 +58,25 @@ const FiltersLeader: React.FC<LeaderFilterProps> = ({onApplyFilter}) => {
       <ModalBottom
         isVisible={modalVisible}
         onClose={() => setModalVisible(false)}>
-        <View style={[styles.modalContent]}>
+        <View style={[modal.modalContent]}>
+          <Text style={styles.label}>Genre</Text>
+          <TextInput editable={false} placeholder="Overall" />
           <Text style={styles.label}>Sort By</Text>
-          <View style={[styles.pickerContainer]}>
+          <View style={[modal.pickerContainer]}>
             <RNPickerSelect
               darkTheme={true}
               onValueChange={value => setSort(value)}
               items={sortOptions}
               style={pickerStyleDocument}
             />
-            <DownCarret stroke="white" style={styles.caretIcon} />
+            <DownCarret stroke="white" style={modal.caretIcon} />
           </View>
+          <Text style={styles.label}>Status Level</Text>
+          <TextInput editable={false} placeholder="Overall" />
+          <Text style={styles.label}>User Location</Text>
+          <TextInput editable={false} placeholder="Ex: Houston, TX" />
           <Button
-            style={[Typography.button, styles.buttonModalContainer]}
+            style={[Typography.button, modal.buttonModalContainer]}
             label="Filter"
             onPress={applyFilter}
           />
@@ -88,13 +94,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   label: {
-    fontSize: 16,
-    fontWeight: 600,
-    marginBottom: 15,
+    fontSize: 15,
+    fontWeight: 400,
+    marginBottom: 7,
   },
-  label2: {
-    marginBottom: 4,
-  },
+});
+const modal = StyleSheet.create({
   modalWrapper: {
     margin: 'auto',
     width: 260,
@@ -105,7 +110,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   modalContent: {
-    height: 220,
+    height: 530,
     width: '100%',
     padding: 20,
     marginBottom: 10,

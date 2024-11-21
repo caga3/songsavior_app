@@ -2,12 +2,13 @@ import React from 'react';
 import {StyleSheet, TouchableOpacity} from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 
-import {Button, View, Text} from './Themed';
+import {Button, View, Text, TextInputIcon, TextInput} from './Themed';
 import IconSvg from './IconsSvg';
 import Typography from '../constants/Typography';
 import {useState} from 'react';
 import ModalBottom from './ModalBottom';
 import DownCarret from '../constants/icons/DownCarret';
+import HbarIcon from '../constants/icons/HBarIcon';
 
 interface ChartFilterProps {
   onApplyFilter: (filter: FilterOptions) => void;
@@ -62,19 +63,34 @@ const FiltersChart: React.FC<ChartFilterProps> = ({onApplyFilter}) => {
       <ModalBottom
         isVisible={modalVisible}
         onClose={() => setModalVisible(false)}>
-        <View style={[styles.modalContent]}>
+        <View style={[modal.modalContent]}>
+          <Text style={styles.label}>Search</Text>
+          <TextInputIcon
+            iconPath="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
+            iconColor="#FFFFFF"
+            editable={false}
+            placeholder="Search Song or Artist"
+          />
+          <HbarIcon style={styles.hbar} />
+          <Text style={styles.labelHead}>Sort By</Text>
           <Text style={styles.label}>Genre</Text>
-          <View style={[styles.pickerContainer]}>
+          <View style={[modal.pickerContainer]}>
             <RNPickerSelect
               darkTheme={true}
               onValueChange={value => setGenre(value)}
               items={genreOptions}
               style={pickerStyleDocument}
             />
-            <DownCarret stroke="white" style={styles.caretIcon} />
+            <DownCarret stroke="white" style={modal.caretIcon} />
           </View>
+
+          <Text style={styles.label}>Artist Location</Text>
+          <TextInput editable={false} placeholder="Location" />
+          <Text style={styles.label}>Release</Text>
+          <TextInput editable={false} placeholder="Past Month" />
+
           <Button
-            style={[Typography.button, styles.buttonModalContainer]}
+            style={[Typography.button, modal.buttonModalContainer]}
             label="Filter"
             onPress={applyFilter}
           />
@@ -92,13 +108,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   label: {
-    fontSize: 16,
+    fontSize: 15,
+    fontWeight: 400,
+    marginBottom: 7,
+  },
+  labelHead: {
+    marginVertical: 10,
+    fontSize: 15,
     fontWeight: 600,
-    marginBottom: 15,
   },
-  label2: {
-    marginBottom: 4,
+  hbar: {
+    marginVertical: 10,
   },
+});
+
+const modal = StyleSheet.create({
   modalWrapper: {
     margin: 'auto',
     width: 260,
@@ -109,7 +133,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   modalContent: {
-    height: 220,
+    height: 590,
     width: '100%',
     padding: 20,
     marginBottom: 10,

@@ -27,7 +27,9 @@ import RestApiServer from '../constants/RestApiServer';
 import {useAuth} from '../context/AuthContext';
 import PauseIcon from '../constants/icons/PauseIcon';
 import {singleAccuracy} from '../constants/Helper';
-import ModalCenter from './ModalCenter';
+import ModalFull from './ModalFull';
+import AccuracyIcon from '../constants/icons/AccuracyIcon';
+import GraphArrowIcon from '../constants/icons/GraphArrowIcon';
 
 interface Props {
   item: string;
@@ -61,6 +63,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
   const [isLikes, setIsLikes] = useState(0);
   const [songPlayer, setSongPlayer] = useState<any>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [disablePlaying, setDisablePlaying] = useState(false);
   const [isVoteReady, setIsVoteReady] = useState(false);
   const [hasVoted, setHasVoted] = useState(false);
   const [voteData, setVoteData] = useState<VoteData>();
@@ -243,16 +246,19 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
     const queueEndedListener = TrackPlayer.addEventListener(
       Event.PlaybackQueueEnded,
       async () => {
+        await TrackPlayer.seekTo(0); // Seek to the start of the track
+        await TrackPlayer.pause();
         if (!isVoteReady) {
           setIsVoteReady(true);
-          await TrackPlayer.seekTo(0); // Seek to the start of the track
-          await TrackPlayer.pause();
+          setDisablePlaying(true);
+        } else {
           setIsPlaying(false);
         }
       },
     );
 
     return () => {
+      setDisablePlaying(false);
       TrackPlayer.reset();
       queueEndedListener.remove();
     };
@@ -260,8 +266,10 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      if (redirect === 'Charts') {
-        handlePlay();
+      if (redirect === 'Charts' || !hasVoted) {
+        setTimeout(() => {
+          handlePlay();
+        }, 1000);
       }
       return async () => {
         setIsPlaying(false);
@@ -282,6 +290,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
     );
   }
   const imageUrl = songPlayer?.album?.images?.[0]?.url;
+
   return (
     <>
       {songPlayer && songPlayer.album && (
@@ -310,8 +319,6 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
 
           {!hasVoted && redirect !== 'Charts' ? (
             <View style={styles.rateSongWrapper}>
-              <HBars />
-
               <Text
                 style={[
                   Typography.textCenter,
@@ -324,7 +331,13 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
                 <View style={styles.downArrows}>
                   <DownArrow />
                 </View>
-                <Text style={[Typography.textCenter, Typography.size1]}>
+                <Text
+                  style={[
+                    Typography.textCenter,
+                    Typography.size1,
+                    Typography.highlight,
+                    Typography.bold,
+                  ]}>
                   TO REVEAL THE ARTIST
                 </Text>
                 <View style={styles.downArrows}>
@@ -358,7 +371,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
               <HBars />
             </View>
           ) : (
-            <View style={styles.rateSongWrapper}>
+            <>
               <View>
                 <Text style={Typography.size2}>{songPlayer.name}</Text>
                 <Text
@@ -389,72 +402,129 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
                   )}
                 </TouchableOpacity>
               </View>
-              <HBars />
+              <View style={styles.ratedSongWrapper}>
+                {voteData && voteData.avg ? (
+                  <View style={Typography.flexBetweenStart}>
+                    <View>
+                      <Text
+                        style={[
+                          Typography.size,
+                          Typography.bold,
+                          Typography.textCenter,
+                          Typography.mb2,
+                        ]}>
+                        Song Ratings
+                      </Text>
+                      <Text
+                        style={[
+                          Typography.h1,
+                          Typography.textCenter,
+                          Typography.mb3,
+                        ]}>
+                        {voteData.avg.toFixed(1)}
+                      </Text>
+                      <Text style={[Typography.text3, Typography.textCenter]}>
+                        Total {voteData.total} Ratings
+                      </Text>
+                    </View>
 
-              {voteData && voteData.avg ? (
-                <>
-                  <Text style={[Typography.size1, Typography.bold]}>
-                    Ratings
-                  </Text>
-                  <View style={[Typography.flexBetween]}>
-                    <Text style={[Typography.size1, Typography.text3]}>
-                      Your rating on this song
-                    </Text>
-                    <View style={styles.rateContainer}>
-                      {Array.from({length: 5}, (_val, id) => (
-                        <View key={id}>
-                          <StarsIcon
-                            width="24"
-                            height="24"
-                            fill={voteData.vote > id ? '#FDF15D' : '#717172'}
-                          />
+                    <View>
+                      <Text
+                        style={[
+                          Typography.size,
+                          Typography.bold,
+                          Typography.textCenter,
+                          Typography.mb2,
+                        ]}>
+                        Your Ratings
+                      </Text>
+                      <Text
+                        style={[
+                          Typography.h1,
+                          Typography.textCenter,
+                          Typography.mb3,
+                        ]}>
+                        {accuracy}
+                      </Text>
+                      <View style={[Typography.flex, Typography.mb]}>
+                        <DownArrow />
+                        <Text
+                          style={[
+                            Typography.size1,
+                            Typography.text3,
+                            Typography.textCenter,
+                            Typography.highlight,
+                            Typography.ms1,
+                          ]}>
+                          145
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View>
+                      <Text
+                        style={[
+                          Typography.size,
+                          Typography.bold,
+                          Typography.textCenter,
+                          Typography.mb2,
+                        ]}>
+                        Overall Score
+                      </Text>
+                      <View style={[Typography.flex, Typography.mb]}>
+                        <GraphArrowIcon />
+                        <Text
+                          style={[
+                            Typography.size1,
+                            Typography.textCenter,
+                            Typography.highlight,
+                            Typography.ms1,
+                          ]}>
+                          3306
+                        </Text>
+                      </View>
+                      <View
+                        style={[
+                          Typography.mt3,
+                          Typography.tintBkgBlue,
+                          styles.accuracy,
+                        ]}>
+                        <View style={Typography.flex}>
+                          <AccuracyIcon width="20" height="20" fill="#FFFFFF" />
+                          <Text style={[Typography.semibold, Typography.size]}>
+                            {accuracy}%
+                          </Text>
                         </View>
-                      ))}
-                      {voteData.total && (
-                        <Text style={Typography.size1}>({voteData.total})</Text>
-                      )}
+                      </View>
                     </View>
                   </View>
-                  <View style={[Typography.flexBetween, Typography.mb]}>
-                    <Text style={[Typography.size1, Typography.text3]}>
-                      Rating Accuracy
-                    </Text>
+                ) : (
+                  <>
                     <Text
                       style={[
                         Typography.size1,
                         Typography.bold,
-                        Typography.green,
-                      ]}>
-                      {accuracy}%
-                    </Text>
-                  </View>
-                </>
-              ) : (
-                <>
-                  <Text
-                    style={[
-                      Typography.size1,
-                      Typography.bold,
-                      Typography.textCenter,
-                      Typography.mt,
-                    ]}>
-                    YOU HAVE NOT RATED THIS SONG
-                  </Text>
-                  <View style={[Typography.flexBetween, Typography.mb]}>
-                    <Text
-                      style={[
-                        Typography.size1,
-                        Typography.text3,
                         Typography.textCenter,
-                        styles.maxWidth,
+                        Typography.mt,
                       ]}>
-                      To rate, you will need to hear it on the discovery stream
+                      YOU HAVE NOT RATED THIS SONG
                     </Text>
-                  </View>
-                </>
-              )}
-              <HBars />
-            </View>
+                    <View style={[Typography.flexBetween, Typography.mb]}>
+                      <Text
+                        style={[
+                          Typography.size1,
+                          Typography.text3,
+                          Typography.textCenter,
+                          styles.maxWidth,
+                        ]}>
+                        To rate, you will need to hear it on the discovery
+                        stream
+                      </Text>
+                    </View>
+                  </>
+                )}
+              </View>
+            </>
           )}
 
           <View style={styles.progressBarContainer}>
@@ -489,13 +559,21 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
               />
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.options, styles.play]}
-              onPress={() => handlePlay()}>
-              <View style={styles.icon}>
-                {isPlaying ? <PauseIcon /> : <PlayIcon />}
+            {!disablePlaying ? (
+              <TouchableOpacity
+                style={[styles.options, styles.play]}
+                onPress={() => handlePlay()}>
+                <View style={styles.icon}>
+                  {isPlaying ? <PauseIcon /> : <PlayIcon />}
+                </View>
+              </TouchableOpacity>
+            ) : (
+              <View style={[styles.options, styles.playDisabled]}>
+                <View style={[styles.icon]}>
+                  <PlayIcon />
+                </View>
               </View>
-            </TouchableOpacity>
+            )}
 
             <TouchableOpacity
               style={[Typography.hide, styles.options]}
@@ -517,80 +595,83 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
             </TouchableOpacity>
           </View>
 
-          <ModalCenter
+          <ModalFull
             isVisible={modalVisible}
-            height={300}
             onClose={() => setModalVisible(false)}>
-            <Text
-              style={[
-                Typography.size2,
-                Typography.highlight,
-                Typography.textCenter,
-                Typography.mb,
-              ]}>
-              Song Savior Game
-            </Text>
-            <HBars />
-            <Swiper
-              dotStyle={styles.dot}
-              activeDotStyle={styles.dotActive}
-              loop={true}>
-              <View style={styles.slide}>
-                <Text
-                  style={[
-                    Typography.size1,
-                    Typography.highlight,
-                    Typography.mb,
-                    Typography.mt,
-                  ]}>
-                  Rating Songs
-                </Text>
-                <Text style={[Typography.mb, Typography.text3]}>
-                  To get placed on the leaderboard, all you have to do is rate
-                  songs when you hear them on the player. However, to eliminate
-                  an unfair advantage, you will only get to rate songs you have
-                  accessed through the randomized stream and not through charts
-                  or profiles.
-                </Text>
+            <View>
+              <Text
+                style={[
+                  Typography.size2,
+                  Typography.highlight,
+                  Typography.textCenter,
+                  Typography.mb,
+                ]}>
+                Song Savior Game
+              </Text>
+              <HBars />
+              <View style={styles.slider}>
+                <Swiper
+                  dotStyle={styles.dot}
+                  activeDotStyle={styles.dotActive}
+                  loop={false}>
+                  <View key={1} style={styles.slide}>
+                    <Text
+                      style={[
+                        Typography.size1,
+                        Typography.highlight,
+                        Typography.mb,
+                        Typography.mt,
+                      ]}>
+                      Rating Songs
+                    </Text>
+                    <Text style={[Typography.mb, Typography.text3]}>
+                      To get placed on the leaderboard, all you have to do is
+                      rate songs when you hear them on the player. However, to
+                      eliminate an unfair advantage, you will only get to rate
+                      songs you have accessed through the randomized stream and
+                      not through charts or profiles.
+                    </Text>
+                  </View>
+                  <View key={2} style={styles.slide}>
+                    <Text
+                      style={[
+                        Typography.size1,
+                        Typography.highlight,
+                        Typography.mb,
+                        Typography.mt,
+                      ]}>
+                      Liking Songs
+                    </Text>
+                    <Text style={[Typography.mb, Typography.text3]}>
+                      To get placed on the leaderboard, all you have to do is
+                      rate songs when you hear them on the player. However, to
+                      eliminate an unfair advantage, you will only get to rate
+                      songs you have accessed through the randomized stream and
+                      not through charts or profiles.
+                    </Text>
+                  </View>
+                  <View key={2} style={styles.slide}>
+                    <Text
+                      style={[
+                        Typography.size1,
+                        Typography.highlight,
+                        Typography.mb,
+                        Typography.mt,
+                      ]}>
+                      Accuracy
+                    </Text>
+                    <Text style={[Typography.mb, Typography.text3]}>
+                      To get placed on the leaderboard, all you have to do is
+                      rate songs when you hear them on the player. However, to
+                      eliminate an unfair advantage, you will only get to rate
+                      songs you have accessed through the randomized stream and
+                      not through charts or profiles.
+                    </Text>
+                  </View>
+                </Swiper>
               </View>
-              <View style={styles.slide}>
-                <Text
-                  style={[
-                    Typography.size1,
-                    Typography.highlight,
-                    Typography.mb,
-                    Typography.mt,
-                  ]}>
-                  Liking Songs
-                </Text>
-                <Text style={[Typography.mb, Typography.text3]}>
-                  To get placed on the leaderboard, all you have to do is rate
-                  songs when you hear them on the player. However, to eliminate
-                  an unfair advantage, you will only get to rate songs you have
-                  accessed through the randomized stream and not through charts
-                  or profiles.
-                </Text>
-              </View>
-              <View style={styles.slide}>
-                <Text
-                  style={[
-                    Typography.size1,
-                    Typography.highlight,
-                    Typography.mb,
-                    Typography.mt,
-                  ]}>
-                  Accuracy
-                </Text>
-                <Text style={[Typography.mb, Typography.text3]}>
-                  To get placed on the leaderboard, all you have to do is rate
-                  songs when you hear them on the player. However, to eliminate
-                  an unfair advantage, you will only get to rate songs you have
-                  accessed through the randomized stream and not through charts
-                  or profiles.
-                </Text>
-              </View>
-            </Swiper>
-          </ModalCenter>
+            </View>
+          </ModalFull>
         </View>
       )}
     </>
@@ -608,14 +689,26 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
     alignItems: 'center',
   },
-
   options: {
     marginHorizontal: 4,
+  },
+  accuracy: {
+    width: 80,
+    borderRadius: 8,
+    padding: 4,
+    margin: 'auto',
+    alignItems: 'center',
   },
   play: {
     width: 80,
     height: 80,
     backgroundColor: '#204976',
+    borderRadius: 40,
+  },
+  playDisabled: {
+    width: 80,
+    height: 80,
+    backgroundColor: '#adadae',
     borderRadius: 40,
   },
   icon: {
@@ -624,7 +717,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
   cardWraper: {
     alignItems: 'center',
     borderRadius: 16,
@@ -646,10 +738,25 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
     alignItems: 'center',
   },
-
   rateSongWrapper: {
     flex: 1,
     position: 'relative',
+    paddingTop: 8,
+    marginBottom: 5,
+    borderWidth: 4,
+    borderRadius: 16,
+    borderColor: '#204976',
+  },
+  ratedSongWrapper: {
+    flex: 1,
+    position: 'relative',
+    paddingHorizontal: 15,
+    paddingTop: 15,
+    paddingBottom: 6,
+    marginBottom: 5,
+    borderWidth: 4,
+    borderRadius: 16,
+    borderColor: '#204976',
   },
   rateWrapper: {
     marginTop: 8,
@@ -659,8 +766,8 @@ const styles = StyleSheet.create({
   },
   help: {
     position: 'absolute',
-    top: 50,
-    right: 0,
+    top: 14,
+    right: 20,
   },
   like: {
     position: 'absolute',
@@ -691,8 +798,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '100%',
   },
+  slider: {
+    height: 300,
+  },
   slide: {
-    flex: 1,
+    paddingHorizontal: 20,
   },
   dotActive: {
     backgroundColor: '#fdf15d',

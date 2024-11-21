@@ -18,6 +18,7 @@ const endpoints = {
   likes: '/ratings/v1/likes',
   leaderboard: '/ratings/v1/leaderboard',
   profile: '/profile/v1/stats',
+  profile_update: '/profile/v1/update',
 };
 
 type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -77,6 +78,37 @@ const callRegister = async (
   dataForm.append('email', $email);
   dataForm.append('password', $password);
   return await makeApiRequest('POST', endpoints.register, dataForm);
+};
+
+// Update Profile
+const updateProfile = async (
+  $userId: number,
+  $display_name: string,
+  $password: string,
+  $file: string,
+  token: string,
+) => {
+  const dataForm = new FormData();
+  dataForm.append('uid', $userId);
+  dataForm.append('display_name', $display_name);
+  dataForm.append('password', $password);
+  if ($file) {
+    const fileExtension = $file.match(/\.([a-zA-Z0-9]+)$/);
+    const filename = fileExtension
+      ? `upload_${$userId}.${fileExtension[1]}`
+      : `upload_${$userId}.jpg`;
+    dataForm.append('file', {
+      uri: $file,
+      type: ['image/png', 'image/jpg'],
+      name: filename,
+    });
+  }
+  return await makeApiRequest(
+    'POST',
+    endpoints.profile_update,
+    dataForm,
+    token,
+  );
 };
 
 // Function to get a conversations
@@ -206,6 +238,7 @@ const fetchVoteById = async (
     token,
   );
 };
+
 // Function to get a stats
 const fetchStats = async (user_id: number, token: string) => {
   return await makeApiRequest(
@@ -215,6 +248,7 @@ const fetchStats = async (user_id: number, token: string) => {
     token,
   );
 };
+
 // Function to get a vote
 const fetchSongs = async (token: string) => {
   return await makeApiRequest('GET', endpoints.songs, null, token);
@@ -252,4 +286,5 @@ export default {
   fetchLikes,
   fetchLeaderBoard,
   fetchProfileStats,
+  updateProfile,
 };

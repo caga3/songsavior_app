@@ -16,6 +16,12 @@ interface AuthContextType {
   userInfo: {};
   setLogIn: (username: string, password: string) => void;
   setLogout: () => void;
+  setProfile: (
+    user_id: number,
+    display_name: string,
+    password: string,
+    file: string,
+  ) => void;
   setRegister: (
     username: string,
     fullname: string,
@@ -31,6 +37,7 @@ const initialContext: AuthContextType = {
   setLogIn: () => {},
   setLogout: () => {},
   setRegister: () => {},
+  setProfile: () => {},
 };
 
 const AuthContext = createContext<AuthContextType>(initialContext);
@@ -62,6 +69,25 @@ export const AuthProvider = ({children}: PropsWithChildren) => {
         'Error',
         'The username, email or password does not match or exist.',
       );
+    }
+  };
+
+  const setProfile = async (
+    user_id: number,
+    display_name: string,
+    password: string,
+    file: string,
+  ) => {
+    const userData = await RestApiServer.updateProfile(
+      user_id,
+      display_name,
+      password,
+      file,
+      userToken,
+    );
+    if (userData && userData.id) {
+      await AsyncStorage.setItem('userInfo', JSON.stringify(userData));
+      setUserInfo(JSON.stringify(userData));
     }
   };
 
@@ -140,6 +166,7 @@ export const AuthProvider = ({children}: PropsWithChildren) => {
         setLogIn,
         setLogout,
         setRegister,
+        setProfile,
       }}>
       {children}
     </AuthContext.Provider>

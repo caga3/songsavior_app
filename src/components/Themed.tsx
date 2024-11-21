@@ -17,6 +17,7 @@ import ButtonArrow from '../constants/icons/ButtonArrow';
 type ThemeProps = {
   lightColor?: string;
   darkColor?: string;
+  editable?: boolean;
 };
 
 type ThemeButtonProps = {
@@ -32,6 +33,7 @@ type ThemeInputIconProps = {
   iconColor?: string;
   lightColor?: string;
   darkColor?: string;
+  editable?: boolean;
   secureTextEntry?: boolean;
 };
 
@@ -91,7 +93,7 @@ export function View(props: ViewProps) {
 }
 
 export function TextInput(props: TextInputProps) {
-  const {style, lightColor, darkColor, ...otherProps} = props;
+  const {style, lightColor, darkColor, editable, ...otherProps} = props;
   const color = useThemeColor({light: lightColor, dark: darkColor}, 'text');
   const borderColor = useThemeColor(
     {light: lightColor, dark: darkColor},
@@ -107,7 +109,7 @@ export function TextInput(props: TextInputProps) {
   );
   const styles = StyleSheet.create({
     textInput: {
-      fontSize: 16,
+      fontSize: 15,
       height: 56,
       borderWidth: 1,
       borderRadius: 16,
@@ -122,6 +124,7 @@ export function TextInput(props: TextInputProps) {
     <DefaultTextInput
       style={[styles.textInput, style]}
       placeholderTextColor={mutedColor}
+      editable={editable}
       {...otherProps}
     />
   );
@@ -135,8 +138,10 @@ export function TextInputIcon(props: TextInputIconProps) {
     lightColor,
     secureTextEntry,
     darkColor,
+    editable,
     ...otherProps
   } = props;
+
   const [isSecure, setIsSecure] = useState(true);
   const color = useThemeColor({light: lightColor, dark: darkColor}, 'text');
   const borderColor = useThemeColor(
@@ -154,12 +159,10 @@ export function TextInputIcon(props: TextInputIconProps) {
   const styles = StyleSheet.create({
     textInput: {
       flex: 1,
-      fontSize: 16,
+      fontSize: 15,
       color: color,
       marginLeft: 10,
-      padding: 0,
-      marginTop: 14,
-      justifyContent: 'center',
+      alignItems: 'center',
     },
     inputGroup: {
       flexDirection: 'row',
@@ -178,14 +181,15 @@ export function TextInputIcon(props: TextInputIconProps) {
     setIsSecure(prevState => !prevState);
   };
   return (
-    <View style={styles.inputGroup}>
+    <View style={[styles.inputGroup, style]}>
       <IconSvg path={iconPath} width="24" height="24" color={iconColor} />
       {secureTextEntry ? (
         <>
           <DefaultTextInput
-            style={[styles.textInput, style]}
+            style={[styles.textInput]}
             placeholderTextColor={mutedColor}
             secureTextEntry={isSecure}
+            editable={editable}
             {...otherProps}
           />
           <TouchableOpacity onPress={showPassword}>
@@ -198,8 +202,9 @@ export function TextInputIcon(props: TextInputIconProps) {
         </>
       ) : (
         <DefaultTextInput
-          style={[styles.textInput, style]}
+          style={[styles.textInput]}
           placeholderTextColor={mutedColor}
+          editable={editable}
           {...otherProps}
         />
       )}
@@ -233,11 +238,11 @@ export function SelectOption(props: SelectProps) {
       backgroundColor: backgroundColor,
     },
     picker: {
-      fontSize: 16,
+      fontSize: 15,
     },
     selectedValue: {
       flex: 1,
-      fontSize: 16,
+      fontSize: 15,
       color: color,
     },
   });
@@ -294,7 +299,7 @@ export function Button(props: ButtonProps) {
       backgroundColor: backgroundColor,
     },
     buttonText: {
-      fontSize: 16,
+      fontSize: 15,
       textAlign: 'center',
       fontWeight: '700',
       color: color,
@@ -344,7 +349,7 @@ export function ButtonIcon(props: ButtonProps) {
     buttonText: {
       flex: 1,
       marginLeft: 12,
-      fontSize: 16,
+      fontSize: 15,
       textAlign: 'center',
       fontWeight: '700',
       color: color,

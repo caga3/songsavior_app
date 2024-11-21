@@ -101,7 +101,7 @@ const OverallLeader: React.FC<Props> = ({nav}) => {
     const reSort = sortWithMiddleFirst(filteredBoard);
     return reSort.map((item: DataItem, index: number) => {
       const totalAvgVote = parseFloat(item.total_avg_vote);
-      const votePercentage = totalAvgVote.toFixed(2);
+      const votePercentage = Math.round(totalAvgVote);
       return (
         <Pressable
           key={index}
@@ -204,7 +204,7 @@ const OverallLeader: React.FC<Props> = ({nav}) => {
                     <View style={Typography.flex}>
                       <AccuracyIcon width="20" height="20" fill="#FFFFFF" />
                       <Text style={[Typography.semibold, Typography.size]}>
-                        {parseFloat(item.total_avg_vote).toFixed(2)}%
+                        {Math.round(parseFloat(item.total_avg_vote))}%
                       </Text>
                     </View>
                   </View>
