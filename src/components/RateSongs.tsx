@@ -92,7 +92,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
         dur => dur.duration,
       );
       setDuration(trackDuration);
-    }, 500);
+    }, 1000);
   };
 
   const fetchData = async () => {
@@ -195,7 +195,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
     await fetchData();
     setTimeout(() => {
       handlePlay();
-    }, 5000);
+    }, 3000);
   };
 
   const handleShare = () => {};
@@ -284,7 +284,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
       if (redirect === 'Charts' || !hasVoted) {
         setTimeout(() => {
           handlePlay();
-        }, 5000);
+        }, 3000);
       }
       return async () => {
         setVoteData(undefined);

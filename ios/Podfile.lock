@@ -1559,6 +1559,8 @@ PODS:
     - React-Core
   - RNCPicker (2.9.0):
     - React-Core
+  - RNDeviceInfo (14.0.4):
+    - React-Core
   - RNGestureHandler (2.20.0):
     - DoubleConversion
     - glog
@@ -1580,7 +1582,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNKeychain (9.0.0):
+  - RNKeychain (9.2.2):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1766,6 +1768,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCPicker (from `../node_modules/@react-native-picker/picker`)"
+  - RNDeviceInfo (from `../node_modules/react-native-device-info`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNKeychain (from `../node_modules/react-native-keychain`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
@@ -1919,6 +1922,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-async-storage/async-storage"
   RNCPicker:
     :path: "../node_modules/@react-native-picker/picker"
+  RNDeviceInfo:
+    :path: "../node_modules/react-native-device-info"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
   RNKeychain:
@@ -2003,8 +2008,9 @@ SPEC CHECKSUMS:
   ReactCommon: 6a952e50c2a4b694731d7682aaa6c79bc156e4ad
   RNCAsyncStorage: d35c79ffba52c1013013e16b1fc295aec2feabb6
   RNCPicker: f963e01f78e546a93b98aa201501713dbda14e94
+  RNDeviceInfo: feea80a690d2bde1fe51461cf548039258bd03f2
   RNGestureHandler: 6dfe7692a191ee224748964127114edf057a1475
-  RNKeychain: 18fc2d8f29dd957ccfc2989d9389f7d5888169f3
+  RNKeychain: 4cfd0dc8634c2dd81a4607c8299ed424bfdee1a7
   RNReanimated: 6e79f3e3b37a88cddfb38525e9652aabd7c4c750
   RNScreens: 19719a9c326e925498ac3b2d35c4e50fe87afc06
   RNSVG: 4590aa95758149fa27c5c83e54a6a466349a1688
