@@ -1,7 +1,7 @@
-import React from 'react';
-import {Alert, StyleSheet} from 'react-native';
+import React, {useState} from 'react';
+import {StyleSheet} from 'react-native';
 
-import {Button, View} from './Themed';
+import {Button, Text, View} from './Themed';
 import {useFilter} from '../context/FilterCategoryContext';
 import Typography from '../constants/Typography';
 
@@ -19,19 +19,29 @@ interface Props {
 
 const StreamPlayer: React.FC<Props> = ({nav}) => {
   const {byGenres, checkBoxSelected} = useFilter();
+  const [submited, setSubmited] = useState(1);
   const handleStream = () => {
-    if (!checkBoxSelected) {
-      Alert.alert('Error', 'Please select a category first');
-    } else {
-      nav.navigate('PlayerRating', {
-        item: checkBoxSelected,
-        filter: byGenres ? 'genres' : 'artists',
-      });
+    if (byGenres) {
+      if (checkBoxSelected) {
+        setSubmited(1);
+        nav.navigate('PlayerRating', {
+          item: checkBoxSelected,
+          filter: byGenres ? 'genres' : 'artists',
+        });
+      } else {
+        setSubmited(2);
+      }
     }
   };
 
   return (
     <View style={styles.containerWrapper}>
+      {!checkBoxSelected && byGenres && submited === 2 && (
+        <Text
+          style={[Typography.mt, Typography.textCenter, Typography.highlight]}>
+          Please select a Genre first.
+        </Text>
+      )}
       <Button
         style={[Typography.button, styles.buttonContainer]}
         label="Launch Stream"

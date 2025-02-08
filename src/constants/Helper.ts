@@ -42,15 +42,6 @@ export const trimString = (input: string, maxLength: number = 49): string => {
   return input;
 };
 
-export const singleAccuracy = (vote: number, avgVote: number): number => {
-  return 100 - Math.abs(vote - avgVote) * 20;
-};
-
-export const getAverage = (ratings: []): number => {
-  const numberOfSongs = ratings.length;
-  return ratings.reduce((a, b) => a + b, 0) / numberOfSongs;
-};
-
 export const sortWithMiddleFirst = (arr: any) => {
   if (arr.length === 0) {
     return arr;
@@ -59,3 +50,58 @@ export const sortWithMiddleFirst = (arr: any) => {
   const reordered = [firstThree[1], firstThree[0], firstThree[2]];
   return reordered;
 };
+
+export const padNumber = (number: number) => {
+  return String(number).padStart(10, '0');
+};
+
+// Get Song Accuracy
+export const songAccuracy = (vote: number, avgVote: number): number => {
+  return 100 - Math.abs(vote - avgVote) * 20;
+};
+
+export const formatTime = (durationInSeconds: number): string => {
+  const totalSeconds = Math.floor(durationInSeconds % 60);
+  const minutes = Math.floor(durationInSeconds / 60)
+    .toString()
+    .padStart(2, '0');
+  const remainingSeconds = totalSeconds % 60; // Calculate remaining seconds correctly
+  const formattedSeconds =
+    remainingSeconds < 10 ? `0${remainingSeconds}` : `${remainingSeconds}`;
+  return `${minutes}:${formattedSeconds}`;
+};
+
+export const format = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60)
+    .toString()
+    .padStart(2, '0');
+  const secs = Math.floor(seconds % 60)
+    .toString()
+    .padStart(2, '0');
+  return `${mins}:${secs}`;
+};
+
+// Get Overall Song Accuracy
+// export const getOverallAccuracy = (ratings: {avg: string}[]): string => {
+//   // Rating from 0 - 4
+//   const rate = 4;
+//   const numberOfSongs = ratings.length;
+//   if (numberOfSongs === 0) {
+//     return '0%';
+//   }
+//   const avgScore =
+//     ratings.reduce((sum, item) => sum + parseFloat(item.avg), 0) /
+//     numberOfSongs;
+//   const percentage = (avgScore / rate) * 100; // Normalize to 0-100%
+//   return `${percentage.toFixed(2)}%`;
+// };
+
+// // Get Overall Song Scores
+// export const getTotalSongScores = (scores: {score: string}[]): number => {
+//   const numberOfSongs = scores.length;
+//   if (numberOfSongs === 0) {
+//     return 0;
+//   }
+//   const score = scores.reduce((sum, item) => sum + parseFloat(item.score), 0);
+//   return parseFloat(score.toFixed(2));
+// };

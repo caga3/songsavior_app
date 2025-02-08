@@ -47,6 +47,9 @@ const Typography = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 15,
   },
+  disabled: {
+    color: 'rgba(255,255,255,0.24)',
+  },
   alignCenter: {
     flex: 1,
     justifyContent: 'center',

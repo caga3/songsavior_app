@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   StyleSheet,
   Image,
@@ -20,6 +20,8 @@ import {sortWithMiddleFirst} from '../constants/Helper';
 import StarsIcon from '../constants/icons/StarsIcon';
 import AccuracyIcon from '../constants/icons/AccuracyIcon';
 import FiltersLeader from '../components/FiltersLeader';
+import {SITE_ROOT} from '../../global';
+import {useFocusEffect} from '@react-navigation/native';
 
 interface DataItem {
   user_id: string;
@@ -47,8 +49,7 @@ const OverallLeader: React.FC<Props> = ({nav}) => {
   const [filteredBoard, setFilteredBoard] = useState<DataItem[]>([]);
 
   const orderPosition = ['2nd', '1st', '3rd'];
-  const default_avatar =
-    'https://www.songsavior.com/wp-content/uploads/2024/07/default_avatar.jpg';
+  const default_avatar = `${SITE_ROOT}uploads/2024/07/default_avatar.jpg`;
 
   const handleProfileScreen = ($item: string) => {
     nav.navigate('Profile', {
@@ -68,6 +69,34 @@ const OverallLeader: React.FC<Props> = ({nav}) => {
     setFilteredBoard([...filteredData]);
   };
 
+  const fetchData = async () => {
+    try {
+      const tokenData = await AsyncStorage.getItem('userToken');
+      if (tokenData) {
+        const responds = await RestApiServer.fetchLeaderBoard(tokenData);
+        if (responds) {
+          setShowLeaderboard(responds);
+          setFilteredBoard(responds);
+          setLoading(false);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      fetchData();
+      return async () => {
+        setShowLeaderboard([]);
+        setFilteredBoard([]);
+        setLoading(true);
+      };
+    }, []),
+  );
+
   useEffect(() => {
     const handleOrientationChange = () => {
       setScreenWidth(Dimensions.get('window'));
@@ -76,22 +105,6 @@ const OverallLeader: React.FC<Props> = ({nav}) => {
       'change',
       handleOrientationChange,
     );
-    const fetchData = async () => {
-      try {
-        const tokenData = await AsyncStorage.getItem('userToken');
-        if (tokenData) {
-          const responds = await RestApiServer.fetchLeaderBoard(tokenData);
-          if (responds) {
-            setShowLeaderboard(responds);
-            setFilteredBoard(responds);
-            setLoading(false);
-          }
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchData();
     return () => {
       subscription?.remove();
     };
@@ -101,7 +114,7 @@ const OverallLeader: React.FC<Props> = ({nav}) => {
     const reSort = sortWithMiddleFirst(filteredBoard);
     return reSort.map((item: DataItem, index: number) => {
       const totalAvgVote = parseFloat(item.total_avg_vote);
-      const votePercentage = Math.round(totalAvgVote);
+      const votePercentage = totalAvgVote.toFixed(2);
       return (
         <Pressable
           key={index}
@@ -204,7 +217,7 @@ const OverallLeader: React.FC<Props> = ({nav}) => {
                     <View style={Typography.flex}>
                       <AccuracyIcon width="20" height="20" fill="#FFFFFF" />
                       <Text style={[Typography.semibold, Typography.size]}>
-                        {Math.round(parseFloat(item.total_avg_vote))}%
+                        {parseFloat(item.total_avg_vote).toFixed(2)}%
                       </Text>
                     </View>
                   </View>

@@ -7,6 +7,7 @@ import {
   TextInput as DefaultTextInput,
   TouchableOpacity as DefaultButton,
   TouchableOpacity,
+  Switch,
 } from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import Colors from '../constants/Colors';
@@ -49,6 +50,12 @@ type ThemeCheckBoxProps = {
   onPress: () => void;
 };
 
+type ThemeRadioProps = {
+  selected?: boolean;
+  onPress?: () => void;
+  children: React.ReactNode;
+};
+
 export type TextProps = ThemeProps & DefaultText['props'];
 export type ViewProps = ThemeProps & DefaultView['props'];
 export type TextInputProps = ThemeProps & DefaultTextInput['props'];
@@ -57,6 +64,7 @@ export type TextInputIconProps = ThemeInputIconProps &
 export type ButtonProps = ThemeButtonProps &
   React.ComponentProps<typeof DefaultButton>;
 export type CheckBoxProps = ThemeCheckBoxProps;
+export type RadioProps = ThemeRadioProps;
 export type SelectProps = ThemeSelectProps;
 
 export function useThemeColor(
@@ -182,7 +190,7 @@ export function TextInputIcon(props: TextInputIconProps) {
   };
   return (
     <View style={[styles.inputGroup, style]}>
-      <IconSvg path={iconPath} width="24" height="24" color={iconColor} />
+      <IconSvg path={iconPath} color={iconColor} />
       {secureTextEntry ? (
         <>
           <DefaultTextInput
@@ -394,13 +402,33 @@ export function CheckBox(props: CheckBoxProps) {
       {...otherProps}>
       {checked && (
         <View style={styles.check}>
-          <IconSvg
-            width="24"
-            height="24"
-            path="m9.55 18l-5.7-5.7l1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z"
-          />
+          <IconSvg path="m9.55 18l-5.7-5.7l1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z" />
         </View>
       )}
     </DefaultButton>
+  );
+}
+
+export function RadioButton(props: RadioProps) {
+  const {selected, onPress, children} = props;
+  const styles = StyleSheet.create({
+    radioGroup: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: 15,
+    },
+  });
+  return (
+    <View style={styles.radioGroup}>
+      {children}
+      <Switch
+        trackColor={{false: '#DDDEE3', true: '#DDDEE3'}}
+        thumbColor={selected ? '#376B86' : '#ffffff'}
+        ios_backgroundColor="#DDDEE3"
+        onValueChange={onPress}
+        value={selected}
+      />
+    </View>
   );
 }

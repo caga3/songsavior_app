@@ -1,18 +1,26 @@
 import React from 'react';
 import Svg, {Path} from 'react-native-svg';
+import {StyleProp, ViewStyle} from 'react-native';
 
 interface LocationIconProps {
   width?: string;
   height?: string;
   stroke?: string;
+  style?: StyleProp<ViewStyle>;
 }
 const LocationIcon: React.FC<LocationIconProps> = ({
   width = '12',
   height = '14',
   stroke = '#FDF15D',
+  style,
 }) => {
   return (
-    <Svg width={width} height={height} viewBox="0 0 12 14" fill="none">
+    <Svg
+      width={width}
+      height={height}
+      viewBox="0 0 12 14"
+      fill="none"
+      style={style}>
       <Path
         d="M5.99984 8.33314C7.10441 8.33314 7.99984 7.43771 7.99984 6.33314C7.99984 5.22857 7.10441 4.33314 5.99984 4.33314C4.89527 4.33314 3.99984 5.22857 3.99984 6.33314C3.99984 7.43771 4.89527 8.33314 5.99984 8.33314Z"
         stroke={stroke}

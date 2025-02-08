@@ -14,8 +14,11 @@ const endpoints = {
   send_vote: '/ratings/v1/votes/send',
   songs: '/ratings/v1/songs',
   songs_id: '/ratings/v1/songs/id',
+  songs_random: '/playlist/v1/song',
+  songs_track: '/playlist/v1/track',
   stats: '/ratings/v1/stats',
   likes: '/ratings/v1/likes',
+  follow: '/profile/v1/follow',
   leaderboard: '/ratings/v1/leaderboard',
   profile: '/profile/v1/stats',
   profile_update: '/profile/v1/update',
@@ -47,6 +50,8 @@ const makeApiRequest = async (
   try {
     const response = await fetch(`${BASE_URL}${endpointKey}`, requestOptions);
     const messageOut = await response.json();
+
+    //console.log(messageOut);
     if (messageOut.code === 'jwt_auth_invalid_token') {
       await AsyncStorage.removeItem('userToken');
       await AsyncStorage.removeItem('userInfo');
@@ -179,6 +184,7 @@ const sendVote = async (
   $title: string,
   $artist: string,
   $image: string,
+  $year: number,
   token: string,
 ) => {
   const dataForm = new FormData();
@@ -190,7 +196,7 @@ const sendVote = async (
   dataForm.append('image', $image);
   dataForm.append('title', $title);
   dataForm.append('artist', $artist);
-
+  dataForm.append('year', $year);
   return await makeApiRequest('POST', endpoints.send_vote, dataForm, token);
 };
 
@@ -205,6 +211,17 @@ const toggleLikes = async (
   dataForm.append('user_id', $user_id);
   dataForm.append('likes', $like);
   return await makeApiRequest('POST', endpoints.likes, dataForm, token);
+};
+
+const toggleFollow = async (
+  $user_id: number,
+  $follow: number,
+  token: string,
+) => {
+  const dataForm = new FormData();
+  dataForm.append('user_id', $user_id);
+  dataForm.append('follow', $follow);
+  return await makeApiRequest('POST', endpoints.follow, dataForm, token);
 };
 
 const fetchLikes = async (song_id: string, user_id: number, token: string) => {
@@ -260,10 +277,35 @@ const fetchLeaderBoard = async (token: string) => {
 };
 
 // Function to get Profile Stats
-const fetchProfileStats = async (user_id: number, token: string) => {
+const fetchProfileStats = async (
+  user_id: number,
+  profile_id: number,
+  token: string,
+) => {
   return await makeApiRequest(
     'GET',
-    endpoints.profile + '?user_id=' + user_id,
+    `${endpoints.profile}?user_id=${user_id}${
+      user_id !== profile_id ? `&profile_id=${profile_id}` : ''
+    }`,
+    null,
+    token,
+  );
+};
+
+// Function to random song
+const searchRandomTrackByCategory = async (genre: string, token: string) => {
+  return await makeApiRequest(
+    'GET',
+    endpoints.songs_random + '?category=' + genre,
+    null,
+    token,
+  );
+};
+// Fetch Track by item ID
+const searchTrack = async (item: string, token: string) => {
+  return await makeApiRequest(
+    'GET',
+    endpoints.songs_track + '?track=' + item,
     null,
     token,
   );
@@ -283,8 +325,11 @@ export default {
   fetchSongs,
   fetchStats,
   toggleLikes,
+  toggleFollow,
   fetchLikes,
   fetchLeaderBoard,
   fetchProfileStats,
   updateProfile,
+  searchRandomTrackByCategory,
+  searchTrack,
 };

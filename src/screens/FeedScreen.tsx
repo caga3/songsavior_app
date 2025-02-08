@@ -9,6 +9,7 @@ import ThreeDots from '../constants/icons/ThreeDots';
 import LikesIcon from '../constants/icons/LikesIcon';
 import CommentsIcon from '../constants/icons/CommentsIcon';
 import ShareIcon from '../constants/icons/ShareIcon';
+import HbarIcon from '../constants/icons/HBarIcon';
 
 const FeedScreen: React.FC = () => {
   const {userInfo} = useAuth();
@@ -188,14 +189,16 @@ const FeedScreen: React.FC = () => {
             <View style={styles.modalWrapper}>
               <Text
                 style={[
-                  Typography.h2,
+                  Typography.h3,
                   Typography.textCenter,
                   Typography.highlight,
+                  Typography.mb0,
                 ]}>
-                Feature Not Available {'\n'}... Yet
+                Feature Not Available Yet!
               </Text>
+              <HbarIcon style={styles.hbar} />
               <Text style={[styles.modalTitle, Typography.text]}>
-                Update feed is unavailable during the beta phase
+                Filtering is unavailable during the beta phase
               </Text>
             </View>
           </View>
@@ -223,11 +226,11 @@ const styles = StyleSheet.create({
   },
   modalWrapper: {
     margin: 'auto',
-    width: 260,
+    width: 280,
   },
   modalTitle: {
-    fontSize: 15,
-    marginBottom: 20,
+    fontSize: 13,
+    marginBottom: 10,
     textAlign: 'center',
   },
   modalContent: {
@@ -238,7 +241,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#131314',
   },
-
+  hbar: {
+    marginVertical: 10,
+  },
   gridImage: {
     width: 40,
     height: 40,

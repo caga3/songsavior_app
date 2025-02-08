@@ -9,6 +9,7 @@ import {useState} from 'react';
 import ModalBottom from './ModalBottom';
 import DownCarret from '../constants/icons/DownCarret';
 import HbarIcon from '../constants/icons/HBarIcon';
+import LocationIcon from '../constants/icons/LocationIcon';
 
 interface ChartFilterProps {
   onApplyFilter: (filter: FilterOptions) => void;
@@ -19,15 +20,8 @@ interface FilterOptions {
 }
 
 const FiltersChart: React.FC<ChartFilterProps> = ({onApplyFilter}) => {
-  const [genre, setGenre] = useState<string | undefined>(undefined);
-  const [modalVisible, setModalVisible] = useState(false);
-  const applyFilter = () => {
-    onApplyFilter({genre});
-    setModalVisible(false);
-  };
-
   const genreOptions = [
-    {label: 'All', value: '*'},
+    {label: 'Overall', value: '*'},
     {label: 'Pop', value: 'pop'},
     {label: 'Rock', value: 'rock'},
     {label: 'Country', value: 'country'},
@@ -35,6 +29,17 @@ const FiltersChart: React.FC<ChartFilterProps> = ({onApplyFilter}) => {
     {label: 'Hip-Hop', value: 'hiphop'},
     {label: 'EDM', value: 'danceelectronic'},
   ];
+
+  const [genre, setGenre] = useState<string | undefined>('*');
+  const [genreTitle, setGenreTitle] = useState<string | undefined>('Overall');
+  const [modalVisible, setModalVisible] = useState(false);
+  const applyFilter = () => {
+    const selectedOption = genreOptions.find(option => option.value === genre);
+    const label = selectedOption ? selectedOption.label : 'Overall';
+    onApplyFilter({genre});
+    setGenreTitle(label);
+    setModalVisible(false);
+  };
 
   return (
     <>
@@ -46,7 +51,7 @@ const FiltersChart: React.FC<ChartFilterProps> = ({onApplyFilter}) => {
             color="#FDF15D"
             path="M10 17C10 18.6569 8.65685 20 7 20C5.34315 20 4 18.6569 4 17C4 15.3431 5.34315 14 7 14C8.65685 14 10 15.3431 10 17ZM10 17V4H20V17M20 17C20 18.6569 18.6569 20 17 20C15.3431 20 14 18.6569 14 17C14 15.3431 15.3431 14 17 14C18.6569 14 20 15.3431 20 17ZM10 8H20"
           />
-          <Text style={[Typography.size2, Typography.ms]}>Overall</Text>
+          <Text style={[Typography.size2, Typography.ms]}>{genreTitle}</Text>
         </View>
         <TouchableOpacity
           onPress={() => {
@@ -64,10 +69,18 @@ const FiltersChart: React.FC<ChartFilterProps> = ({onApplyFilter}) => {
         isVisible={modalVisible}
         onClose={() => setModalVisible(false)}>
         <View style={[modal.modalContent]}>
-          <Text style={styles.label}>Search</Text>
+          <Text
+            style={[
+              Typography.size,
+              Typography.textCenter,
+              Typography.highlight,
+            ]}>
+            More filters will be available post-beta.
+          </Text>
+          <Text style={[Typography.disabled, styles.label]}>Search</Text>
           <TextInputIcon
             iconPath="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
-            iconColor="#FFFFFF"
+            iconColor="rgba(255,255,255,0.24)"
             editable={false}
             placeholder="Search Song or Artist"
           />
@@ -75,20 +88,48 @@ const FiltersChart: React.FC<ChartFilterProps> = ({onApplyFilter}) => {
           <Text style={styles.labelHead}>Sort By</Text>
           <Text style={styles.label}>Genre</Text>
           <View style={[modal.pickerContainer]}>
-            <RNPickerSelect
-              darkTheme={true}
-              onValueChange={value => setGenre(value)}
-              items={genreOptions}
-              style={pickerStyleDocument}
+            <IconSvg
+              style={modal.leftIcon}
+              width="21"
+              height="21"
+              color="#FDF15D"
+              path="M10 17C10 18.6569 8.65685 20 7 20C5.34315 20 4 18.6569 4 17C4 15.3431 5.34315 14 7 14C8.65685 14 10 15.3431 10 17ZM10 17V4H20V17M20 17C20 18.6569 18.6569 20 17 20C15.3431 20 14 18.6569 14 17C14 15.3431 15.3431 14 17 14C18.6569 14 20 15.3431 20 17ZM10 8H20"
             />
+            <View style={modal.iconLeftPaddingSm}>
+              <RNPickerSelect
+                darkTheme={true}
+                onValueChange={value => setGenre(value)}
+                items={genreOptions}
+                value={genre}
+                style={pickerStyleDocument}
+              />
+            </View>
             <DownCarret stroke="white" style={modal.caretIcon} />
           </View>
-
-          <Text style={styles.label}>Artist Location</Text>
-          <TextInput editable={false} placeholder="Location" />
-          <Text style={styles.label}>Release</Text>
-          <TextInput editable={false} placeholder="Past Month" />
-
+          <Text style={[Typography.disabled, styles.label]}>
+            Artist Location
+          </Text>
+          <View>
+            <LocationIcon
+              width="20"
+              height="21"
+              stroke="rgba(255,255,255,0.24)"
+              style={modal.leftIcon}
+            />
+            <TextInput
+              style={modal.iconLeftPadding}
+              editable={false}
+              placeholder="Location"
+            />
+          </View>
+          <Text style={[Typography.disabled, styles.label]}>Release</Text>
+          <View>
+            <TextInput editable={false} placeholder="Past Month" />
+            <DownCarret
+              stroke="rgba(255,255,255,0.24)"
+              style={modal.caretIcon}
+            />
+          </View>
           <Button
             style={[Typography.button, modal.buttonModalContainer]}
             label="Filter"
@@ -133,7 +174,7 @@ const modal = StyleSheet.create({
     textAlign: 'center',
   },
   modalContent: {
-    height: 590,
+    height: 620,
     width: '100%',
     padding: 20,
     marginBottom: 10,
@@ -153,10 +194,22 @@ const modal = StyleSheet.create({
     borderColor: '#1e1e1f',
     backgroundColor: 'rgba(227, 227, 221, 0.04)',
   },
+  iconLeftPadding: {
+    paddingLeft: 45,
+  },
+  iconLeftPaddingSm: {
+    paddingLeft: 30,
+  },
   caretIcon: {
     position: 'absolute',
     top: 17,
     right: 18,
+    pointerEvents: 'none',
+  },
+  leftIcon: {
+    position: 'absolute',
+    top: 17,
+    left: 15,
     pointerEvents: 'none',
   },
 });

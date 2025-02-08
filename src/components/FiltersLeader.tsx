@@ -2,12 +2,14 @@ import React from 'react';
 import {StyleSheet, TouchableOpacity} from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 
-import {Button, View, Text, TextInput} from './Themed';
+import {Button, View, Text, TextInput, RadioButton} from './Themed';
 import IconSvg from './IconsSvg';
 import Typography from '../constants/Typography';
 import {useState} from 'react';
 import ModalBottom from './ModalBottom';
 import DownCarret from '../constants/icons/DownCarret';
+import LocationIcon from '../constants/icons/LocationIcon';
+import GraphArrowIcon from '../constants/icons/GraphArrowIcon';
 
 interface LeaderFilterProps {
   onApplyFilter: (filter: FilterOptions) => void;
@@ -27,7 +29,7 @@ const FiltersLeader: React.FC<LeaderFilterProps> = ({onApplyFilter}) => {
   };
 
   const sortOptions = [
-    {label: 'Accuracy', value: 'accuracy'},
+    {label: 'Score', value: 'accuracy'},
     {label: 'Votes', value: 'votes'},
   ];
 
@@ -59,22 +61,76 @@ const FiltersLeader: React.FC<LeaderFilterProps> = ({onApplyFilter}) => {
         isVisible={modalVisible}
         onClose={() => setModalVisible(false)}>
         <View style={[modal.modalContent]}>
-          <Text style={styles.label}>Genre</Text>
-          <TextInput editable={false} placeholder="Overall" />
+          <Text
+            style={[
+              Typography.size,
+              Typography.textCenter,
+              Typography.highlight,
+            ]}>
+            More filters will be available post-beta.
+          </Text>
+          <Text style={[Typography.disabled, styles.label]}>Genre</Text>
+          <View>
+            <IconSvg
+              style={modal.leftIcon}
+              width="21"
+              height="21"
+              color="rgba(255,255,255,0.24)"
+              path="M10 17C10 18.6569 8.65685 20 7 20C5.34315 20 4 18.6569 4 17C4 15.3431 5.34315 14 7 14C8.65685 14 10 15.3431 10 17ZM10 17V4H20V17M20 17C20 18.6569 18.6569 20 17 20C15.3431 20 14 18.6569 14 17C14 15.3431 15.3431 14 17 14C18.6569 14 20 15.3431 20 17ZM10 8H20"
+            />
+            <TextInput
+              style={modal.iconLeftPadding}
+              editable={false}
+              placeholder="Overall"
+            />
+            <DownCarret
+              stroke="rgba(255,255,255,0.24)"
+              style={modal.caretIcon}
+            />
+          </View>
           <Text style={styles.label}>Sort By</Text>
           <View style={[modal.pickerContainer]}>
-            <RNPickerSelect
-              darkTheme={true}
-              onValueChange={value => setSort(value)}
-              items={sortOptions}
-              style={pickerStyleDocument}
-            />
+            <GraphArrowIcon style={modal.leftIcon} />
+            <View style={modal.iconLeftPaddingSm}>
+              <RNPickerSelect
+                darkTheme={true}
+                onValueChange={value => setSort(value)}
+                items={sortOptions}
+                value={sort}
+                style={pickerStyleDocument}
+              />
+            </View>
             <DownCarret stroke="white" style={modal.caretIcon} />
           </View>
-          <Text style={styles.label}>Status Level</Text>
-          <TextInput editable={false} placeholder="Overall" />
-          <Text style={styles.label}>User Location</Text>
-          <TextInput editable={false} placeholder="Ex: Houston, TX" />
+          <Text style={[Typography.disabled, styles.label]}>Status Level</Text>
+          <View>
+            <TextInput editable={false} placeholder="Overall" />
+            <DownCarret
+              stroke="rgba(255,255,255,0.24)"
+              style={modal.caretIcon}
+            />
+          </View>
+          <Text style={[Typography.disabled, styles.label]}>User Location</Text>
+          <View>
+            <LocationIcon
+              width="20"
+              height="21"
+              stroke="rgba(255,255,255,0.24)"
+              style={modal.leftIcon}
+            />
+            <TextInput
+              style={modal.iconLeftPadding}
+              editable={false}
+              placeholder="Ex: Houston, TX"
+            />
+          </View>
+          <View>
+            <RadioButton>
+              <Text style={[Typography.disabled, styles.label]}>
+                Prioritize Accuracy
+              </Text>
+            </RadioButton>
+          </View>
           <Button
             style={[Typography.button, modal.buttonModalContainer]}
             label="Filter"
@@ -110,7 +166,7 @@ const modal = StyleSheet.create({
     textAlign: 'center',
   },
   modalContent: {
-    height: 530,
+    height: 610,
     width: '100%',
     padding: 20,
     marginBottom: 10,
@@ -130,10 +186,22 @@ const modal = StyleSheet.create({
     borderColor: '#1e1e1f',
     backgroundColor: 'rgba(227, 227, 221, 0.04)',
   },
+  iconLeftPadding: {
+    paddingLeft: 45,
+  },
+  iconLeftPaddingSm: {
+    paddingLeft: 30,
+  },
   caretIcon: {
     position: 'absolute',
     top: 17,
     right: 18,
+    pointerEvents: 'none',
+  },
+  leftIcon: {
+    position: 'absolute',
+    top: 17,
+    left: 15,
     pointerEvents: 'none',
   },
 });

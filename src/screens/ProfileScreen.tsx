@@ -1,16 +1,16 @@
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
-  FlatList,
   Image,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  ImageSourcePropType,
 } from 'react-native';
 
 import {useRoute, RouteProp} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Button, Text, TextInput, View} from '../components/Themed';
 import ModalFull from '../components/ModalFull';
 import ProfileNav from '../components/ProfileNav';
@@ -24,8 +24,18 @@ import VBarIcon from '../constants/icons/VBarIcon';
 import {useAuth} from '../context/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RestApiServer from '../constants/RestApiServer';
-import {cleanText, slugText} from '../constants/Helper';
+import {slugText} from '../constants/Helper';
 import {launchImageLibrary} from 'react-native-image-picker';
+import {RootAppStackParamList} from '../types/types';
+import AddIcon from '../constants/icons/AddIcon';
+import GraphArrowIcon from '../constants/icons/GraphArrowIcon';
+import AccuracyIcon from '../constants/icons/AccuracyIcon';
+import GraphIcon from '../constants/icons/GraphIcon';
+import FollowIcon from '../constants/icons/FollowIcon';
+import {SITE_ROOT} from '../../global';
+import MinusIcon from '../constants/icons/MinusIcon';
+
+type ProfileScreenProp = NativeStackNavigationProp<RootAppStackParamList>;
 
 interface DataItem {
   id: number;
@@ -35,40 +45,27 @@ interface DataItem {
   user_badges: string;
   avatar_url: string;
   user_display_name: string;
-  votes: {
-    song_id: string;
-    vote: number;
-    title: string;
-    artist: string;
-    image: string;
-    genre: string;
-    avg: number;
-    total: number;
-  };
+  followers: number;
+  following: number;
 }
-type Genre = 'rock' | 'pop' | 'country' | 'rb' | 'hiphop' | 'danceelectronic';
-
 type RootStackParamList = {
   Profile: {item?: string};
 };
 
-const genreImages: Record<Genre, ImageSourcePropType> = {
-  rock: require('../assets/images/genres/genre_rock.png'),
-  pop: require('../assets/images/genres/genre_pop.png'),
-  country: require('../assets/images/genres/genre_country.png'),
-  rb: require('../assets/images/genres/genre_rb.png'),
-  hiphop: require('../assets/images/genres/genre_hiphop.png'),
-  danceelectronic: require('../assets/images/genres/genre_danceelectronic.png'),
-};
-
 const ProfileScreen: React.FC = () => {
   const route = useRoute<RouteProp<RootStackParamList, 'Profile'>>();
+  const navigation = useNavigation<ProfileScreenProp>();
   const routes = route.params;
-  const {userInfo, setLogout, setProfile} = useAuth();
+  const {userInfo, setLogout, setProfile, userToken} = useAuth();
   const [showProfile, setShowProfile] = useState<DataItem>();
-  const [showGenres, setShowGenres] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isFollowers, setIsFollowers] = useState(false);
+  const [addFollow, setAddFollow] = useState(0);
+  const [groupBy, setGroupBy] = useState(0);
   const [totalRated, setTotalRated] = useState(0);
+  const [score, setScore] = useState(0);
+  const [accuracy, setAccuracy] = useState('');
+  const [ranking, setRanking] = useState(0);
   const [modalLevelVisible, setModalLevelVisible] = useState(false);
   const [modalBadgesVisible, setModalBadgesVisible] = useState(false);
   const [modalEditVisible, setModalEditVisible] = useState(false);
@@ -80,9 +77,41 @@ const ProfileScreen: React.FC = () => {
   const getUserInfo =
     typeof userInfo === 'string' ? JSON.parse(userInfo) : null;
   const user_id = routes && routes.item ? routes.item : getUserInfo.id;
-  const default_avatar =
-    'https://www.songsavior.com/wp-content/uploads/2024/07/default_avatar.jpg';
+  const default_avatar = `${SITE_ROOT}uploads/2024/07/default_avatar.jpg`;
 
+  const handleSelection = (value: number) => {
+    setGroupBy(value);
+  };
+  const handleMessageAction = () => {
+    navigation.navigate('Messages');
+  };
+  const handleFollowAction = async () => {
+    setIsFollowers(true);
+    if (getUserInfo) {
+      const msg = await RestApiServer.toggleFollow(
+        user_id,
+        getUserInfo.id,
+        userToken,
+      );
+      if (msg) {
+        setAddFollow(msg.followers);
+      }
+    }
+  };
+
+  const handleUnFollowAction = async () => {
+    setIsFollowers(false);
+    if (getUserInfo) {
+      const msg = await RestApiServer.toggleFollow(
+        user_id,
+        getUserInfo.id,
+        userToken,
+      );
+      if (msg) {
+        setAddFollow(msg.followers);
+      }
+    }
+  };
   const badgeImages: {[key: string]: any} = {
     default: {
       name: 'Fan',
@@ -179,18 +208,25 @@ const ProfileScreen: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const tokenData = await AsyncStorage.getItem('userToken');
-        if (tokenData) {
+        if (userToken) {
           const responds = await RestApiServer.fetchProfileStats(
             user_id,
-            tokenData,
+            getUserInfo.id,
+            userToken,
           );
           if (responds) {
-            const groupedGenres = groupGenres(responds.votes[0]);
+            if (getUserInfo.id !== user_id) {
+              if (responds.is_following > 0) {
+                setIsFollowers(true);
+              }
+            }
+            setAddFollow(responds.followers);
             setShowProfile(responds);
-            setTotalRated(responds.length);
+            setTotalRated(responds.votes);
             setDisplayName(responds.user_display_name);
-            setShowGenres(groupedGenres);
+            setScore(responds.score);
+            setAccuracy(responds.accuracy);
+            setRanking(responds.rank);
             setLoading(false);
           }
         }
@@ -200,43 +236,6 @@ const ProfileScreen: React.FC = () => {
     };
     fetchData();
   }, [showProfile?.id]);
-
-  const groupGenres = (data: DataItem['votes']): string[] => {
-    const genreSet = new Set<string>();
-    // Add genre from single vote object
-    genreSet.add(data.genre);
-    return Array.from(genreSet); // Return an array with the single genre
-  };
-
-  const renderItem = ({item}: {item: string}) => {
-    const sanitizedItem = cleanText(item) as Genre;
-    return (
-      <View style={[Typography.flexBetween, Typography.flexTop, Typography.mb]}>
-        <View style={Typography.relative}>
-          <Image source={genreImages[sanitizedItem]} style={styles.gridImage} />
-          <Text style={[Typography.textCenter, styles.overlay]}>{item}</Text>
-        </View>
-        <View>
-          <Text style={[Typography.textCenter, Typography.highlight]}>
-            Ranking
-          </Text>
-          <Text style={Typography.textCenter}>26</Text>
-        </View>
-        <View>
-          <Text style={[Typography.textCenter, Typography.highlight]}>
-            Accuracy
-          </Text>
-          <Text style={Typography.textCenter}>88%</Text>
-        </View>
-        <View>
-          <Text style={[Typography.textCenter, Typography.highlight]}>
-            Rating
-          </Text>
-          <Text style={Typography.textCenter}>480</Text>
-        </View>
-      </View>
-    );
-  };
 
   if (loading) {
     return (
@@ -342,147 +341,189 @@ const ProfileScreen: React.FC = () => {
                   </View>
                 </View>
               </View>
-              <View style={Typography.card}>
-                <View style={styles.divider}>
-                  <VBarIcon />
-                </View>
-                <View style={Typography.flexAround}>
-                  <View>
-                    <View style={Typography.flexCenter}>
-                      <IconSvg
-                        width="24"
-                        height="24"
-                        color="#FDF15D"
-                        path="M16 3.13C16.8604 3.3503 17.623 3.8507 18.1676 4.55231C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89317 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88M21 21V19C20.9949 18.1172 20.6979 17.2608 20.1553 16.5644C19.6126 15.868 18.8548 15.3707 18 15.15M13 7C13 9.20914 11.2091 11 9 11C6.79086 11 5 9.20914 5 7C5 4.79086 6.79086 3 9 3C11.2091 3 13 4.79086 13 7ZM3 21V19C3 17.9391 3.42143 16.9217 4.17157 16.1716C4.92172 15.4214 5.93913 15 7 15H11C12.0609 15 13.0783 15.4214 13.8284 16.1716C14.5786 16.9217 15 17.9391 15 19V21H3Z"
-                      />
-                      <Text
-                        style={[
-                          Typography.semibold,
-                          Typography.size1,
-                          Typography.text,
-                          Typography.ms,
-                          Typography.textCenter,
-                        ]}>
-                        Followers
-                      </Text>
-                    </View>
-                    <Text
-                      style={[
-                        Typography.text4,
-                        Typography.size1,
-                        Typography.textCenter,
-                      ]}>
-                      257
-                    </Text>
-                  </View>
-                  <View>
-                    <View style={Typography.flexCenter}>
-                      <IconSvg
-                        width="24"
-                        height="24"
-                        fill="#26A300"
-                        stroke={false}
-                        path="M11.2929 9.70711L7.70711 13.2929C7.07714 13.9229 7.52331 15 8.41421 15H15.5858C16.4767 15 16.9229 13.9229 16.2929 13.2929L12.7071 9.70711C12.3166 9.31658 11.6834 9.31658 11.2929 9.70711Z"
-                      />
-
-                      <Text
-                        style={[
-                          Typography.semibold,
-                          Typography.size1,
-                          Typography.text,
-                          Typography.ms,
-                          Typography.textCenter,
-                        ]}>
-                        Overall Ranking
-                      </Text>
-                    </View>
-                    <Text
-                      style={[
-                        Typography.text4,
-                        Typography.size1,
-                        Typography.textCenter,
-                      ]}>
-                      1,882
-                    </Text>
-                  </View>
-                </View>
-              </View>
             </View>
             <View style={[{flexGrow: 1}, styles.container]}>
               <ScrollView style={{flex: 1, ...styles.scrollView}}>
-                <Text style={[Typography.h2, Typography.semibold]}>Stats</Text>
-                <View style={Typography.card}>
-                  <View style={Typography.flexBetween}>
-                    <View style={Typography.flex}>
-                      <IconSvg
-                        width="24"
-                        height="24"
-                        color="#FDF15D"
-                        path="M12.375 4C12.5977 4 12.8011 4.12654 12.8996 4.32642L15.1708 8.93229L20.2488 9.66887C20.4693 9.70085 20.6526 9.85542 20.7214 10.0675C20.7902 10.2796 20.7327 10.5124 20.573 10.668L16.8932 14.253L17.7609 19.3154C17.7985 19.5352 17.7082 19.7573 17.5279 19.8883C17.3476 20.0193 17.1086 20.0364 16.9115 19.9325L12.3802 17.5426L7.83805 19.9327C7.64093 20.0365 7.40206 20.0192 7.22189 19.8882C7.04172 19.7571 6.95149 19.5351 6.98914 19.3154L7.85681 14.253L4.17699 10.668C4.01733 10.5124 3.9598 10.2796 4.02862 10.0675C4.09744 9.85542 4.28066 9.70085 4.50117 9.66887L9.5792 8.93229L11.8504 4.32642C11.9489 4.12654 12.1523 4 12.375 4Z"
-                      />
-                      <Text
-                        style={[
-                          Typography.semibold,
-                          Typography.size1,
-                          Typography.ms,
-                          Typography.textCenter,
-                          Typography.text,
-                        ]}>
-                        Songs Rated
-                      </Text>
-                    </View>
-                    <Text
-                      style={[
-                        Typography.text4,
-                        Typography.size1,
-                        Typography.textCenter,
-                      ]}>
-                      {totalRated}
-                    </Text>
+                <View style={[Typography.flexBetween, Typography.mb]}>
+                  <View style={styles.buttonWrapper}>
+                    <TouchableOpacity
+                      style={styles.buttonIcon}
+                      onPress={handleMessageAction}>
+                      <IconSvg path="M12 12V12.01M8 12V12.01M16 12V12.01M3 20L4.3 16.1C3.17644 14.4383 2.76999 12.4704 3.15622 10.5623C3.54244 8.65419 4.69506 6.93567 6.39977 5.72628C8.10447 4.51688 10.2453 3.8989 12.4241 3.98724C14.6029 4.07559 16.6715 4.86424 18.2453 6.20656C19.819 7.54889 20.7909 9.35354 20.9801 11.285C21.1693 13.2164 20.563 15.1432 19.2739 16.7071C17.9848 18.271 16.1007 19.3656 13.9718 19.7874C11.8429 20.2091 9.6142 19.9293 7.7 19L3 20Z" />
+                      <Text style={Typography.ms}>Message</Text>
+                    </TouchableOpacity>
                   </View>
-                  <View style={[Typography.flexBetween, Typography.mt3]}>
-                    <View style={Typography.flex}>
-                      <IconSvg
-                        width="24"
-                        height="24"
-                        color="#FDF15D"
-                        path="M6 18L18 6M18 17C18 17.5523 17.5523 18 17 18C16.4477 18 16 17.5523 16 17C16 16.4477 16.4477 16 17 16C17.5523 16 18 16.4477 18 17ZM8 7C8 7.55228 7.55228 8 7 8C6.44772 8 6 7.55228 6 7C6 6.44772 6.44772 6 7 6C7.55228 6 8 6.44772 8 7Z"
-                      />
-                      <Text
-                        style={[
-                          Typography.semibold,
-                          Typography.size1,
-                          Typography.ms,
-                          Typography.textCenter,
-                          Typography.text,
-                        ]}>
-                        Rating Accuracy
-                      </Text>
-                    </View>
-                    <View style={[Typography.tintBkgGreen, styles.accuracy]}>
-                      <Text style={[Typography.semibold, Typography.green]}>
-                        92%
-                      </Text>
-                    </View>
+                  <View style={styles.buttonWrapper}>
+                    {showProfile.id === Number(getUserInfo.id) ? (
+                      <View style={[styles.buttonIcon, styles.buttonMuted]}>
+                        <AddIcon />
+                        <Text style={Typography.ms}>Follow</Text>
+                      </View>
+                    ) : isFollowers ? (
+                      <TouchableOpacity
+                        style={[styles.buttonIcon, styles.buttonTeal]}
+                        onPress={handleUnFollowAction}>
+                        <MinusIcon />
+                        <Text style={Typography.ms}>Unfollow</Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity
+                        style={[styles.buttonIcon, styles.buttonTeal]}
+                        onPress={handleFollowAction}>
+                        <AddIcon />
+                        <Text style={Typography.ms}>Follow</Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
                 </View>
-
-                <Text style={[Typography.h2, Typography.semibold]}>
-                  Related Genres
-                </Text>
-                <View style={Typography.card}>
-                  <FlatList
-                    scrollEnabled={false}
-                    data={showGenres}
-                    renderItem={renderItem}
-                    keyExtractor={item => item}
+                <View>
+                  {groupBy === 0 ? (
+                    <View>
+                      <Text style={[Typography.h2, Typography.semibold]}>
+                        Stats
+                      </Text>
+                      <View style={Typography.card}>
+                        <View style={Typography.flexBetween}>
+                          <View style={Typography.flex}>
+                            <GraphArrowIcon />
+                            <Text style={[Typography.sizeSm, Typography.ms]}>
+                              Score
+                            </Text>
+                          </View>
+                          <Text style={Typography.highlight}>{score}</Text>
+                        </View>
+                        <View style={Typography.flexBetween}>
+                          <View style={Typography.flex}>
+                            <IconSvg
+                              width="20"
+                              height="20"
+                              color="#FDF15D"
+                              path="M12.375 4C12.5977 4 12.8011 4.12654 12.8996 4.32642L15.1708 8.93229L20.2488 9.66887C20.4693 9.70085 20.6526 9.85542 20.7214 10.0675C20.7902 10.2796 20.7327 10.5124 20.573 10.668L16.8932 14.253L17.7609 19.3154C17.7985 19.5352 17.7082 19.7573 17.5279 19.8883C17.3476 20.0193 17.1086 20.0364 16.9115 19.9325L12.3802 17.5426L7.83805 19.9327C7.64093 20.0365 7.40206 20.0192 7.22189 19.8882C7.04172 19.7571 6.95149 19.5351 6.98914 19.3154L7.85681 14.253L4.17699 10.668C4.01733 10.5124 3.9598 10.2796 4.02862 10.0675C4.09744 9.85542 4.28066 9.70085 4.50117 9.66887L9.5792 8.93229L11.8504 4.32642C11.9489 4.12654 12.1523 4 12.375 4Z"
+                            />
+                            <Text style={[Typography.sizeSm, Typography.ms]}>
+                              Songs Rated
+                            </Text>
+                          </View>
+                          <Text style={Typography.highlight}>{totalRated}</Text>
+                        </View>
+                        <View style={[Typography.flexBetween, Typography.mt3]}>
+                          <View style={Typography.flex}>
+                            <AccuracyIcon fill="#fdf15d" />
+                            <Text style={[Typography.sizeSm, Typography.ms]}>
+                              Rating Accuracy
+                            </Text>
+                          </View>
+                          <Text style={Typography.highlight}>{accuracy}%</Text>
+                        </View>
+                        <View style={[Typography.flexBetween, Typography.mt3]}>
+                          <View style={Typography.flex}>
+                            <GraphIcon />
+                            <Text style={[Typography.sizeSm, Typography.ms]}>
+                              Ranking
+                            </Text>
+                          </View>
+                          <Text style={Typography.highlight}>{ranking}</Text>
+                        </View>
+                      </View>
+                      <View style={Typography.card}>
+                        <View style={styles.divider}>
+                          <VBarIcon />
+                        </View>
+                        <View style={Typography.flexAround}>
+                          <View>
+                            <View style={Typography.flexCenter}>
+                              <FollowIcon />
+                              <Text style={[Typography.sizeSm, Typography.ms]}>
+                                Followers
+                              </Text>
+                            </View>
+                            <Text
+                              style={[Typography.text4, Typography.textCenter]}>
+                              {addFollow}
+                            </Text>
+                          </View>
+                          <View>
+                            <View style={Typography.flexCenter}>
+                              <IconSvg
+                                width="22"
+                                height="22"
+                                color="#FDF15D"
+                                path="M16 3.13C16.8604 3.3503 17.623 3.8507 18.1676 4.55231C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89317 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88M21 21V19C20.9949 18.1172 20.6979 17.2608 20.1553 16.5644C19.6126 15.868 18.8548 15.3707 18 15.15M13 7C13 9.20914 11.2091 11 9 11C6.79086 11 5 9.20914 5 7C5 4.79086 6.79086 3 9 3C11.2091 3 13 4.79086 13 7ZM3 21V19C3 17.9391 3.42143 16.9217 4.17157 16.1716C4.92172 15.4214 5.93913 15 7 15H11C12.0609 15 13.0783 15.4214 13.8284 16.1716C14.5786 16.9217 15 17.9391 15 19V21H3Z"
+                              />
+                              <Text style={[Typography.sizeSm, Typography.ms]}>
+                                Following
+                              </Text>
+                            </View>
+                            <Text
+                              style={[Typography.text4, Typography.textCenter]}>
+                              {showProfile.following}
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                      <Text style={[Typography.h2, Typography.semibold]}>
+                        Achievements
+                      </Text>
+                      <View style={Typography.card}>
+                        <View style={Typography.flex}>
+                          <Image
+                            source={require('../assets/images/achievements/rookie.png')}
+                            style={styles.achievements}
+                          />
+                          <Image
+                            source={require('../assets/images/achievements/rookie.png')}
+                            style={styles.achievements}
+                          />
+                        </View>
+                      </View>
+                    </View>
+                  ) : (
+                    <View>
+                      <Text style={[Typography.h2, Typography.semibold]}>
+                        Playlists
+                      </Text>
+                      <View style={Typography.card}>
+                        <Text style={[Typography.text4, Typography.sizeSm]}>
+                          Best Pop
+                        </Text>
+                      </View>
+                      <Text style={[Typography.h2, Typography.semibold]}>
+                        Saved Stations
+                      </Text>
+                      <View style={Typography.card}>
+                        <Text style={[Typography.text4, Typography.sizeSm]}>
+                          Close New Country
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+                </View>
+              </ScrollView>
+              <View
+                style={[styles.buttonContainer, Typography.tab, Typography.mb]}>
+                <View style={styles.buttonWrapper}>
+                  <Button
+                    style={
+                      groupBy === 0
+                        ? [Typography.button, styles.button]
+                        : [Typography.tab, styles.button]
+                    }
+                    onPress={() => handleSelection(0)}
+                    label="Game"
                   />
                 </View>
-
-                <Text style={[Typography.h2, Typography.semibold]}>
-                  Related Songs
-                </Text>
-              </ScrollView>
+                <View style={styles.buttonWrapper}>
+                  <Button
+                    style={
+                      groupBy === 1
+                        ? [Typography.button, styles.button]
+                        : [Typography.tab, styles.button]
+                    }
+                    onPress={() => handleSelection(1)}
+                    label="Music"
+                  />
+                </View>
+              </View>
               <ModalFull
                 isVisible={modalLevelVisible}
                 onClose={() => setModalLevelVisible(false)}>
@@ -521,8 +562,6 @@ const ProfileScreen: React.FC = () => {
                     <View style={{marginBottom: 15, ...Typography.flexBetween}}>
                       <View style={Typography.flex}>
                         <IconSvg
-                          width="24"
-                          height="24"
                           color="#FDF15D"
                           path="M6 18L18 6M18 17C18 17.5523 17.5523 18 17 18C16.4477 18 16 17.5523 16 17C16 16.4477 16.4477 16 17 16C17.5523 16 18 16.4477 18 17ZM8 7C8 7.55228 7.55228 8 7 8C6.44772 8 6 7.55228 6 7C6 6.44772 6.44772 6 7 6C7.55228 6 8 6.44772 8 7Z"
                         />
@@ -537,7 +576,7 @@ const ProfileScreen: React.FC = () => {
                           Rating Accuracy
                         </Text>
                       </View>
-                      <View style={[Typography.tintBkgGreen, styles.accuracy]}>
+                      <View>
                         <Text style={[Typography.semibold, Typography.green]}>
                           92% Accuracy
                         </Text>
@@ -625,6 +664,8 @@ const ProfileScreen: React.FC = () => {
                             <IconSvg
                               width="16"
                               height="12"
+                              boxWidth="16"
+                              boxHeight="12"
                               stroke={true}
                               color="#FDF15D"
                               path="M3.3335 7.99996L6.66683 11.3333L13.3335 4.66663"
@@ -719,11 +760,50 @@ const styles = StyleSheet.create({
     marginBottom: -20,
   },
   containerInfo: {
-    marginTop: 70,
+    marginTop: 90,
     paddingHorizontal: 20,
   },
   container: {
     paddingHorizontal: 20,
+    marginTop: 10,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 16,
+  },
+  buttonWrapper: {
+    flex: 1,
+    margin: 4,
+  },
+  buttonIcon: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    textAlign: 'center',
+    height: 56,
+    borderWidth: 0,
+    borderRadius: 16,
+    paddingHorizontal: 15,
+    backgroundColor: '#1D1D1F',
+  },
+  button: {
+    height: 56,
+    borderWidth: 0,
+    borderRadius: 16,
+    paddingHorizontal: 15,
+  },
+  buttonTeal: {
+    backgroundColor: '#376B86',
+  },
+  buttonMuted: {
+    backgroundColor: 'gray',
+  },
+  buttonFilters: {
+    borderRadius: 6,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   profileImg: {
     width: 128,
@@ -736,16 +816,17 @@ const styles = StyleSheet.create({
     height: 48,
     resizeMode: 'contain',
   },
+  achievements: {
+    width: 54,
+    height: 74,
+    resizeMode: 'contain',
+    marginRight: 4,
+  },
   level: {
     width: 65,
     height: 66,
     position: 'relative',
     resizeMode: 'contain',
-  },
-  accuracy: {
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    height: 24,
   },
   divider: {
     position: 'absolute',

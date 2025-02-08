@@ -1,11 +1,12 @@
 import React, {useState} from 'react';
 import {StyleSheet, Text, TouchableOpacity} from 'react-native';
 
-import {Button, View, TextInput} from './Themed';
+import {Button, View, TextInputIcon} from './Themed';
 import IconSvg from './IconsSvg';
 import {useFilter} from '../context/FilterCategoryContext';
 import Typography from '../constants/Typography';
 import ModalBottom from './ModalBottom';
+import HbarIcon from '../constants/icons/HBarIcon';
 
 export function FiltersCategory() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -63,12 +64,26 @@ export function FiltersCategory() {
       </View>
 
       {byArtists && (
-        <TextInput
-          style={styles.inputGap}
-          placeholder="Similar Artists"
-          value={searchArtists}
-          onChangeText={text => handleSearchArtists(text)}
-        />
+        <>
+          <TextInputIcon
+            style={styles.inputGap}
+            placeholder="Similar Artists"
+            value={searchArtists}
+            editable={false}
+            onChangeText={text => handleSearchArtists(text)}
+            iconColor="rgba(255,255,255,0.24)"
+            iconPath="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
+          />
+          <Text
+            style={[
+              Typography.size,
+              Typography.mt,
+              Typography.textCenter,
+              Typography.highlight,
+            ]}>
+            Search is unavailable during the beta phase.
+          </Text>
+        </>
       )}
 
       <ModalBottom
@@ -78,12 +93,14 @@ export function FiltersCategory() {
           <View style={styles.modalWrapper}>
             <Text
               style={[
-                Typography.h2,
+                Typography.h3,
                 Typography.textCenter,
                 Typography.highlight,
+                Typography.mb0,
               ]}>
-              Feature Not Available {'\n'}... Yet
+              Feature Not Available Yet!
             </Text>
+            <HbarIcon style={styles.hbar} />
             <Text style={[styles.modalTitle, Typography.text]}>
               Filtering is unavailable during the beta phase
             </Text>
@@ -91,7 +108,7 @@ export function FiltersCategory() {
           <Button
             style={[Typography.button, styles.buttonModalContainer]}
             onPress={() => setModalVisible(false)}
-            label="Confirm"
+            label="Confirm Settings"
           />
         </View>
       </ModalBottom>
@@ -142,12 +159,15 @@ const styles = StyleSheet.create({
   },
   modalWrapper: {
     margin: 'auto',
-    width: 260,
+    width: 280,
   },
   modalTitle: {
-    fontSize: 15,
-    marginBottom: 20,
+    fontSize: 13,
+    marginBottom: 15,
     textAlign: 'center',
+  },
+  hbar: {
+    marginVertical: 10,
   },
   modalContent: {
     height: '28%',

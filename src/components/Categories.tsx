@@ -11,14 +11,15 @@ import {
 import {View, Text, CheckBox} from './Themed';
 import {useFilter} from '../context/FilterCategoryContext';
 import Typography from '../constants/Typography';
-import SpotifyService from '../constants/SpotifyService';
+import SevenDigitalService from '../constants/SevenDigitalService';
 import {slugText} from '../constants/Helper';
+import SpotifyService from '../constants/SpotifyService';
 
 type Category = {
   id: string;
   name: string;
-  icons: {url: string}[];
-  images: {url: string}[];
+  title: string;
+  images?: {url: string}[];
 };
 interface Checkbox {
   checked: boolean;
@@ -40,58 +41,36 @@ const Categories: React.FC = () => {
   const {byGenres, byArtists, searchArtists, handleSelectedCheckBox} =
     useFilter();
 
-  const handleCheckboxChange = (obj: CheckboxState, isGenres: boolean) => {
+  const handleCheckboxChange = (obj: CheckboxState) => {
     setCheckboxes(prevCheckboxes => {
       const updatedCheckboxes: Record<string, {checked: boolean}> = {};
       Object.keys(prevCheckboxes).forEach(key => {
         updatedCheckboxes[key] = {checked: false};
       });
-      updatedCheckboxes[obj.id] = {checked: !prevCheckboxes[obj.id]?.checked};
-      const categoryType = isGenres ? obj.name.toLowerCase() : obj.id;
-      !prevCheckboxes[obj.id]?.checked
+      updatedCheckboxes[obj.name] = {
+        checked: !prevCheckboxes[obj.name]?.checked,
+      };
+      const categoryType = obj.name;
+      !prevCheckboxes[obj.name]?.checked
         ? handleSelectedCheckBox(categoryType)
-        : null;
+        : handleSelectedCheckBox('');
       return updatedCheckboxes;
     });
   };
 
   useEffect(() => {
-    const filterCategories = (
-      categoryData: Category[],
-      categoryNames: string[],
-    ): Category[] => {
-      return categoryData.filter(category =>
-        categoryNames.includes(category.name),
-      );
-    };
     const fetchData = async () => {
       try {
-        const token = await SpotifyService.getAccessToken();
-        if (token) {
-          let filteredCategories;
-          if (searchArtists && searchArtists.length > 2) {
-            filteredCategories = await SpotifyService.searchArtists(
-              token,
-              searchArtists,
-            );
-          } else {
-            if (byGenres) {
-              const categoryNames = [
-                'Pop',
-                'Rock',
-                'Country',
-                'Hip-Hop',
-                'R&B',
-                'Dance/Electronic',
-              ];
-              const categoriesData = await SpotifyService.fetchGenres(token);
-              filteredCategories = filterCategories(
-                categoriesData,
-                categoryNames,
-              );
-            } else if (byArtists && searchArtists === '') {
+        let filteredCategories = [];
+        if (searchArtists && searchArtists.length > 2) {
+        } else {
+          if (byGenres) {
+            filteredCategories = await SevenDigitalService.fetchGenres();
+          } else if (byArtists && searchArtists === '') {
+            const tokenObj = await SpotifyService.getAccessToken();
+            if (tokenObj) {
               filteredCategories = await SpotifyService.fetchRandomArtists(
-                token,
+                tokenObj,
               );
             }
           }
@@ -127,11 +106,11 @@ const Categories: React.FC = () => {
         scrollEnabled={false}
         renderItem={({item}) => (
           <View style={[styles.grid, {width: calculatedWidth}]} key={item.id}>
-            <Pressable onPress={() => handleCheckboxChange(item, byGenres)}>
+            <Pressable onPress={() => handleCheckboxChange(item)}>
               {byArtists && item.images && item.images.length > 0 && (
                 <Image
                   source={{uri: item.images[0].url}}
-                  style={(Typography.imgFluid, styles.gridImage)}
+                  style={(Typography.imgFluid, styles.gridImageDisable)}
                 />
               )}
 
@@ -144,12 +123,17 @@ const Categories: React.FC = () => {
                 />
               )}
 
-              <Text style={styles.gridText}>{item.name}</Text>
-              <CheckBox
-                style={styles.checkbox}
-                checked={checkboxes[item.id]?.checked}
-                onPress={() => handleCheckboxChange(item, byGenres)}
-              />
+              <Text
+                style={byArtists ? styles.gridTextDisable : styles.gridText}>
+                {item.title}
+              </Text>
+              {!byArtists && (
+                <CheckBox
+                  style={styles.checkbox}
+                  checked={checkboxes[item.name]?.checked}
+                  onPress={() => handleCheckboxChange(item)}
+                />
+              )}
             </Pressable>
           </View>
         )}
@@ -157,8 +141,8 @@ const Categories: React.FC = () => {
       {byGenres && (
         <Text
           style={[
-            Typography.h3,
             Typography.mt,
+            Typography.size,
             Typography.textCenter,
             Typography.highlight,
           ]}>
@@ -184,10 +168,22 @@ const styles = StyleSheet.create({
     width: 175,
     height: 96,
   },
+  gridImageDisable: {
+    borderRadius: 8,
+    width: 175,
+    height: 96,
+    opacity: 0.4,
+  },
   gridText: {
     position: 'absolute',
     bottom: 10,
     left: 15,
+  },
+  gridTextDisable: {
+    position: 'absolute',
+    bottom: 10,
+    left: 15,
+    opacity: 0.5,
   },
   checkbox: {
     position: 'absolute',

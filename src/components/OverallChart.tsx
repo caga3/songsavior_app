@@ -1,4 +1,4 @@
-import React, {useLayoutEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   StyleSheet,
   Image,
@@ -19,6 +19,7 @@ import RestApiServer from '../constants/RestApiServer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {trimString} from '../constants/Helper';
 import FiltersChart from '../components/FiltersChart';
+import {useFocusEffect} from '@react-navigation/native';
 
 interface DataItem {
   id: number;
@@ -74,31 +75,42 @@ const OverallChart: React.FC<Props> = ({nav}) => {
     setFilteredChart(filteredData);
   };
 
-  useLayoutEffect(() => {
+  const fetchData = async () => {
+    try {
+      const tokenData = await AsyncStorage.getItem('userToken');
+      if (tokenData) {
+        const responds = await RestApiServer.fetchSongs(tokenData);
+        if (responds) {
+          setShowChart(responds);
+          setFilteredChart(responds);
+          setLoading(false);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      fetchData();
+      return async () => {
+        setShowChart([]);
+        setFilteredChart([]);
+        setLoading(true);
+      };
+    }, []),
+  );
+
+  useEffect(() => {
     const handleOrientationChange = () => {
       setScreenWidth(Dimensions.get('window'));
     };
-
     const subscription = Dimensions.addEventListener(
       'change',
       handleOrientationChange,
     );
-    const fetchData = async () => {
-      try {
-        const tokenData = await AsyncStorage.getItem('userToken');
-        if (tokenData) {
-          const responds = await RestApiServer.fetchSongs(tokenData);
-          if (responds) {
-            setShowChart(responds);
-            setFilteredChart(responds);
-            setLoading(false);
-          }
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchData();
     return () => {
       subscription?.remove();
     };
@@ -151,6 +163,8 @@ const OverallChart: React.FC<Props> = ({nav}) => {
                 <IconSvg
                   width="16"
                   height="16"
+                  boxWidth="16"
+                  boxHeight="16"
                   color="#FDF15D"
                   path="M4 2.66666V13.3333L12.6667 7.99999L4 2.66666Z"
                 />
