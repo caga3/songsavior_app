@@ -11,8 +11,7 @@ function App() {
   useEffect(() => {
     const checkForUpdate = async () => {
       const currentVersion = DeviceInfo.getVersion();
-      const storedVersion = await AsyncStorage.getItem('appVersion');
-      console.log(currentVersion);
+      const storedVersion = await AsyncStorage.getItem('appVersion'); 
       if (storedVersion !== currentVersion) {
         await AsyncStorage.setItem('appVersion', currentVersion);
         await AsyncStorage.clear();
