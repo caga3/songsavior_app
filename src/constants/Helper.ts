@@ -81,22 +81,6 @@ export const format = (seconds: number): string => {
   return `${mins}:${secs}`;
 };
 
-export const checkIfKeyExists = async (key) => {
-  try {
-    const value = await AsyncStorage.getItem(key);
-    if (value === null) {
-      console.log(`Key "${key}" does not exist.`);
-      return false; // Key does NOT exist
-    } else {
-      console.log(`Key "${key}" exists with value:`, value);
-      return true; // Key exists
-    }
-  } catch (error) {
-    console.error('Error checking key in AsyncStorage:', error);
-    return false;
-  }
-};
-
 // Get Overall Song Accuracy
 // export const getOverallAccuracy = (ratings: {avg: string}[]): string => {
 //   // Rating from 0 - 4

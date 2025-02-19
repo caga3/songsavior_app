@@ -37,6 +37,14 @@ import MinusIcon from '../constants/icons/MinusIcon';
 
 type ProfileScreenProp = NativeStackNavigationProp<RootAppStackParamList>;
 
+const ALLOWED_FILE_TYPES = ['jpg', 'jpeg', 'png', 'gif'];
+interface ImageAsset {
+  uri: string;
+  type: string;
+  fileName: string;
+  extension: string;
+}
+
 interface DataItem {
   id: number;
   city: string;
@@ -73,7 +81,7 @@ const ProfileScreen: React.FC = () => {
   const [password, setPassword] = useState('');
   const [successProfileMessage, setSuccessProfileMessage] = useState('');
   const [failedProfileMessage, setFailedProfileMessage] = useState('');
-  const [imageUri, setImageUri] = useState('');
+  const [selectedImage, setSelectedImage] = useState<ImageAsset | null>(null);
   const getUserInfo =
     typeof userInfo === 'string' ? JSON.parse(userInfo) : null;
   const user_id = routes && routes.item ? routes.item : getUserInfo.id;
@@ -82,9 +90,19 @@ const ProfileScreen: React.FC = () => {
   const handleSelection = (value: number) => {
     setGroupBy(value);
   };
+
+  // Go to Messages
   const handleMessageAction = () => {
-    navigation.navigate('Messages');
+    if (getUserInfo.id !== user_id) {
+      navigation.navigate('Chat', {
+        recipient_id: user_id,
+      });
+    } else {
+      navigation.navigate('Messages');
+    }
   };
+
+  // Follow a User
   const handleFollowAction = async () => {
     setIsFollowers(true);
     if (getUserInfo) {
@@ -99,6 +117,7 @@ const ProfileScreen: React.FC = () => {
     }
   };
 
+  // UnFollow a User
   const handleUnFollowAction = async () => {
     setIsFollowers(false);
     if (getUserInfo) {
@@ -112,6 +131,7 @@ const ProfileScreen: React.FC = () => {
       }
     }
   };
+
   const badgeImages: {[key: string]: any} = {
     default: {
       name: 'Fan',
@@ -169,16 +189,30 @@ const ProfileScreen: React.FC = () => {
   };
 
   const pickImage = async () => {
-    launchImageLibrary({mediaType: 'photo'}, response => {
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.errorCode) {
-        console.error('Image picker error:', response.errorMessage);
-      } else if (response.assets && response.assets[0]) {
-        const pickedImage = response.assets[0];
-        if (pickedImage.uri) {
-          setImageUri(pickedImage.uri);
+    launchImageLibrary({mediaType: 'photo', quality: 1}, response => {
+      if (response.assets && response.assets.length > 0) {
+        const image = response.assets[0];
+        if (!image.uri || !image.type || !image.fileName) {
+          setFailedProfileMessage('Invalid image file. Please try again.');
+          return;
         }
+
+        // Extract file extension
+        const extension = image.fileName.split('.').pop()?.toLowerCase();
+
+        if (!extension || !ALLOWED_FILE_TYPES.includes(extension)) {
+          setFailedProfileMessage(
+            'Invalid image file. Please select a JPG, PNG, or GIF file.',
+          );
+          return;
+        }
+
+        setSelectedImage({
+          uri: image.uri,
+          type: image.type,
+          fileName: image.fileName,
+          extension,
+        });
       }
     });
   };
@@ -190,16 +224,20 @@ const ProfileScreen: React.FC = () => {
   };
 
   const updateProfile = async () => {
-    setSuccessProfileMessage('');
-    setFailedProfileMessage('');
-    await setProfile(user_id, displayName, password, imageUri);
-    const userDataJson = await AsyncStorage.getItem('userInfo');
-    if (showProfile && userDataJson) {
-      const userData = JSON.parse(userDataJson);
-      showProfile.user_display_name = userData.user_display_name;
-      showProfile.avatar_url = userData.avatar;
-      setShowProfile(showProfile);
-      setSuccessProfileMessage('Profile has been updated.');
+    if (selectedImage) {
+      setSuccessProfileMessage('');
+      setFailedProfileMessage('');
+      setProfile(user_id, displayName, password, selectedImage.uri);
+      const userDataJson = await AsyncStorage.getItem('userInfo');
+      if (showProfile && userDataJson) {
+        const userData = JSON.parse(userDataJson);
+        showProfile.user_display_name = userData.user_display_name;
+        showProfile.avatar_url = userData.avatar;
+        setShowProfile(showProfile);
+        setSuccessProfileMessage('Profile has been updated.');
+      } else {
+        setFailedProfileMessage('Profile failed to updated.');
+      }
     } else {
       setFailedProfileMessage('Profile failed to updated.');
     }
@@ -710,9 +748,9 @@ const ProfileScreen: React.FC = () => {
                       label="Upload Image"
                       onPress={pickImage}
                     />
-                    {imageUri && (
+                    {selectedImage && (
                       <Image
-                        source={{uri: imageUri}}
+                        source={{uri: selectedImage.uri}}
                         style={uploadStyle.image}
                       />
                     )}

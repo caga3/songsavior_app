@@ -69,14 +69,20 @@ const FiltersChart: React.FC<ChartFilterProps> = ({onApplyFilter}) => {
         isVisible={modalVisible}
         onClose={() => setModalVisible(false)}>
         <View style={[modal.modalContent]}>
-          <Text
-            style={[
-              Typography.size,
-              Typography.textCenter,
-              Typography.highlight,
-            ]}>
-            More filters will be available post-beta.
-          </Text>
+          <View style={modal.modalWrapper}>
+            <Text
+              style={[
+                Typography.h3,
+                Typography.textCenter,
+                Typography.highlight,
+                Typography.mb0,
+              ]}>
+              Feature Not Available Yet!
+            </Text>
+            <Text style={[modal.modalTitle, Typography.text]}>
+              Some filters not available in beta.
+            </Text>
+          </View>
           <Text style={[Typography.disabled, styles.label]}>Search</Text>
           <TextInputIcon
             iconPath="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"

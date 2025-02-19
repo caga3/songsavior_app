@@ -16,9 +16,9 @@ import IconSvg from '../components/IconsSvg';
 import {useRoute, RouteProp} from '@react-navigation/native';
 import {useAuth} from '../context/AuthContext';
 import {formatTimestamp} from '../constants/Helper';
-import io from 'socket.io-client';
 import RestApiServer from '../constants/RestApiServer';
-import {SOCKET_URL, SITE_ROOT} from '../../global';
+import {SITE_ROOT} from '../../global';
+import WebSocketConnect from '../constants/WebSocketConnect';
 
 interface Info {
   ID: string;
@@ -27,7 +27,7 @@ interface Info {
 }
 
 interface DataItem {
-  conversation_id: number;
+  recipient_id: number;
   created_at: string;
   id?: number;
   info: Info;
@@ -36,12 +36,12 @@ interface DataItem {
 }
 
 type RootStackParamList = {
-  Chat: {conversationId: number};
+  Chat: {recipient_id: number; conversation_id: number};
 };
+
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'Chat'>;
 
 const ChatScreen: React.FC = () => {
-  const socket = io(SOCKET_URL);
   const [loading, setLoading] = useState(true);
   const route = useRoute<ChatScreenRouteProp>();
   const scrollViewRef = useRef<ScrollView>(null);
@@ -51,34 +51,25 @@ const ChatScreen: React.FC = () => {
   const getUserInfo =
     typeof userInfo === 'string' ? JSON.parse(userInfo) : null;
   const default_avatar = `${SITE_ROOT}/uploads/2024/07/default_avatar.jpg`;
+  // Capture Conversation User ID
+  const recipient_id = route.params.recipient_id;
+  const conversation_id = route.params.conversation_id;
 
+  // Scroll to Bottom Always
   const scrollToBottom = () => {
     scrollViewRef.current?.scrollToEnd({animated: false});
   };
 
   const handleSendMessage = async () => {
-    const convId = route.params.conversationId;
     if (getUserInfo) {
       if (newMessage.trim() !== '') {
+        // console.log(recipient_id);
         await RestApiServer.sendMessages(
-          convId,
+          recipient_id,
           getUserInfo.id,
           newMessage,
           userToken,
         );
-        const messageObj = {
-          conversation_id: convId,
-          created_at: new Date(),
-          id: messages.length + 1,
-          info: {
-            ID: getUserInfo.id,
-            avatar_url: getUserInfo.avatar_url,
-            user_display_name: getUserInfo.user_display_name,
-          },
-          sender_id: getUserInfo.id,
-          text: newMessage,
-        };
-        socket.emit('message', messageObj);
         setNewMessage('');
       }
     }
@@ -86,23 +77,60 @@ const ChatScreen: React.FC = () => {
   };
 
   useEffect(() => {
-    const fetchMessages = async () => {
-      if (userToken && route.params) {
-        const convId = route.params.conversationId;
-        const msg = await RestApiServer.fetchMessages(convId, userToken);
-        setMessages(msg);
-        scrollToBottom();
-        setLoading(false);
+    // Connect to Socket
+    const socket = WebSocketConnect(getUserInfo.id);
+    const fetchData = async () => {
+      if (userToken) {
+        if (route.params) {
+          let msg;
+          if (conversation_id) {
+            msg = await RestApiServer.fetchMessagesConversation(
+              conversation_id,
+              userToken,
+            );
+          } else {
+            msg = await RestApiServer.fetchMessages(
+              recipient_id,
+              getUserInfo.id,
+              userToken,
+            );
+          }
+          //console.log(msg);
+          setMessages(msg);
+          setTimeout(() => {
+            scrollToBottom();
+          }, 1000);
+          setInterval;
+        }
       }
+      setLoading(false);
     };
-    fetchMessages();
-    socket.connect();
-    socket.on('message', message => {
-      setMessages(prevMessages => [...prevMessages, message]);
+    // Get Old Converations
+    fetchData();
+
+    // Listen for new messages
+    socket.onmessage = event => {
+      //console.log('Received message:', event);
+      // const messageObj = {
+      //   conversation_id: messageResponds.id,
+      //   created_at: new Date(),
+      //   id: messages.length + 1,
+      //   info: {
+      //     ID: getUserInfo.id,
+      //     avatar_url: getUserInfo.avatar_url,
+      //     user_display_name: getUserInfo.user_display_name,
+      //   },
+      //   sender_id: getUserInfo.id,
+      //   text: newMessage,
+      // };
+      //setMessages(prevMessages => [...prevMessages, event.data]);
       scrollToBottom();
-    });
+    };
+
     return () => {
-      socket.disconnect();
+      if (socket) {
+        socket.close();
+      }
       setMessages([]);
     };
   }, [route.params]);

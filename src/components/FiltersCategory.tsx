@@ -1,14 +1,18 @@
 import React, {useState} from 'react';
 import {StyleSheet, Text, TouchableOpacity} from 'react-native';
 
-import {Button, View, TextInputIcon} from './Themed';
+import {Button, View, TextInputIcon, RadioButton, TextInput} from './Themed';
 import IconSvg from './IconsSvg';
 import {useFilter} from '../context/FilterCategoryContext';
 import Typography from '../constants/Typography';
 import ModalBottom from './ModalBottom';
-import HbarIcon from '../constants/icons/HBarIcon';
+import RNPickerSelect from 'react-native-picker-select';
+import GraphArrowIcon from '../constants/icons/GraphArrowIcon';
+import DownCarret from '../constants/icons/DownCarret';
+import LocationIcon from '../constants/icons/LocationIcon';
 
 export function FiltersCategory() {
+  const [sort, setSort] = useState<string | undefined>('past-week');
   const [modalVisible, setModalVisible] = useState(false);
   const {
     byGenres,
@@ -17,6 +21,8 @@ export function FiltersCategory() {
     handleSelection,
     handleSearchArtists,
   } = useFilter();
+
+  const sortOptions = [{label: 'Past Week', value: 'past-week'}];
 
   return (
     <View>
@@ -81,7 +87,7 @@ export function FiltersCategory() {
               Typography.textCenter,
               Typography.highlight,
             ]}>
-            Search is unavailable during the beta phase.
+            This feature is unavailable during the beta phase.
           </Text>
         </>
       )}
@@ -89,8 +95,8 @@ export function FiltersCategory() {
       <ModalBottom
         isVisible={modalVisible}
         onClose={() => setModalVisible(false)}>
-        <View style={[styles.modalContent]}>
-          <View style={styles.modalWrapper}>
+        <View style={[modal.modalContent]}>
+          <View style={modal.modalWrapper}>
             <Text
               style={[
                 Typography.h3,
@@ -100,13 +106,46 @@ export function FiltersCategory() {
               ]}>
               Feature Not Available Yet!
             </Text>
-            <HbarIcon style={styles.hbar} />
-            <Text style={[styles.modalTitle, Typography.text]}>
-              Filtering is unavailable during the beta phase
+            <Text style={[modal.modalTitle, Typography.text]}>
+              Advanced filters not available in beta.
             </Text>
           </View>
+          <Text style={styles.label}>Advance Options</Text>
+          <View>
+            <LocationIcon
+              width="20"
+              height="21"
+              stroke="rgba(255,255,255,0.24)"
+              style={modal.leftIcon}
+            />
+            <TextInput
+              style={modal.iconLeftPadding}
+              editable={false}
+              placeholder="Ex: Houston, TX"
+            />
+          </View>
+          <View style={[modal.pickerContainer]}>
+            <GraphArrowIcon style={modal.leftIcon} />
+            <View style={modal.iconLeftPaddingSm}>
+              <RNPickerSelect
+                darkTheme={true}
+                onValueChange={value => setSort(value)}
+                items={sortOptions}
+                value={sort}
+                style={pickerStyleDocument}
+              />
+            </View>
+            <DownCarret stroke="white" style={modal.caretIcon} />
+          </View>
+          <View>
+            <RadioButton>
+              <Text style={[Typography.disabled, styles.label]}>
+                Include Low Rating Songs?
+              </Text>
+            </RadioButton>
+          </View>
           <Button
-            style={[Typography.button, styles.buttonModalContainer]}
+            style={[Typography.button, modal.buttonModalContainer]}
             onPress={() => setModalVisible(false)}
             label="Confirm Settings"
           />
@@ -116,6 +155,56 @@ export function FiltersCategory() {
   );
 }
 
+const modal = StyleSheet.create({
+  modalWrapper: {
+    margin: 'auto',
+    width: 260,
+  },
+  modalTitle: {
+    fontSize: 15,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalContent: {
+    height: 610,
+    width: '100%',
+    padding: 20,
+    marginBottom: 10,
+    borderRadius: 10,
+    backgroundColor: '#131314',
+  },
+  buttonModalContainer: {
+    marginVertical: 0,
+  },
+  pickerContainer: {
+    height: 56,
+    borderWidth: 1,
+    borderRadius: 16,
+    marginBottom: 20,
+    paddingHorizontal: 10,
+    position: 'relative',
+    borderColor: '#1e1e1f',
+    backgroundColor: 'rgba(227, 227, 221, 0.04)',
+  },
+  iconLeftPadding: {
+    paddingLeft: 45,
+  },
+  iconLeftPaddingSm: {
+    paddingLeft: 30,
+  },
+  caretIcon: {
+    position: 'absolute',
+    top: 17,
+    right: 18,
+    pointerEvents: 'none',
+  },
+  leftIcon: {
+    position: 'absolute',
+    top: 17,
+    left: 15,
+    pointerEvents: 'none',
+  },
+});
 const styles = StyleSheet.create({
   containerWrapper: {
     flexDirection: 'row',
@@ -157,27 +246,28 @@ const styles = StyleSheet.create({
     fontWeight: 600,
     marginBottom: 15,
   },
-  modalWrapper: {
-    margin: 'auto',
-    width: 280,
-  },
-  modalTitle: {
-    fontSize: 13,
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  hbar: {
-    marginVertical: 10,
-  },
-  modalContent: {
-    height: '28%',
-    width: '100%',
-    padding: 20,
-    marginBottom: 10,
-    borderRadius: 10,
-    backgroundColor: '#131314',
-  },
-  buttonModalContainer: {
-    marginVertical: 0,
-  },
 });
+
+const pickerStyleDocument = {
+  inputIOS: {
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+    borderWidth: 0,
+    color: '#E3E3DD',
+    fontSize: 15,
+  },
+  placeholder: {
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+    borderWidth: 0,
+    color: '#E3E3DD',
+    fontSize: 15,
+  },
+  inputAndroid: {
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+    borderWidth: 0,
+    color: '#E3E3DD',
+    fontSize: 15,
+  },
+};

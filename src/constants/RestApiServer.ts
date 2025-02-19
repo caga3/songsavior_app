@@ -8,6 +8,7 @@ const endpoints = {
   filter_converations: '/messaging/v1/conversations/filter',
   create_converations: '/messaging/v1/conversations/create',
   messages: '/messaging/v1/messages',
+  messages_conversation: '/messaging/v1/messages-conversation',
   send_message: '/messaging/v1/messages/send',
   vote_id: '/ratings/v1/votes/id',
   votes: '/ratings/v1/votes',
@@ -104,7 +105,7 @@ const updateProfile = async (
       : `upload_${$userId}.jpg`;
     dataForm.append('file', {
       uri: $file,
-      type: ['image/png', 'image/jpg'],
+      type: ['image/png', 'image/jpg', 'image/gif', 'image/jpeg'],
       name: filename,
     });
   }
@@ -151,10 +152,31 @@ const createConversation = async (
 };
 
 // Function to get a messages
-const fetchMessages = async (convId: number, token: string) => {
+const fetchMessagesConversation = async (
+  conversation_id: number,
+  token: string,
+) => {
   return await makeApiRequest(
     'GET',
-    endpoints.messages + '?conv_id=' + convId,
+    endpoints.messages_conversation + '?conversation_id=' + conversation_id,
+    null,
+    token,
+  );
+};
+
+// Function to get a messages
+const fetchMessages = async (
+  recipient_id: number,
+  sender_id: number,
+  token: string,
+) => {
+  return await makeApiRequest(
+    'GET',
+    endpoints.messages +
+      '?recipient_id=' +
+      recipient_id +
+      '&sender_id=' +
+      sender_id,
     null,
     token,
   );
@@ -162,15 +184,16 @@ const fetchMessages = async (convId: number, token: string) => {
 
 // Function to send messages
 const sendMessages = async (
-  $conversation_id: number,
+  $recipient_id: number,
   $sender_id: number,
   $text: string,
   token: string,
 ) => {
   const dataForm = new FormData();
-  dataForm.append('conv_id', $conversation_id);
+  dataForm.append('recipient_id', $recipient_id);
   dataForm.append('sender_id', $sender_id);
   dataForm.append('text', $text);
+  // console.log(dataForm);
   return await makeApiRequest('POST', endpoints.send_message, dataForm, token);
 };
 
@@ -317,6 +340,7 @@ export default {
   fetchConversations,
   filterConversations,
   createConversation,
+  fetchMessagesConversation,
   fetchMessages,
   sendMessages,
   sendVote,

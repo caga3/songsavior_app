@@ -155,6 +155,7 @@ const AppStack = () => {
       <Stack.Screen name="Tabs" component={TabNavigator} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="Messages" component={MessageStack} />
+      <Stack.Screen name="Chat" component={ChatScreen} />
     </Stack.Navigator>
   );
 };

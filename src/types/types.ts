@@ -8,5 +8,7 @@ export type RootAuthStackParamList = {
 export type RootAppStackParamList = {
   Profile: undefined;
   Messages: undefined;
-  Chat: undefined;
+  Chat: {
+    recipient_id: undefined;
+  };
 };

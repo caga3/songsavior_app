@@ -30,7 +30,7 @@ const FiltersLeader: React.FC<LeaderFilterProps> = ({onApplyFilter}) => {
 
   const sortOptions = [
     {label: 'Score', value: 'accuracy'},
-    {label: 'Votes', value: 'votes'},
+    {label: 'Total Ratings', value: 'total-ratings'},
   ];
 
   return (
@@ -61,14 +61,20 @@ const FiltersLeader: React.FC<LeaderFilterProps> = ({onApplyFilter}) => {
         isVisible={modalVisible}
         onClose={() => setModalVisible(false)}>
         <View style={[modal.modalContent]}>
-          <Text
-            style={[
-              Typography.size,
-              Typography.textCenter,
-              Typography.highlight,
-            ]}>
-            More filters will be available post-beta.
-          </Text>
+          <View style={modal.modalWrapper}>
+            <Text
+              style={[
+                Typography.h3,
+                Typography.textCenter,
+                Typography.highlight,
+                Typography.mb0,
+              ]}>
+              Feature Not Available Yet!
+            </Text>
+            <Text style={[modal.modalTitle, Typography.text]}>
+              Some filters not available in beta.
+            </Text>
+          </View>
           <Text style={[Typography.disabled, styles.label]}>Genre</Text>
           <View>
             <IconSvg

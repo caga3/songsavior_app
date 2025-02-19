@@ -6,13 +6,11 @@ import {
   Pressable,
   SafeAreaView,
   StyleSheet,
-  TouchableOpacity,
 } from 'react-native';
 
 import {Text, TextInput, View} from '../components/Themed';
 import Typography from '../constants/Typography';
 import GoBack from '../components/GoBack';
-import AddIcon from '../constants/icons/AddIcon';
 import IconSvg from '../components/IconsSvg';
 import RestApiServer from '../constants/RestApiServer';
 import {formatTimestamp} from '../constants/Helper';
@@ -46,10 +44,6 @@ const MessageScreen: React.FC<Props> = ({navigation}) => {
   const default_avatar = `${SITE_ROOT}/uploads/2024/07/default_avatar.jpg`;
   const [search, setSearch] = useState('');
   const [conversations, setConversations] = useState<DataItem[]>([]);
-
-  const handleGoChat = () => {
-    navigation.navigate('ChatScreen');
-  };
 
   const searchMessages = async (text: string) => {
     try {
@@ -91,7 +85,7 @@ const MessageScreen: React.FC<Props> = ({navigation}) => {
     <Pressable
       onPress={() =>
         navigation.navigate('ChatScreen', {
-          conversationId: item.id,
+          send_to: item.id,
         })
       }>
       <View style={styles.message}>
@@ -144,9 +138,6 @@ const MessageScreen: React.FC<Props> = ({navigation}) => {
         <View style={Typography.headerWrapper}>
           <Text style={[Typography.h3, Typography.textCenter]}>MESSAGES</Text>
         </View>
-        <TouchableOpacity style={Typography.menuRight} onPress={handleGoChat}>
-          <AddIcon />
-        </TouchableOpacity>
         <View style={{position: 'relative'}}>
           <IconSvg
             style={styles.searchIcon}

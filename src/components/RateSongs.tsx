@@ -428,7 +428,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
                           Typography.textCenter,
                           Typography.mb2,
                         ]}>
-                        Song Ratings
+                        Song Rating
                       </Text>
                       <Text
                         style={[
@@ -439,7 +439,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
                         {voteData.avg}
                       </Text>
                       <Text style={[Typography.text3, Typography.textCenter]}>
-                        Total {voteData.total} Ratings
+                        {voteData.total} Rating
                       </Text>
                     </View>
 
@@ -451,7 +451,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
                           Typography.textCenter,
                           Typography.mb2,
                         ]}>
-                        Your Ratings
+                        Your Rating
                       </Text>
                       <Text
                         style={[
