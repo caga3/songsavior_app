@@ -5,6 +5,7 @@ import {
   Image,
   Keyboard,
   ScrollView,
+  SafeAreaView,
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
@@ -184,6 +185,7 @@ const ChatScreen: React.FC = () => {
   }
 
   return (
+    <SafeAreaView style={{flex: 1}}>
     <View style={{flex: 1}}>
       <View style={{flex: 1, ...Typography.container}}>
         <GoBack />
@@ -234,6 +236,7 @@ const ChatScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
     </View>
+    </SafeAreaView>
   );
 };
 

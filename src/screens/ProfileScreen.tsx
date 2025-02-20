@@ -382,6 +382,7 @@ const ProfileScreen: React.FC = () => {
             </View>
             <View style={[{flexGrow: 1}, styles.container]}>
               <ScrollView style={{flex: 1, ...styles.scrollView}}>
+                {showProfile.id !== Number(getUserInfo?.id) && (
                 <View style={[Typography.flexBetween, Typography.mb]}>
                   <View style={styles.buttonWrapper}>
                     <TouchableOpacity
@@ -392,12 +393,7 @@ const ProfileScreen: React.FC = () => {
                     </TouchableOpacity>
                   </View>
                   <View style={styles.buttonWrapper}>
-                    {showProfile.id === Number(getUserInfo.id) ? (
-                      <View style={[styles.buttonIcon, styles.buttonMuted]}>
-                        <AddIcon />
-                        <Text style={Typography.ms}>Follow</Text>
-                      </View>
-                    ) : isFollowers ? (
+                    {isFollowers ? (
                       <TouchableOpacity
                         style={[styles.buttonIcon, styles.buttonTeal]}
                         onPress={handleUnFollowAction}>
@@ -414,6 +410,7 @@ const ProfileScreen: React.FC = () => {
                     )}
                   </View>
                 </View>
+                )}
                 <View>
                   {groupBy === 0 ? (
                     <View>

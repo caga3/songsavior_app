@@ -110,7 +110,7 @@ export function FiltersCategory() {
               Advanced filters not available in beta.
             </Text>
           </View>
-          <Text style={styles.label}>Advance Options</Text>
+          <Text style={[Typography.text,styles.label]}>Advance Options</Text>
           <View>
             <LocationIcon
               width="20"
@@ -124,17 +124,12 @@ export function FiltersCategory() {
               placeholder="Ex: Houston, TX"
             />
           </View>
-          <View style={[modal.pickerContainer]}>
-            <GraphArrowIcon style={modal.leftIcon} />
-            <View style={modal.iconLeftPaddingSm}>
-              <RNPickerSelect
-                darkTheme={true}
-                onValueChange={value => setSort(value)}
-                items={sortOptions}
-                value={sort}
-                style={pickerStyleDocument}
-              />
-            </View>
+          <View>  
+            <TextInput
+              style={Typography.disabled}
+              editable={false}
+              placeholder="Past Week"
+            />
             <DownCarret stroke="white" style={modal.caretIcon} />
           </View>
           <View>
@@ -166,7 +161,7 @@ const modal = StyleSheet.create({
     textAlign: 'center',
   },
   modalContent: {
-    height: 610,
+    height: 410,
     width: '100%',
     padding: 20,
     marginBottom: 10,
