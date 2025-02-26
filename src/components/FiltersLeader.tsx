@@ -20,7 +20,7 @@ interface FilterOptions {
 }
 
 const FiltersLeader: React.FC<LeaderFilterProps> = ({onApplyFilter}) => {
-  const [sort, setSort] = useState<string | undefined>('accuracy');
+  const [sort, setSort] = useState<string | undefined>('votes');
   const [modalVisible, setModalVisible] = useState(false);
 
   const applyFilter = () => {
@@ -29,7 +29,7 @@ const FiltersLeader: React.FC<LeaderFilterProps> = ({onApplyFilter}) => {
   };
 
   const sortOptions = [
-    {label: 'Score', value: 'accuracy'},
+    {label: 'Votes', value: 'votes'},
     {label: 'Total Ratings', value: 'total-ratings'},
   ];
 

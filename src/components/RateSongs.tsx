@@ -31,6 +31,7 @@ import GraphArrowIcon from '../constants/icons/GraphArrowIcon';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {format, formatTime} from '../constants/Helper';
 import UpArrow from '../constants/icons/UpArrow';
+import PlaylistIcon from '../constants/icons/PlaylistIcon';
 
 interface Props {
   item: string;
@@ -156,6 +157,20 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
       console.error(error);
     }
   };
+  <svg
+    width="18"
+    height="13"
+    viewBox="0 0 18 13"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M14 6V12M15 1H1H15ZM1 5H10H1ZM7 9H1H7ZM11 9H17H11Z"
+      stroke="white"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </svg>;
 
   const progressBar = (position: number): number => {
     if (redirect !== 'Charts') {
@@ -170,8 +185,8 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
     await TrackPlayer.seekTo(0);
   };
 
-  const handleRewind = async () => {
-    await TrackPlayer.seekTo(0);
+  const handlePlaylist = async () => {
+    // await TrackPlayer.seekTo(0);
   };
 
   const handlePlay = async () => {
@@ -370,6 +385,18 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
               <TouchableOpacity style={styles.help} onPress={handleHelpModal}>
                 <IconSvg path="M12 17V17.01M12 13.5C11.9816 13.1754 12.0692 12.8536 12.2495 12.583C12.4299 12.3125 12.6933 12.1079 13 12C13.3759 11.8563 13.7132 11.6272 13.9856 11.331C14.2579 11.0347 14.4577 10.6792 14.5693 10.2926C14.6809 9.90595 14.7013 9.49869 14.6287 9.10287C14.5562 8.70704 14.3928 8.33345 14.1513 8.01151C13.9099 7.68958 13.597 7.42808 13.2373 7.24762C12.8776 7.06715 12.4809 6.97264 12.0785 6.97152C11.6761 6.97041 11.2789 7.06272 10.9182 7.24119C10.5576 7.41965 10.2432 7.67941 10 8M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" />
               </TouchableOpacity>
+              {!isVoteReady && (
+                <Text
+                  style={[
+                    styles.unlock,
+                    Typography.textCenter,
+                    Typography.size1,
+                    Typography.highlight,
+                    Typography.bold,
+                  ]}>
+                  RATING UNLOCKED SHORTLY
+                </Text>
+              )}
               <View style={styles.rateContainer}>
                 {Array.from({length: 5}, (_val, id) =>
                   isVoteReady ? (
@@ -565,10 +592,9 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
               onPress={() => handleRePlay()}>
               <IconSvg path="M4 12V9C4 8.20435 4.31607 7.44129 4.87868 6.87868C5.44129 6.31607 6.20435 6 7 6H20M20 6L17 3M20 6L17 9M20 12V15C20 15.7956 19.6839 16.5587 19.1213 17.1213C18.5587 17.6839 17.7956 18 17 18H4M4 18L7 21M4 18L7 15" />
             </TouchableOpacity>
-            <TouchableOpacity
-              style={[Typography.hide, styles.options]}
-              onPress={handleRewind}>
-              <IconSvg path="M4 5V19M20 5V19L8 12L20 5Z" />
+
+            <TouchableOpacity style={[styles.options]} onPress={handlePlaylist}>
+              <PlaylistIcon />
             </TouchableOpacity>
 
             {!disablePlaying ? (
@@ -590,7 +616,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
             <TouchableOpacity
               style={[
                 styles.options,
-                !hasVoted || redirect === 'Charts' ? Typography.hide : '',
+                redirect === 'Charts' ? Typography.hide : '',
               ]}
               onPress={handleForward}>
               <IconSvg path="M20 5V19M4 5V19L16 12L4 5Z" />
@@ -719,6 +745,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#adadae',
     borderRadius: 40,
   },
+  unlock: {
+    position: 'absolute',
+    bottom: 26,
+    left: 0,
+    right: 0,
+    margin: 'auto',
+  },
   icon: {
     flex: 1,
     marginLeft: 5,
@@ -731,8 +764,8 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   cardImage: {
-    width: 232,
-    height: 232,
+    width: 300,
+    height: 300,
     borderRadius: 16,
   },
   maxWidth: {
@@ -808,7 +841,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffd700',
   },
   opacity: {
-    opacity: 0.15,
+    opacity: 0.1,
   },
   timeContainer: {
     flexDirection: 'row',

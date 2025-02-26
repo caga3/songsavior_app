@@ -103,26 +103,47 @@ const fetchGenres = async (token: string) => {
 };
 
 const fetchRandomArtists = async (token: string) => {
-  const randomCharacter = getRandomCharacter();
+  //const randomCharacter = getRandomCharacter();
+  const randomCharacter =
+    '3q7HBObVc0L8jNeTe5Gofh,66CXWjxzNUsdJxJ2JdwvnR,0du5cEVh5yTK9QJze8zA0C,6vWDO969PvNqNYHIOW5v0m,7dGJo4pcD2V6oG8kP0tJRR,1HY2Jd0NmPuamShAr6KMms,06HL4z0CvFAxyc27GXpf02,23zg3TcAtWQy7J6upgbUnj';
   const artists = await searchArtists(token, randomCharacter);
   return artists;
 };
 
 // Function to fetch Artists from Spotify API
+// const searchArtists = async (token: string, query: string) => {
+//   try {
+//     const response = await axios.get(`${config.clientUrl}/search`, {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//       },
+//       params: {
+//         q: `artist:${query}`,
+//         type: 'artist',
+//         limit: 1,
+//       },
+//     });
+//     console.log(response.data.artists.items);
+//     const data = response.data ?? {};
+//     return data ? data.artists.items : data;
+//   } catch (error) {
+//     console.error(error);
+//   }
+// };
+
 const searchArtists = async (token: string, query: string) => {
   try {
-    const response = await axios.get(`${config.clientUrl}/search`, {
+    const response = await axios.get(`${config.clientUrl}/artists`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
       params: {
-        q: `artist:${query}`,
-        type: 'artist',
-        limit: 20,
+        ids: query,
       },
     });
+    // console.log(response.data.artists);
     const data = response.data ?? {};
-    return data ? data.artists.items : data;
+    return data ? data.artists : data;
   } catch (error) {
     console.error(error);
   }

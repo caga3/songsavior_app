@@ -47,7 +47,7 @@ type ThemeSelectProps = {
 type ThemeCheckBoxProps = {
   style: any;
   checked: boolean;
-  onPress: () => void;
+  onPress?: () => void;
 };
 
 type ThemeRadioProps = {

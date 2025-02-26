@@ -12,7 +12,7 @@ const WebSocketConnect = (uid: number) => {
 
   // Handle incoming messages
   socket.onmessage = (json: any) => {
-    console.log(json);
+    //console.log(json);
     if (json.data) {
       const dataMessage = JSON.parse(json.data);
       console.log('Message from server:', dataMessage);

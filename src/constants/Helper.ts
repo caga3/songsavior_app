@@ -14,6 +14,43 @@ export const formatTimestamp = (timestamp: number) => {
   }
 };
 
+export const timeAgo = (dbTime: string): string => {
+  // Convert "YYYY-MM-DD HH:mm:ss" to "YYYY-MM-DDTHH:mm:ss"
+  const formattedDate = dbTime.replace(' ', 'T');
+  // Create a Date object assuming the timestamp is in UTC
+  const pastDate = new Date(formattedDate + 'Z'); // 'Z' makes it UTC
+  // Get current time
+  const now = new Date();
+  // Get the difference in milliseconds
+  const diffInMs = now.getTime() - pastDate.getTime();
+  // Convert to seconds
+  const diffInSec = Math.floor(diffInMs / 1000);
+  // Define time intervals
+  const intervals: {label: string; seconds: number}[] = [
+    {label: 'year', seconds: 31536000},
+    {label: 'month', seconds: 2592000},
+    {label: 'week', seconds: 604800},
+    {label: 'day', seconds: 86400},
+    {label: 'hour', seconds: 3600},
+    {label: 'minute', seconds: 60},
+    {label: 'second', seconds: 1},
+  ];
+  // Find the right interval
+  for (const interval of intervals) {
+    const count = Math.floor(diffInSec / interval.seconds);
+    if (count >= 1) {
+      return `${count} ${interval.label}${count > 1 ? 's' : ''} ago`;
+    }
+  }
+  return 'Just now';
+};
+
+// Example Usage
+const dbTime = '2025-02-25 23:52:40'; // Database time (UTC)
+const relativeTime = timeAgo(dbTime);
+
+console.log(relativeTime); // Example Output: "5 minutes ago", "2 days ago", etc.
+
 export const cleanText = (input: string): string => {
   if (!input) {
     return 'default'; // Return a default slug if text is empty, null, or undefined

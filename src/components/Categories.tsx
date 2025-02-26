@@ -42,20 +42,22 @@ const Categories: React.FC = () => {
     useFilter();
 
   const handleCheckboxChange = (obj: CheckboxState) => {
-    setCheckboxes(prevCheckboxes => {
-      const updatedCheckboxes: Record<string, {checked: boolean}> = {};
-      Object.keys(prevCheckboxes).forEach(key => {
-        updatedCheckboxes[key] = {checked: false};
+    if (!byArtists) {
+      setCheckboxes(prevCheckboxes => {
+        const updatedCheckboxes: Record<string, {checked: boolean}> = {};
+        Object.keys(prevCheckboxes).forEach(key => {
+          updatedCheckboxes[key] = {checked: false};
+        });
+        updatedCheckboxes[obj.name] = {
+          checked: !prevCheckboxes[obj.name]?.checked,
+        };
+        const categoryType = obj.name;
+        !prevCheckboxes[obj.name]?.checked
+          ? handleSelectedCheckBox(categoryType)
+          : handleSelectedCheckBox('');
+        return updatedCheckboxes;
       });
-      updatedCheckboxes[obj.name] = {
-        checked: !prevCheckboxes[obj.name]?.checked,
-      };
-      const categoryType = obj.name;
-      !prevCheckboxes[obj.name]?.checked
-        ? handleSelectedCheckBox(categoryType)
-        : handleSelectedCheckBox('');
-      return updatedCheckboxes;
-    });
+    }
   };
 
   useEffect(() => {
@@ -125,13 +127,18 @@ const Categories: React.FC = () => {
 
               <Text
                 style={byArtists ? styles.gridTextDisable : styles.gridText}>
-                {item.title}
+                {byArtists ? item.name : item.title}
               </Text>
-              {!byArtists && (
+              {!byArtists ? (
                 <CheckBox
                   style={styles.checkbox}
                   checked={checkboxes[item.name]?.checked}
                   onPress={() => handleCheckboxChange(item)}
+                />
+              ) : (
+                <CheckBox
+                  style={styles.checkboxDisable}
+                  checked={checkboxes[item.name]?.checked}
                 />
               )}
             </Pressable>
@@ -185,11 +192,18 @@ const styles = StyleSheet.create({
     left: 15,
     opacity: 0.5,
   },
+  checkboxDisable: {
+    position: 'absolute',
+    zIndex: -1,
+    top: 8,
+    right: 10,
+    opacity: 0.5,
+  },
   checkbox: {
     position: 'absolute',
-    zIndex: 1,
+    zIndex: 0,
     top: 8,
-    right: 0,
+    right: 10,
   },
 });
 

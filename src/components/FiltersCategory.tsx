@@ -6,13 +6,13 @@ import IconSvg from './IconsSvg';
 import {useFilter} from '../context/FilterCategoryContext';
 import Typography from '../constants/Typography';
 import ModalBottom from './ModalBottom';
-import RNPickerSelect from 'react-native-picker-select';
-import GraphArrowIcon from '../constants/icons/GraphArrowIcon';
+// import RNPickerSelect from 'react-native-picker-select';
+// import GraphArrowIcon from '../constants/icons/GraphArrowIcon';
 import DownCarret from '../constants/icons/DownCarret';
 import LocationIcon from '../constants/icons/LocationIcon';
 
 export function FiltersCategory() {
-  const [sort, setSort] = useState<string | undefined>('past-week');
+  // const [sort, setSort] = useState<string | undefined>('past-week');
   const [modalVisible, setModalVisible] = useState(false);
   const {
     byGenres,
@@ -22,7 +22,7 @@ export function FiltersCategory() {
     handleSearchArtists,
   } = useFilter();
 
-  const sortOptions = [{label: 'Past Week', value: 'past-week'}];
+  // const sortOptions = [{label: 'Past Week', value: 'past-week'}];
 
   return (
     <View>
@@ -110,7 +110,7 @@ export function FiltersCategory() {
               Advanced filters not available in beta.
             </Text>
           </View>
-          <Text style={[Typography.text,styles.label]}>Advance Options</Text>
+          <Text style={[Typography.text, styles.label]}>Advance Options</Text>
           <View>
             <LocationIcon
               width="20"
@@ -124,7 +124,7 @@ export function FiltersCategory() {
               placeholder="Ex: Houston, TX"
             />
           </View>
-          <View>  
+          <View>
             <TextInput
               style={Typography.disabled}
               editable={false}
@@ -243,26 +243,26 @@ const styles = StyleSheet.create({
   },
 });
 
-const pickerStyleDocument = {
-  inputIOS: {
-    paddingVertical: 20,
-    paddingHorizontal: 10,
-    borderWidth: 0,
-    color: '#E3E3DD',
-    fontSize: 15,
-  },
-  placeholder: {
-    paddingVertical: 20,
-    paddingHorizontal: 10,
-    borderWidth: 0,
-    color: '#E3E3DD',
-    fontSize: 15,
-  },
-  inputAndroid: {
-    paddingVertical: 20,
-    paddingHorizontal: 10,
-    borderWidth: 0,
-    color: '#E3E3DD',
-    fontSize: 15,
-  },
-};
+// const pickerStyleDocument = {
+//   inputIOS: {
+//     paddingVertical: 20,
+//     paddingHorizontal: 10,
+//     borderWidth: 0,
+//     color: '#E3E3DD',
+//     fontSize: 15,
+//   },
+//   placeholder: {
+//     paddingVertical: 20,
+//     paddingHorizontal: 10,
+//     borderWidth: 0,
+//     color: '#E3E3DD',
+//     fontSize: 15,
+//   },
+//   inputAndroid: {
+//     paddingVertical: 20,
+//     paddingHorizontal: 10,
+//     borderWidth: 0,
+//     color: '#E3E3DD',
+//     fontSize: 15,
+//   },
+// };

@@ -383,33 +383,33 @@ const ProfileScreen: React.FC = () => {
             <View style={[{flexGrow: 1}, styles.container]}>
               <ScrollView style={{flex: 1, ...styles.scrollView}}>
                 {showProfile.id !== Number(getUserInfo?.id) && (
-                <View style={[Typography.flexBetween, Typography.mb]}>
-                  <View style={styles.buttonWrapper}>
-                    <TouchableOpacity
-                      style={styles.buttonIcon}
-                      onPress={handleMessageAction}>
-                      <IconSvg path="M12 12V12.01M8 12V12.01M16 12V12.01M3 20L4.3 16.1C3.17644 14.4383 2.76999 12.4704 3.15622 10.5623C3.54244 8.65419 4.69506 6.93567 6.39977 5.72628C8.10447 4.51688 10.2453 3.8989 12.4241 3.98724C14.6029 4.07559 16.6715 4.86424 18.2453 6.20656C19.819 7.54889 20.7909 9.35354 20.9801 11.285C21.1693 13.2164 20.563 15.1432 19.2739 16.7071C17.9848 18.271 16.1007 19.3656 13.9718 19.7874C11.8429 20.2091 9.6142 19.9293 7.7 19L3 20Z" />
-                      <Text style={Typography.ms}>Message</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <View style={styles.buttonWrapper}>
-                    {isFollowers ? (
+                  <View style={[Typography.flexBetween, Typography.mb]}>
+                    <View style={styles.buttonWrapper}>
                       <TouchableOpacity
-                        style={[styles.buttonIcon, styles.buttonTeal]}
-                        onPress={handleUnFollowAction}>
-                        <MinusIcon />
-                        <Text style={Typography.ms}>Unfollow</Text>
+                        style={styles.buttonIcon}
+                        onPress={handleMessageAction}>
+                        <IconSvg path="M12 12V12.01M8 12V12.01M16 12V12.01M3 20L4.3 16.1C3.17644 14.4383 2.76999 12.4704 3.15622 10.5623C3.54244 8.65419 4.69506 6.93567 6.39977 5.72628C8.10447 4.51688 10.2453 3.8989 12.4241 3.98724C14.6029 4.07559 16.6715 4.86424 18.2453 6.20656C19.819 7.54889 20.7909 9.35354 20.9801 11.285C21.1693 13.2164 20.563 15.1432 19.2739 16.7071C17.9848 18.271 16.1007 19.3656 13.9718 19.7874C11.8429 20.2091 9.6142 19.9293 7.7 19L3 20Z" />
+                        <Text style={Typography.ms}>Message</Text>
                       </TouchableOpacity>
-                    ) : (
-                      <TouchableOpacity
-                        style={[styles.buttonIcon, styles.buttonTeal]}
-                        onPress={handleFollowAction}>
-                        <AddIcon />
-                        <Text style={Typography.ms}>Follow</Text>
-                      </TouchableOpacity>
-                    )}
+                    </View>
+                    <View style={styles.buttonWrapper}>
+                      {isFollowers ? (
+                        <TouchableOpacity
+                          style={[styles.buttonIcon, styles.buttonTeal]}
+                          onPress={handleUnFollowAction}>
+                          <MinusIcon />
+                          <Text style={Typography.ms}>Unfollow</Text>
+                        </TouchableOpacity>
+                      ) : (
+                        <TouchableOpacity
+                          style={[styles.buttonIcon, styles.buttonTeal]}
+                          onPress={handleFollowAction}>
+                          <AddIcon />
+                          <Text style={Typography.ms}>Follow</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
                   </View>
-                </View>
                 )}
                 <View>
                   {groupBy === 0 ? (

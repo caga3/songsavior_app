@@ -75,6 +75,7 @@ const OverallLeader: React.FC<Props> = ({nav}) => {
       if (tokenData) {
         const responds = await RestApiServer.fetchLeaderBoard(tokenData);
         if (responds) {
+          // console.log(responds);
           setShowLeaderboard(responds);
           setFilteredBoard(responds);
           setLoading(false);
