@@ -52,7 +52,7 @@ const ChatScreen: React.FC = () => {
     typeof userInfo === 'string' ? JSON.parse(userInfo) : null;
   const default_avatar = `${SITE_ROOT}/uploads/2024/07/default_avatar.jpg`;
   // Capture Conversation User ID
-  const recipient_id = route.params.recipient_id;
+  const recipient_id = route.params.recipient_id; 
   const conversation_id = route.params.conversation_id;
 
   // Scroll to Bottom Always
@@ -199,31 +199,31 @@ const ChatScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={{flex: 1}}>
-      <View style={{flex: 1}}>
-        <View style={{flex: 1, ...Typography.container}}>
+      <View style={{height: 64, backgroundColor: '#131314'}}>
+        <View>
           <GoBack />
-          {messages && (
-            <>
-              <View style={styles.userMessage}>
-                <View style={Typography.flex}>
-                  <Image
-                    source={{
-                      uri: messages[0]?.info?.avatar_url || default_avatar,
-                    }}
-                    style={styles.profileImg}
-                  />
-                  <View>
-                    <Text
-                      style={[Typography.h3, Typography.mb0, Typography.mt3]}>
-                      {getUserInfo.user_display_name}
-                    </Text>
-                    <Text style={Typography.text4}>Active Now</Text>
-                  </View>
-                </View>
-              </View>
-              <KeyboardAwareScrollView
-                contentContainerStyle={{flex: 1}}
-                extraHeight={100}>
+        </View>
+        <View style={styles.userMessage}>
+          <View style={Typography.flex}>
+            <Image
+              source={{
+                uri: messages[0]?.info?.avatar_url || default_avatar,
+              }}
+              style={styles.profileImg}
+            />
+            <View>
+              <Text
+                style={[Typography.h3, Typography.mb0, Typography.mt3]}>
+                {getUserInfo.user_display_name}
+              </Text>
+              <Text style={Typography.text4}>Active Now</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+      <KeyboardAwareScrollView contentContainerStyle={{flex: 1}} extraHeight={100}>
+        <View style={{flex: 1, paddingHorizontal:20, paddingBottom: 20}}> 
+          {messages && ( 
                 <ScrollView
                   style={styles.scrollView}
                   ref={scrollViewRef}
@@ -235,9 +235,7 @@ const ChatScreen: React.FC = () => {
                     renderItem={renderItem}
                     keyExtractor={(item, index) => index.toString()}
                   />
-                </ScrollView>
-              </KeyboardAwareScrollView>
-            </>
+                </ScrollView>  
           )}
         </View>
         <View style={styles.inputContainer}>
@@ -253,16 +251,20 @@ const ChatScreen: React.FC = () => {
             <IconSvg path="M10.3209 14L21.3209 3M10.3209 14L13.8209 21C13.8647 21.0957 13.9352 21.1769 14.0238 21.2338C14.1125 21.2906 14.2156 21.3209 14.3209 21.3209C14.4262 21.3209 14.5293 21.2906 14.6179 21.2338C14.7066 21.1769 14.777 21.0957 14.8209 21L21.3209 3M10.3209 14L3.32087 10.5C3.22513 10.4561 3.144 10.3857 3.08712 10.2971C3.03024 10.2084 3 10.1053 3 10C3 9.89468 3.03024 9.79158 3.08712 9.70295C3.144 9.61431 3.22513 9.54387 3.32087 9.5L21.3209 3" />
           </TouchableOpacity>
         </View>
-      </View>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  back: {
+    verticalAlign: 'top',
+  },
   userMessage: {
     position: 'relative',
-    left: 40,
-    top: 2,
+    zIndex: 100,
+    left: 50,
+    top: 15,
   },
   listInvert: {
     flex: 1,

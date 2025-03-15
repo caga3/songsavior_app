@@ -332,7 +332,8 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
     }
   };
 
-  const confirmNext = async () => {
+  const confirmNext = async () => { 
+    setShowScore(false);
     if (!showAutoPlayNext) {
       setShowAutoPlayNext(true);
     } else {
@@ -366,6 +367,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
 
     // Check if Auto Play Next
     const AssignedAutoPlayNext = async () => {
+      // await AsyncStorage.removeItem(STORAGE_AUTOPLAY_KEY);
       const storedAutoPlayNext = await AsyncStorage.getItem(
         STORAGE_AUTOPLAY_KEY,
       );
