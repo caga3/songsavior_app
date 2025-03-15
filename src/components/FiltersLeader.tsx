@@ -10,6 +10,7 @@ import ModalBottom from './ModalBottom';
 import DownCarret from '../constants/icons/DownCarret';
 import LocationIcon from '../constants/icons/LocationIcon';
 import GraphArrowIcon from '../constants/icons/GraphArrowIcon';
+import HbarIcon from '../constants/icons/HBarIcon';
 
 interface LeaderFilterProps {
   onApplyFilter: (filter: FilterOptions) => void;
@@ -61,87 +62,94 @@ const FiltersLeader: React.FC<LeaderFilterProps> = ({onApplyFilter}) => {
         isVisible={modalVisible}
         onClose={() => setModalVisible(false)}>
         <View style={[modal.modalContent]}>
-          <View style={modal.modalWrapper}>
+          <View style={[modal.wrapper, Typography.mb5]}>
             <Text
               style={[
-                Typography.h3,
+                modal.title,
                 Typography.textCenter,
                 Typography.highlight,
                 Typography.mb0,
               ]}>
               Feature Not Available Yet!
             </Text>
-            <Text style={[modal.modalTitle, Typography.text]}>
+            <HbarIcon style={modal.hbar} />
+            <Text style={[modal.message, Typography.text]}>
               Some filters not available in beta.
             </Text>
           </View>
-          <Text style={[Typography.disabled, styles.label]}>Genre</Text>
-          <View>
-            <IconSvg
-              style={modal.leftIcon}
-              width="21"
-              height="21"
-              color="rgba(255,255,255,0.24)"
-              path="M10 17C10 18.6569 8.65685 20 7 20C5.34315 20 4 18.6569 4 17C4 15.3431 5.34315 14 7 14C8.65685 14 10 15.3431 10 17ZM10 17V4H20V17M20 17C20 18.6569 18.6569 20 17 20C15.3431 20 14 18.6569 14 17C14 15.3431 15.3431 14 17 14C18.6569 14 20 15.3431 20 17ZM10 8H20"
-            />
-            <TextInput
-              style={modal.iconLeftPadding}
-              editable={false}
-              placeholder="Overall"
-            />
-            <DownCarret
-              stroke="rgba(255,255,255,0.24)"
-              style={modal.caretIcon}
-            />
-          </View>
-          <Text style={styles.label}>Sort By</Text>
-          <View style={[modal.pickerContainer]}>
-            <GraphArrowIcon style={modal.leftIcon} />
-            <View style={modal.iconLeftPaddingSm}>
-              <RNPickerSelect
-                darkTheme={true}
-                onValueChange={value => setSort(value)}
-                items={sortOptions}
-                value={sort}
-                style={pickerStyleDocument}
+          <View style={modal.wrapper}>
+            <Text style={[Typography.disabled, styles.label]}>Genre</Text>
+            <View>
+              <IconSvg
+                style={modal.leftIcon}
+                width="21"
+                height="21"
+                color="rgba(255,255,255,0.24)"
+                path="M10 17C10 18.6569 8.65685 20 7 20C5.34315 20 4 18.6569 4 17C4 15.3431 5.34315 14 7 14C8.65685 14 10 15.3431 10 17ZM10 17V4H20V17M20 17C20 18.6569 18.6569 20 17 20C15.3431 20 14 18.6569 14 17C14 15.3431 15.3431 14 17 14C18.6569 14 20 15.3431 20 17ZM10 8H20"
+              />
+              <TextInput
+                style={modal.iconLeftPadding}
+                editable={false}
+                placeholder="Overall"
+              />
+              <DownCarret
+                stroke="rgba(255,255,255,0.24)"
+                style={modal.caretIcon}
               />
             </View>
-            <DownCarret stroke="white" style={modal.caretIcon} />
-          </View>
-          <Text style={[Typography.disabled, styles.label]}>Status Level</Text>
-          <View>
-            <TextInput editable={false} placeholder="Overall" />
-            <DownCarret
-              stroke="rgba(255,255,255,0.24)"
-              style={modal.caretIcon}
+            <Text style={styles.label}>Sort By</Text>
+            <View style={[modal.pickerContainer]}>
+              <GraphArrowIcon style={modal.leftIcon} />
+              <View style={modal.iconLeftPaddingSm}>
+                <RNPickerSelect
+                  darkTheme={true}
+                  onValueChange={value => setSort(value)}
+                  items={sortOptions}
+                  value={sort}
+                  style={pickerStyleDocument}
+                />
+              </View>
+              <DownCarret stroke="white" style={modal.caretIcon} />
+            </View>
+            <Text style={[Typography.disabled, styles.label]}>
+              Status Level
+            </Text>
+            <View>
+              <TextInput editable={false} placeholder="Overall" />
+              <DownCarret
+                stroke="rgba(255,255,255,0.24)"
+                style={modal.caretIcon}
+              />
+            </View>
+            <Text style={[Typography.disabled, styles.label]}>
+              User Location
+            </Text>
+            <View>
+              <LocationIcon
+                width="20"
+                height="21"
+                stroke="rgba(255,255,255,0.24)"
+                style={modal.leftIcon}
+              />
+              <TextInput
+                style={modal.iconLeftPadding}
+                editable={false}
+                placeholder="Ex: Houston, TX"
+              />
+            </View>
+            <View>
+              <RadioButton>
+                <Text style={[Typography.disabled, styles.label]}>
+                  Prioritize Accuracy
+                </Text>
+              </RadioButton>
+            </View>
+            <Button
+              style={[Typography.button, modal.buttonModalContainer]}
+              label="Filter"
+              onPress={applyFilter}
             />
           </View>
-          <Text style={[Typography.disabled, styles.label]}>User Location</Text>
-          <View>
-            <LocationIcon
-              width="20"
-              height="21"
-              stroke="rgba(255,255,255,0.24)"
-              style={modal.leftIcon}
-            />
-            <TextInput
-              style={modal.iconLeftPadding}
-              editable={false}
-              placeholder="Ex: Houston, TX"
-            />
-          </View>
-          <View>
-            <RadioButton>
-              <Text style={[Typography.disabled, styles.label]}>
-                Prioritize Accuracy
-              </Text>
-            </RadioButton>
-          </View>
-          <Button
-            style={[Typography.button, modal.buttonModalContainer]}
-            label="Filter"
-            onPress={applyFilter}
-          />
         </View>
       </ModalBottom>
     </>
@@ -162,22 +170,28 @@ const styles = StyleSheet.create({
   },
 });
 const modal = StyleSheet.create({
-  modalWrapper: {
+  wrapper: {
     margin: 'auto',
-    width: 260,
+    width: '100%',
+    padding: 20,
+    borderRadius: 20,
+    backgroundColor: '#131314',
   },
-  modalTitle: {
+  hbar: {
+    marginVertical: 13,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 600,
+    textAlign: 'center',
+  },
+  message: {
     fontSize: 15,
-    marginBottom: 20,
     textAlign: 'center',
   },
   modalContent: {
-    height: 610,
+    height: 670,
     width: '100%',
-    padding: 20,
-    marginBottom: 10,
-    borderRadius: 10,
-    backgroundColor: '#131314',
   },
   buttonModalContainer: {
     marginVertical: 0,
@@ -189,7 +203,7 @@ const modal = StyleSheet.create({
     marginBottom: 20,
     paddingHorizontal: 10,
     position: 'relative',
-    borderColor: '#1e1e1f',
+    borderColor: 'rgba(255,255,255,0.24)',
     backgroundColor: 'rgba(227, 227, 221, 0.04)',
   },
   iconLeftPadding: {

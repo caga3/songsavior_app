@@ -20,6 +20,7 @@ import {timeAgo} from '../constants/Helper';
 import RestApiServer from '../constants/RestApiServer';
 import {SITE_ROOT} from '../../global';
 import WebSocketConnect from '../constants/WebSocketConnect';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 type FormattedMessage = {
   recipient_id: number;
@@ -220,18 +221,22 @@ const ChatScreen: React.FC = () => {
                   </View>
                 </View>
               </View>
-              <ScrollView
-                style={styles.scrollView}
-                ref={scrollViewRef}
-                onContentSizeChange={scrollToBottom}>
-                <FlatList
-                  style={styles.listInvert}
-                  scrollEnabled={false}
-                  data={messages}
-                  renderItem={renderItem}
-                  keyExtractor={(item, index) => index.toString()}
-                />
-              </ScrollView>
+              <KeyboardAwareScrollView
+                contentContainerStyle={{flex: 1}}
+                extraHeight={100}>
+                <ScrollView
+                  style={styles.scrollView}
+                  ref={scrollViewRef}
+                  onContentSizeChange={scrollToBottom}>
+                  <FlatList
+                    style={styles.listInvert}
+                    scrollEnabled={false}
+                    data={messages}
+                    renderItem={renderItem}
+                    keyExtractor={(item, index) => index.toString()}
+                  />
+                </ScrollView>
+              </KeyboardAwareScrollView>
             </>
           )}
         </View>

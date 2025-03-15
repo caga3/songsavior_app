@@ -11,7 +11,11 @@ interface ModalProp {
 
 const ModalBottom: React.FC<ModalProp> = ({isVisible, onClose, children}) => {
   return (
-    <Modal transparent={true} visible={isVisible} onRequestClose={onClose}>
+    <Modal
+      transparent={true}
+      visible={isVisible}
+      animationType="fade"
+      onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.modalBackground}>
           <TouchableWithoutFeedback onPress={() => {}}>

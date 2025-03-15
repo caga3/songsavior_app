@@ -122,10 +122,12 @@ export function TextInput(props: TextInputProps) {
       borderWidth: 1,
       borderRadius: 16,
       paddingHorizontal: 15,
-      marginBottom: 20,
+      marginBottom: 15,
       color: color,
-      borderColor: borderColor,
-      backgroundColor: backgroundColor,
+      borderColor: editable ? borderColor : 'rgba(255, 255, 255, 0.035)',
+      backgroundColor: editable
+        ? backgroundColor
+        : 'rgba(255, 255, 255, 0.035)',
     },
   });
   return (
@@ -180,8 +182,10 @@ export function TextInputIcon(props: TextInputIconProps) {
       paddingHorizontal: 15,
       borderWidth: 1,
       borderRadius: 16,
-      borderColor: borderColor,
-      backgroundColor: backgroundColor,
+      borderColor: editable ? borderColor : 'rgba(255, 255, 255, 0.035)',
+      backgroundColor: editable
+        ? backgroundColor
+        : 'rgba(255, 255, 255, 0.035)',
       marginBottom: 15,
     },
   });

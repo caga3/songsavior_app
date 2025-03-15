@@ -1,9 +1,10 @@
-import React, {useLayoutEffect, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useState} from 'react';
 import {
   Image,
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
+  Pressable,
 } from 'react-native';
 import TrackPlayer, {
   State,
@@ -13,7 +14,7 @@ import TrackPlayer, {
 } from 'react-native-track-player';
 import Swiper from 'react-native-swiper';
 
-import {Text, View} from './Themed';
+import {Button, CheckBox, Text, View} from './Themed';
 import IconSvg from './IconsSvg';
 import PlayIcon from '../constants/icons/PlayIcon';
 import HBars from '../constants/icons/HBarIcon';
@@ -32,6 +33,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {format, formatTime} from '../constants/Helper';
 import UpArrow from '../constants/icons/UpArrow';
 import PlaylistIcon from '../constants/icons/PlaylistIcon';
+import PlaylistMinusIcon from '../constants/icons/PlaylistMinusIcon';
+import ModalCenter from './ModalCenter';
+import HbarIcon from '../constants/icons/HBarIcon';
+import DownCarret from '../constants/icons/DownCarret';
 
 interface Props {
   item: string;
@@ -49,21 +54,34 @@ interface VoteData {
   avg: number;
   accuracy: string;
   score: number;
+  worth: number;
+  multi: number;
   total_score: number;
 }
+
+const STORAGE_SKIP_KEY = 'SkipShowForward';
+const STORAGE_AUTOPLAY_KEY = 'AutoPlayNext';
 
 const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
   const progress = useProgress();
   const [duration, setDuration] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isLikes, setIsLikes] = useState(0);
+  const [toPlaylist, setToPlaylist] = useState(0);
   const [songPlayer, setSongPlayer] = useState<any>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [autoPlayNext, setAutoPlayNext] = useState('yes');
+  const [showAutoPlayNext, setShowAutoPlayNext] = useState(false);
   const [disablePlaying, setDisablePlaying] = useState(false);
   const [isVoteReady, setIsVoteReady] = useState(false);
   const [hasVoted, setHasVoted] = useState(false);
+  const [showScore, setShowScore] = useState(false);
   const [voteData, setVoteData] = useState<VoteData>();
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalForward, setModalForward] = useState(false);
+  const [checkedShowSkip, setCheckedShowSkip] = useState(false);
+  const [showExpand, setShowExpand] = useState(false);
+  const [isHiddenSkipForward, setIsHiddenSkipForward] = useState(false);
   const playbackState = usePlaybackState();
   const {userInfo, userToken} = useAuth();
 
@@ -101,6 +119,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
       if (item) {
         let playerData = [];
         let playerId = '';
+        let playerKey = '';
         const tokenData = await AsyncStorage.getItem('userToken');
         //console.log(tokenData);
         if (filter === 'genres') {
@@ -126,7 +145,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
           if (tokenData) {
             playerData = await RestApiServer.searchTrack(item, tokenData);
           }
-          playerId = item;
+          playerId = playerData.id;
         }
         if (playerId) {
           const votedOnSong = await RestApiServer.fetchVoteById(
@@ -139,14 +158,24 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
             setVoteData(votedOnSong);
           }
           const likesData = await RestApiServer.fetchLikes(
-            playerId,
+            playerKey,
             getUserInfo.id,
             userToken,
           );
-          if (likesData && likesData.likes) {
+          if (likesData && likesData.length) {
             setIsLikes(1);
           } else {
             setIsLikes(0);
+          }
+          const playlistData = await RestApiServer.fetchPlaylist(
+            playerKey,
+            getUserInfo.id,
+            userToken,
+          );
+          if (playlistData && playlistData.length) {
+            setToPlaylist(1);
+          } else {
+            setToPlaylist(0);
           }
           setSongPlayer(playerData);
           await playerSetup(playerData);
@@ -174,7 +203,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
 
   const progressBar = (position: number): number => {
     if (redirect !== 'Charts') {
-      if (position >= 60 && !isVoteReady) {
+      if (position >= 10 && !isVoteReady) {
         setIsVoteReady(true);
       }
     }
@@ -186,7 +215,20 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
   };
 
   const handlePlaylist = async () => {
-    // await TrackPlayer.seekTo(0);
+    if (getUserInfo && songPlayer) {
+      const setPlaylist = toPlaylist === 1 ? 0 : 1;
+      const song_id = songPlayer.id;
+      const user_id = getUserInfo.id;
+      const msg = await RestApiServer.togglePlaylist(
+        song_id,
+        user_id,
+        setPlaylist,
+        userToken,
+      );
+      if (msg) {
+        setToPlaylist(setPlaylist);
+      }
+    }
   };
 
   const handlePlay = async () => {
@@ -200,20 +242,33 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
   };
 
   const handleForward = async () => {
+    if (!isVoteReady && !isHiddenSkipForward) {
+      setModalForward(true);
+    } else {
+      resetPlayer(true);
+    }
+  };
+
+  const resetPlayer = async (bypass = false) => {
     setLoading(true);
+    setShowScore(false);
     setIsPlaying(false);
     setDisablePlaying(false);
     setHasVoted(false);
     setVoteData(undefined);
     setIsVoteReady(false);
+    setShowExpand(false);
     await TrackPlayer.reset();
     await fetchData();
-    setTimeout(() => {
-      handlePlay();
-    }, 3000);
+    if (!autoPlayNext || bypass) {
+      setTimeout(() => {
+        handlePlay();
+      }, 3000);
+    }
   };
 
   const handleShare = () => {};
+
   const handleHelpModal = () => {
     setModalVisible(true);
   };
@@ -260,9 +315,66 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
         //console.log(msg);
         setHasVoted(true);
         setVoteData(msg);
+        setShowScore(true);
       }
     }
   };
+
+  const toggleCheckedShowSkip = async () => {
+    const newCheckedState = !checkedShowSkip;
+    setCheckedShowSkip(newCheckedState);
+    if (newCheckedState) {
+      await AsyncStorage.setItem(STORAGE_SKIP_KEY, JSON.stringify(true));
+      setIsHiddenSkipForward(true);
+    } else {
+      await AsyncStorage.removeItem(STORAGE_SKIP_KEY);
+      setIsHiddenSkipForward(false);
+    }
+  };
+
+  const confirmNext = async () => {
+    if (!showAutoPlayNext) {
+      setShowAutoPlayNext(true);
+    } else {
+      resetPlayer();
+    }
+  };
+
+  const confirmAutoPlayNext = async () => {
+    await AsyncStorage.setItem(
+      STORAGE_AUTOPLAY_KEY,
+      JSON.stringify(autoPlayNext),
+    );
+    setShowAutoPlayNext(false);
+    resetPlayer();
+  };
+
+  useEffect(() => {
+    // Check if Skipped Forward
+    const AssignedCheckShowSkipForward = async () => {
+      // await AsyncStorage.removeItem(STORAGE_SKIP_KEY);
+      const storedCheckedShowSkip = await AsyncStorage.getItem(
+        STORAGE_SKIP_KEY,
+      );
+      if (storedCheckedShowSkip) {
+        setIsHiddenSkipForward(true);
+      } else {
+        setIsHiddenSkipForward(false);
+      }
+    };
+    AssignedCheckShowSkipForward();
+
+    // Check if Auto Play Next
+    const AssignedAutoPlayNext = async () => {
+      const storedAutoPlayNext = await AsyncStorage.getItem(
+        STORAGE_AUTOPLAY_KEY,
+      );
+      if (storedAutoPlayNext) {
+        setAutoPlayNext(autoPlayNext); // Set the saved option
+      }
+    };
+    AssignedAutoPlayNext();
+  }, []);
 
   useLayoutEffect(() => {
     // DEVONLY
@@ -270,7 +382,6 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
     // setDisablePlaying(true);
     setLoading(true);
     fetchData();
-
     // Listener for playback events
     const queueEndedListener = TrackPlayer.addEventListener(
       Event.PlaybackQueueEnded,
@@ -594,7 +705,11 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
             </TouchableOpacity>
 
             <TouchableOpacity style={[styles.options]} onPress={handlePlaylist}>
-              <PlaylistIcon />
+              {toPlaylist ? (
+                <PlaylistMinusIcon stroke="#fdf15d" />
+              ) : (
+                <PlaylistIcon />
+              )}
             </TouchableOpacity>
 
             {!disablePlaying ? (
@@ -706,11 +821,358 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
               </View>
             </View>
           </ModalFull>
+
+          <ModalCenter
+            isVisible={modalForward}
+            onClose={() => setModalForward(false)}>
+            <View style={modal.wrapper}>
+              <Text
+                style={[
+                  modal.title,
+                  Typography.textCenter,
+                  Typography.highlight,
+                  Typography.mb0,
+                ]}>
+                ARE YOU SURE YOU WANT TO SKIP WITHOUT RATING?
+              </Text>
+              <HbarIcon style={modal.hbar} />
+              <Text
+                style={[
+                  Typography.size1,
+                  Typography.textCenter,
+                  Typography.mb,
+                ]}>
+                You will not be able to rate this song later.
+              </Text>
+              <View style={Typography.mt}>
+                <Button
+                  style={[
+                    Typography.buttonOutline,
+                    modal.buttonModalContainer,
+                    Typography.mb,
+                  ]}
+                  onPress={() => setModalVisible(false)}
+                  label="Yes, Skip"
+                />
+                <Button
+                  style={[
+                    Typography.button,
+                    modal.buttonModalContainer,
+                    Typography.mb,
+                  ]}
+                  onPress={() => setModalForward(false)}
+                  label="No, Go Back!"
+                />
+                <View style={Typography.flex}>
+                  <CheckBox
+                    style={styles.options}
+                    checked={checkedShowSkip}
+                    onPress={toggleCheckedShowSkip}
+                  />
+                  <Text
+                    style={[Typography.size, Typography.ms1]}
+                    onPress={toggleCheckedShowSkip}>
+                    Do not show this message again.
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </ModalCenter>
+
+          <ModalCenter
+            isVisible={showScore}
+            onClose={() => setShowScore(false)}>
+            <View>
+              <View style={[modal.wrapper, Typography.mb5]}>
+                <Text
+                  style={[
+                    modal.title,
+                    Typography.textCenter,
+                    Typography.highlight,
+                    Typography.mb0,
+                  ]}>
+                  Song Score!
+                </Text>
+                <HbarIcon style={[modal.hbar, Typography.mb]} />
+                <View style={modal.scoreWrapper}>
+                  <View style={[Typography.flex]}>
+                    <UpArrow />
+                    <Text style={modal.scoreBoard}>{voteData?.points}</Text>
+                  </View>
+                </View>
+                <Button
+                  style={[
+                    Typography.button,
+                    modal.buttonModalContainer,
+                    Typography.mb,
+                  ]}
+                  onPress={confirmNext}
+                  label="Next"
+                />
+                <Pressable onPress={() => setShowExpand(!showExpand)}>
+                  <View style={Typography.flexCenter}>
+                    <Text style={[Typography.size, Typography.me]}>Expand</Text>
+                    {showExpand ? (
+                      <DownCarret style={Typography.flip} />
+                    ) : (
+                      <DownCarret />
+                    )}
+                  </View>
+                </Pressable>
+              </View>
+
+              {showExpand && (
+                <View style={modal.wrapper}>
+                  <View
+                    style={[
+                      Typography.mb2,
+                      Typography.flexBetween,
+                      Typography.flexStretch,
+                    ]}>
+                    <View
+                      style={[
+                        Typography.py10,
+                        Typography.tab,
+                        modal.flexElement,
+                      ]}>
+                      <Text style={[Typography.size, Typography.bold]}>
+                        Song Worth
+                      </Text>
+                      <Text
+                        style={[
+                          Typography.size2,
+                          Typography.exbold,
+                          Typography.my,
+                        ]}>
+                        {voteData?.worth}
+                      </Text>
+                      <Text style={[Typography.size, Typography.highlight]}>
+                        {'>'} 5 Rating
+                      </Text>
+                    </View>
+                    <Text style={modal.widthElement}>X</Text>
+                    <View
+                      style={[
+                        Typography.py10,
+                        Typography.tab,
+                        modal.flexElement,
+                      ]}>
+                      <Text style={[Typography.size, Typography.textCenter]}>
+                        Accuracy Level
+                      </Text>
+                      <View style={Typography.flexBetween}>
+                        <View>
+                          <Image
+                            source={require('../assets/images/levels/disc.png')}
+                            style={modal.level}
+                            resizeMode="contain"
+                          />
+                        </View>
+                        <View>
+                          <Text
+                            style={[
+                              Typography.size2,
+                              Typography.exbold,
+                              Typography.my,
+                              Typography.textCenter,
+                            ]}>
+                            {voteData?.multi}
+                          </Text>
+                          <View
+                            style={[Typography.tintBkgBlue, styles.accuracy]}>
+                            <View style={Typography.flex}>
+                              <AccuracyIcon
+                                width="20"
+                                height="20"
+                                fill="#FFFFFF"
+                              />
+                              <Text
+                                style={[Typography.semibold, Typography.size]}>
+                                {voteData?.accuracy}%
+                              </Text>
+                            </View>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+
+                  <View style={[modal.scoreBoardSm, Typography.flex]}>
+                    <Text style={modal.scoreBoardSmTxt}>= Song Score </Text>
+                    <View style={Typography.flex}>
+                      <UpArrow />
+                      <Text style={[modal.scoreBoardSmNm, Typography.exbold]}>
+                        {voteData?.points}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              )}
+            </View>
+          </ModalCenter>
+
+          <ModalCenter
+            isVisible={showAutoPlayNext}
+            onClose={() => setShowAutoPlayNext(false)}>
+            <View style={modal.wrapper}>
+              <Text
+                style={[
+                  modal.title,
+                  Typography.textCenter,
+                  Typography.highlight,
+                  Typography.mb0,
+                ]}>
+                Auto play next song after song finishes?
+              </Text>
+              <HbarIcon style={modal.hbar} />
+              <View style={Typography.mt}>
+                <View style={[Typography.flexAround, Typography.mb]}>
+                  <View style={Typography.flex}>
+                    <CheckBox
+                      style={styles.options}
+                      checked={autoPlayNext === 'yes'}
+                      onPress={() => setAutoPlayNext('yes')}
+                    />
+                    <Text
+                      style={[Typography.size, Typography.ms1]}
+                      onPress={() => setAutoPlayNext('yes')}>
+                      Yes
+                    </Text>
+                  </View>
+                  <View style={Typography.flex}>
+                    <CheckBox
+                      style={styles.options}
+                      checked={autoPlayNext === 'no'}
+                      onPress={() => setAutoPlayNext('no')}
+                    />
+                    <Text
+                      style={[Typography.size, Typography.ms1]}
+                      onPress={() => setAutoPlayNext('no')}>
+                      No
+                    </Text>
+                  </View>
+                </View>
+                <Button
+                  style={[
+                    Typography.button,
+                    modal.buttonModalContainer,
+                    Typography.mt,
+                  ]}
+                  onPress={confirmAutoPlayNext}
+                  label="Confirm"
+                />
+              </View>
+            </View>
+          </ModalCenter>
         </View>
       )}
     </>
   );
 };
+
+const modal = StyleSheet.create({
+  wrapper: {
+    margin: 'auto',
+    width: '100%',
+    padding: 20,
+    borderRadius: 20,
+    backgroundColor: '#131314',
+  },
+  hbar: {
+    marginVertical: 13,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 600,
+    textAlign: 'center',
+  },
+  message: {
+    fontSize: 15,
+    textAlign: 'center',
+  },
+  modalContent: {
+    height: 490,
+    width: '100%',
+  },
+  scoreWrapper: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 15,
+    height: 88,
+    width: '100%',
+    borderRadius: 4,
+    backgroundColor: 'rgba(253,241,93,0.10)',
+  },
+  scoreBoard: {
+    color: '#fdf15d',
+    fontSize: 38,
+    lineHeight: 44,
+    fontWeight: 600,
+  },
+  scoreBoardSm: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    padding: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(253,241,93,0.10)',
+  },
+  level: {
+    width: 60,
+    height: 60,
+  },
+  scoreBoardSmTxt: {
+    color: '#fdf15d',
+    fontSize: 16,
+    fontWeight: 500,
+  },
+  scoreBoardSmNm: {
+    color: '#fdf15d',
+    fontSize: 22,
+    fontWeight: 600,
+  },
+  widthElement: {
+    verticalAlign: 'middle',
+    width: 30,
+    textAlign: 'center',
+  },
+  flexElement: {
+    flex: 1,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  buttonModalContainer: {
+    marginVertical: 0,
+  },
+  pickerContainer: {
+    height: 56,
+    borderWidth: 1,
+    borderRadius: 16,
+    marginBottom: 20,
+    paddingHorizontal: 10,
+    position: 'relative',
+    borderColor: '#1e1e1f',
+    backgroundColor: 'rgba(227, 227, 221, 0.04)',
+  },
+  iconLeftPadding: {
+    paddingLeft: 45,
+  },
+  iconLeftPaddingSm: {
+    paddingLeft: 30,
+  },
+  caretIcon: {
+    position: 'absolute',
+    top: 17,
+    right: 18,
+    pointerEvents: 'none',
+  },
+  leftIcon: {
+    position: 'absolute',
+    top: 17,
+    left: 15,
+    pointerEvents: 'none',
+  },
+});
 
 const styles = StyleSheet.create({
   container: {

@@ -46,10 +46,10 @@ export const timeAgo = (dbTime: string): string => {
 };
 
 // Example Usage
-const dbTime = '2025-02-25 23:52:40'; // Database time (UTC)
-const relativeTime = timeAgo(dbTime);
+//const dbTime = '2025-02-25 23:52:40'; // Database time (UTC)
+//const relativeTime = timeAgo(dbTime);
 
-console.log(relativeTime); // Example Output: "5 minutes ago", "2 days ago", etc.
+//console.log(relativeTime); // Example Output: "5 minutes ago", "2 days ago", etc.
 
 export const cleanText = (input: string): string => {
   if (!input) {

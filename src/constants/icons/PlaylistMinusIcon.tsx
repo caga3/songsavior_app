@@ -2,14 +2,16 @@ import React from 'react';
 
 import Svg, {Path} from 'react-native-svg';
 
-interface PlaylistIconProps {
+interface PlaylistMinusIconProps {
   stroke?: string;
 }
-const PlaylistIcon: React.FC<PlaylistIconProps> = ({stroke = '#FFFFFF'}) => {
+const PlaylistMinusIcon: React.FC<PlaylistMinusIconProps> = ({
+  stroke = '#FFFFFF',
+}) => {
   return (
     <Svg width="30" height="30" viewBox="0 0 24 24" fill="none">
       <Path
-        d="M17 11V17M18 6H4H18ZM4 10H13H4ZM10 14H4H10ZM14 14H20H14Z"
+        d="M17 17M18 6H4H18ZM4 10H13H4ZM10 14H4H10ZM14 14H20H14Z"
         stroke={stroke}
         stroke-width="1.5"
         stroke-linecap="round"
@@ -18,4 +20,4 @@ const PlaylistIcon: React.FC<PlaylistIconProps> = ({stroke = '#FFFFFF'}) => {
     </Svg>
   );
 };
-export default PlaylistIcon;
+export default PlaylistMinusIcon;

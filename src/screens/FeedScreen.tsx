@@ -189,7 +189,7 @@ const FeedScreen: React.FC = () => {
             <View style={styles.modalWrapper}>
               <Text
                 style={[
-                  Typography.h3,
+                  styles.title,
                   Typography.textCenter,
                   Typography.highlight,
                   Typography.mb0,
@@ -197,7 +197,7 @@ const FeedScreen: React.FC = () => {
                 Feature Not Available Yet!
               </Text>
               <HbarIcon style={styles.hbar} />
-              <Text style={[styles.modalTitle, Typography.text]}>
+              <Text style={[styles.message, Typography.text]}>
                 Filtering is unavailable during the beta phase
               </Text>
             </View>
@@ -226,23 +226,33 @@ const styles = StyleSheet.create({
   },
   modalWrapper: {
     margin: 'auto',
-    width: 280,
+    width: '100%',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 600,
+    textAlign: 'center',
+  },
+  message: {
+    fontSize: 15,
+    fontWeight: 400,
+    textAlign: 'center',
   },
   modalTitle: {
     fontSize: 13,
-    marginBottom: 10,
     textAlign: 'center',
   },
   modalContent: {
-    height: 170,
+    height: 150,
     width: '100%',
     padding: 20,
-    marginBottom: 10,
-    borderRadius: 10,
+    borderRadius: 20,
+    borderBottomEndRadius: 0,
+    borderBottomStartRadius: 0,
     backgroundColor: '#131314',
   },
   hbar: {
-    marginVertical: 10,
+    marginVertical: 13,
   },
   gridImage: {
     width: 40,

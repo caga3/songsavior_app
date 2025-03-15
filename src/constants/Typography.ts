@@ -29,6 +29,9 @@ const Typography = StyleSheet.create({
   bold: {
     fontWeight: '700',
   },
+  exbold: {
+    fontWeight: '800',
+  },
   h1: {
     fontSize: 32,
     fontWeight: '700',
@@ -74,6 +77,9 @@ const Typography = StyleSheet.create({
   },
   fluid: {
     backgroundColor: Colors[colorScheme].background,
+  },
+  flip: {
+    transform: [{scaleY: -1}],
   },
   flex: {
     flexDirection: 'row',
@@ -123,6 +129,9 @@ const Typography = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
   },
+  flexMiddle: {
+    justifyContent: 'center',
+  },
   flexTop: {
     alignItems: 'flex-start',
   },
@@ -171,11 +180,17 @@ const Typography = StyleSheet.create({
   me: {
     marginRight: 7,
   },
+  me5: {
+    marginRight: 5,
+  },
   mb: {
     marginBottom: 15,
   },
   mb0: {
     marginBottom: 0,
+  },
+  mb5: {
+    marginBottom: 5,
   },
   mb2: {
     marginBottom: 8,
@@ -195,11 +210,37 @@ const Typography = StyleSheet.create({
   my: {
     marginVertical: 7,
   },
+  mx10: {
+    marginHorizontal: 10,
+  },
+  p10: {
+    padding: 10,
+  },
+  p20: {
+    padding: 20,
+  },
+  p15: {
+    padding: 15,
+  },
+  py15: {
+    paddingVertical: 15,
+  },
+  py10: {
+    paddingVertical: 10,
+  },
   tab: {
     backgroundColor: Colors[colorScheme].tab,
   },
   button: {
     backgroundColor: Colors[colorScheme].button,
+    textAlign: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonOutline: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: Colors[colorScheme].button,
     textAlign: 'center',
     alignItems: 'center',
     justifyContent: 'center',

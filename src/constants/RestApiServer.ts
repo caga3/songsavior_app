@@ -19,6 +19,7 @@ const endpoints = {
   songs_track: '/playlist/v1/track',
   stats: '/ratings/v1/stats',
   likes: '/ratings/v1/likes',
+  playlist: '/ratings/v1/playlist',
   follow: '/profile/v1/follow',
   leaderboard: '/ratings/v1/leaderboard',
   profile: '/profile/v1/stats',
@@ -236,6 +237,19 @@ const toggleLikes = async (
   return await makeApiRequest('POST', endpoints.likes, dataForm, token);
 };
 
+const togglePlaylist = async (
+  $song_id: string,
+  $user_id: number,
+  $list: number,
+  token: string,
+) => {
+  const dataForm = new FormData();
+  dataForm.append('song_id', $song_id);
+  dataForm.append('user_id', $user_id);
+  dataForm.append('list', $list);
+  return await makeApiRequest('POST', endpoints.playlist, dataForm, token);
+};
+
 const toggleFollow = async (
   $user_id: number,
   $follow: number,
@@ -248,6 +262,19 @@ const toggleFollow = async (
 };
 
 const fetchLikes = async (song_id: string, user_id: number, token: string) => {
+  return await makeApiRequest(
+    'GET',
+    endpoints.likes + '?song_id=' + song_id + '&user_id=' + user_id,
+    null,
+    token,
+  );
+};
+
+const fetchPlaylist = async (
+  song_id: string,
+  user_id: number,
+  token: string,
+) => {
   return await makeApiRequest(
     'GET',
     endpoints.likes + '?song_id=' + song_id + '&user_id=' + user_id,
@@ -348,7 +375,9 @@ export default {
   fetchVoteById,
   fetchSongs,
   fetchStats,
+  fetchPlaylist,
   toggleLikes,
+  togglePlaylist,
   toggleFollow,
   fetchLikes,
   fetchLeaderBoard,

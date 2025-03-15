@@ -10,6 +10,7 @@ import ModalBottom from './ModalBottom';
 // import GraphArrowIcon from '../constants/icons/GraphArrowIcon';
 import DownCarret from '../constants/icons/DownCarret';
 import LocationIcon from '../constants/icons/LocationIcon';
+import HbarIcon from '../constants/icons/HBarIcon';
 
 export function FiltersCategory() {
   // const [sort, setSort] = useState<string | undefined>('past-week');
@@ -96,54 +97,63 @@ export function FiltersCategory() {
         isVisible={modalVisible}
         onClose={() => setModalVisible(false)}>
         <View style={[modal.modalContent]}>
-          <View style={modal.modalWrapper}>
+          <View style={[modal.wrapper, Typography.mb5]}>
             <Text
               style={[
-                Typography.h3,
+                modal.title,
                 Typography.textCenter,
                 Typography.highlight,
                 Typography.mb0,
               ]}>
               Feature Not Available Yet!
             </Text>
-            <Text style={[modal.modalTitle, Typography.text]}>
+            <HbarIcon style={modal.hbar} />
+            <Text style={[modal.message, Typography.text]}>
               Advanced filters not available in beta.
             </Text>
           </View>
-          <Text style={[Typography.text, styles.label]}>Advance Options</Text>
-          <View>
-            <LocationIcon
-              width="20"
-              height="21"
-              stroke="rgba(255,255,255,0.24)"
-              style={modal.leftIcon}
-            />
-            <TextInput
-              style={modal.iconLeftPadding}
-              editable={false}
-              placeholder="Ex: Houston, TX"
+          <View style={modal.wrapper}>
+            <Text style={[Typography.text, Typography.bold, styles.label]}>
+              Advance Options
+            </Text>
+            <View>
+              <LocationIcon
+                width="20"
+                height="21"
+                stroke="rgba(255,255,255,0.24)"
+                style={modal.leftIcon}
+              />
+              <TextInput
+                style={modal.iconLeftPadding}
+                editable={false}
+                placeholder="Ex: Houston, TX"
+              />
+            </View>
+            <Text style={[Typography.disabled, styles.label]}>Release</Text>
+            <View>
+              <TextInput
+                style={Typography.disabled}
+                editable={false}
+                placeholder="Past Week"
+              />
+              <DownCarret
+                stroke="rgba(255,255,255,0.24)"
+                style={modal.caretIcon}
+              />
+            </View>
+            <View>
+              <RadioButton>
+                <Text style={[Typography.disabled, styles.label]}>
+                  Include Low Rating Songs?
+                </Text>
+              </RadioButton>
+            </View>
+            <Button
+              style={[Typography.button, modal.buttonModalContainer]}
+              onPress={() => setModalVisible(false)}
+              label="Confirm Settings"
             />
           </View>
-          <View>
-            <TextInput
-              style={Typography.disabled}
-              editable={false}
-              placeholder="Past Week"
-            />
-            <DownCarret stroke="white" style={modal.caretIcon} />
-          </View>
-          <View>
-            <RadioButton>
-              <Text style={[Typography.disabled, styles.label]}>
-                Include Low Rating Songs?
-              </Text>
-            </RadioButton>
-          </View>
-          <Button
-            style={[Typography.button, modal.buttonModalContainer]}
-            onPress={() => setModalVisible(false)}
-            label="Confirm Settings"
-          />
         </View>
       </ModalBottom>
     </View>
@@ -151,22 +161,28 @@ export function FiltersCategory() {
 }
 
 const modal = StyleSheet.create({
-  modalWrapper: {
+  wrapper: {
     margin: 'auto',
-    width: 260,
+    width: '100%',
+    padding: 20,
+    borderRadius: 20,
+    backgroundColor: '#131314',
   },
-  modalTitle: {
+  hbar: {
+    marginVertical: 13,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 600,
+    textAlign: 'center',
+  },
+  message: {
     fontSize: 15,
-    marginBottom: 20,
     textAlign: 'center',
   },
   modalContent: {
-    height: 410,
+    height: 490,
     width: '100%',
-    padding: 20,
-    marginBottom: 10,
-    borderRadius: 10,
-    backgroundColor: '#131314',
   },
   buttonModalContainer: {
     marginVertical: 0,
@@ -238,7 +254,6 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: 600,
     marginBottom: 15,
   },
 });

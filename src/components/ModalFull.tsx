@@ -12,7 +12,11 @@ interface ModalProp {
 
 const ModalFull: React.FC<ModalProp> = ({isVisible, onClose, children}) => {
   return (
-    <Modal transparent={true} visible={isVisible} onRequestClose={onClose}>
+    <Modal
+      transparent={true}
+      visible={isVisible}
+      animationType="fade"
+      onRequestClose={onClose}>
       <SafeAreaView style={styles.modalContainer}>
         <View style={[styles.modalContent]}>
           <TouchableOpacity
