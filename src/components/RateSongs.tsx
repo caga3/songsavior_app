@@ -203,7 +203,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
 
   const progressBar = (position: number): number => {
     if (redirect !== 'Charts') {
-      if (position >= 10 && !isVoteReady) {
+      if (position >= 60 && !isVoteReady) {
         setIsVoteReady(true);
       }
     }
