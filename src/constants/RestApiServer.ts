@@ -5,10 +5,9 @@ const endpoints = {
   auth: '/jwt-auth/v1/token',
   register: '/wp-register/v1/register',
   converations: '/messaging/v1/conversations',
-  filter_converations: '/messaging/v1/conversations/filter',
-  create_converations: '/messaging/v1/conversations/create',
+  // create_converations: '/messaging/v1/conversations/create',
   messages: '/messaging/v1/messages',
-  messages_conversation: '/messaging/v1/messages-conversation',
+  //messages_conversation: '/messaging/v1/messages-conversations',
   send_message: '/messaging/v1/messages/send',
   vote_id: '/ratings/v1/votes/id',
   votes: '/ratings/v1/votes',
@@ -131,26 +130,26 @@ const filterConversations = async (
   token: string,
 ) => {
   const endPoint =
-    endpoints.filter_converations + '?user_id=' + userId + '&filter=' + filter;
+    endpoints.converations + '?user_id=' + userId + '&filter=' + filter;
   return await makeApiRequest('GET', endPoint, null, token);
 };
 
 // Function to create Conversa
-const createConversation = async (
-  sender_id: number,
-  recipient_id: number,
-  token: string,
-) => {
-  const dataForm = new FormData();
-  dataForm.append('sender_id', sender_id);
-  dataForm.append('recipient_id', recipient_id);
-  return await makeApiRequest(
-    'POST',
-    endpoints.create_converations,
-    dataForm,
-    token,
-  );
-};
+// const createConversation = async (
+//   sender_id: number,
+//   recipient_id: number,
+//   token: string,
+// ) => {
+//   const dataForm = new FormData();
+//   dataForm.append('sender_id', sender_id);
+//   dataForm.append('recipient_id', recipient_id);
+//   return await makeApiRequest(
+//     'POST',
+//     endpoints.create_converations,
+//     dataForm,
+//     token,
+//   );
+// };
 
 // Function to get a messages
 const fetchMessagesConversation = async (
@@ -187,13 +186,13 @@ const fetchMessages = async (
 const sendMessages = async (
   $recipient_id: number,
   $sender_id: number,
-  $text: string,
+  $message: string,
   token: string,
 ) => {
   const dataForm = new FormData();
   dataForm.append('recipient_id', $recipient_id);
   dataForm.append('sender_id', $sender_id);
-  dataForm.append('text', $text);
+  dataForm.append('message', $message);
   // console.log(dataForm);
   return await makeApiRequest('POST', endpoints.send_message, dataForm, token);
 };
@@ -366,7 +365,7 @@ export default {
   callRegister,
   fetchConversations,
   filterConversations,
-  createConversation,
+  //createConversation,
   fetchMessagesConversation,
   fetchMessages,
   sendMessages,

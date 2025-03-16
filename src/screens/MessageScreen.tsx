@@ -13,23 +13,22 @@ import Typography from '../constants/Typography';
 import GoBack from '../components/GoBack';
 import IconSvg from '../components/IconsSvg';
 import RestApiServer from '../constants/RestApiServer';
-import {formatTimestamp} from '../constants/Helper';
+import {timeAgo} from '../constants/Helper';
 import {useAuth} from '../context/AuthContext';
 import {SITE_ROOT} from '../../global';
-interface Info {
-  ID: number;
-  avatar_url: string;
-  user_display_name: string;
-}
 
-interface DataItem {
-  created_at: string;
+type FormattedMessage = {
   id: number;
-  info: Info;
-  sender_id: number;
   recipient_id: number;
-  text: string;
-}
+  sender_id: number;
+  message: string;
+  recipient: {
+    ID: number;
+    avatar_url: string;
+    user_display_name: string;
+  };
+  created_at: string;
+};
 interface Props {
   navigation: {
     navigate: (screenName: string, params?: {}) => void;
@@ -43,24 +42,28 @@ const MessageScreen: React.FC<Props> = ({navigation}) => {
     typeof userInfo === 'string' ? JSON.parse(userInfo) : null;
   const default_avatar = `${SITE_ROOT}/uploads/2024/07/default_avatar.jpg`;
   const [search, setSearch] = useState('');
-  const [conversations, setConversations] = useState<DataItem[]>([]);
+  const [conversations, setConversations] = useState<FormattedMessage[]>([]);
 
-  const searchMessages = async (text: string) => {
+  const searchMessages = async (filterMessage: string) => {
     try {
-      setSearch(text);
-      if (text.length > 2) {
-        const msgs = await RestApiServer.filterConversations(
+      setSearch(filterMessage);
+      if (filterMessage.length > 2) {
+        const msg = await RestApiServer.filterConversations(
           getUserInfo.id,
-          text,
+          filterMessage,
           userToken,
         );
-        setConversations(msgs);
-      } else if (text.length === 0) {
+        if (msg) {
+          setConversations(msg);
+        }
+      } else if (filterMessage.length === 0) {
         const msg = await RestApiServer.fetchConversations(
           getUserInfo.id,
           userToken,
         );
-        setConversations(msg);
+        if (msg) {
+          setConversations(msg);
+        }
       }
     } catch (error) {
       console.error(error);
@@ -74,49 +77,55 @@ const MessageScreen: React.FC<Props> = ({navigation}) => {
           getUserInfo.id,
           userToken,
         );
-        setConversations(msg);
+        if (msg) {
+          setConversations(msg);
+        }
         setLoading(false);
       }
     };
     fetchConversations();
   }, []);
 
-  const renderItem = ({item}: {item: DataItem}) => (
-    <Pressable
-      onPress={() =>
-        navigation.navigate('ChatScreen', {
-          send_to: item.id,
-        })
-      }>
-      <View style={styles.message}>
-        <Image
-          source={{
-            uri: item.info.avatar_url || default_avatar,
-          }}
-          style={styles.profileImg}
-        />
-        <View style={{flex: 1}}>
-          <Text style={[Typography.h3, Typography.mb0]}>
-            {item.info.user_display_name}
-          </Text>
-          <View style={Typography.flexAroundStart}>
-            <View
-              style={{
-                flex: 1,
-              }}>
-              <Text style={[Typography.size1, Typography.text4]}>
-                {item.text}
+  const renderItem = ({item}: {item: FormattedMessage}) => (
+    <>
+      {item && (
+        <Pressable
+          onPress={() =>
+            navigation.navigate('Chat', {
+              recipient_id: item.recipient_id,
+            })
+          }>
+          <View style={styles.message}>
+            <Image
+              source={{
+                uri: item.recipient.avatar_url || default_avatar,
+              }}
+              style={styles.profileImg}
+            />
+            <View style={{flex: 1}}>
+              <Text style={[Typography.h3, Typography.mb0]}>
+                {item.recipient.user_display_name}
               </Text>
-            </View>
-            <View>
-              <Text style={[Typography.size1, Typography.text4]}>
-                {formatTimestamp(new Date(item.created_at).getTime())}
-              </Text>
+              <View style={Typography.flexAroundStart}>
+                <View
+                  style={{
+                    flex: 1,
+                  }}>
+                  <Text style={[Typography.size1, Typography.text4]}>
+                    {item.message}
+                  </Text>
+                </View>
+                <View>
+                  <Text style={[Typography.size1, Typography.text4]}>
+                    {timeAgo(item.created_at)}
+                  </Text>
+                </View>
+              </View>
             </View>
           </View>
-        </View>
-      </View>
-    </Pressable>
+        </Pressable>
+      )}
+    </>
   );
 
   if (loading) {
@@ -148,7 +157,7 @@ const MessageScreen: React.FC<Props> = ({navigation}) => {
           style={styles.inputGap}
           placeholder="Search"
           value={search}
-          onChangeText={text => searchMessages(text)}
+          onChangeText={message => searchMessages(message)}
         />
         <View style={styles.scrollView}>
           <FlatList

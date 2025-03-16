@@ -332,7 +332,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
     }
   };
 
-  const confirmNext = async () => { 
+  const confirmNext = async () => {
     setShowScore(false);
     if (!showAutoPlayNext) {
       setShowAutoPlayNext(true);

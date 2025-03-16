@@ -23,20 +23,24 @@ import WebSocketConnect from '../constants/WebSocketConnect';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 type FormattedMessage = {
-  recipient_id: number;
-  created_at: string;
   id: number;
-  info: {
-    ID: number;
-    avatar_url: string;
-    user_display_name: string;
-  };
+  recipient_id: number;
   sender_id: number;
-  text: string;
+  message: string;
+  created_at: string;
+};
+
+type FormattedRecipient = {
+  ID: string;
+  avatar_url: string;
+  user_display_name: string;
+  online: boolean;
 };
 
 type RootStackParamList = {
-  Chat: {recipient_id: number; conversation_id: number};
+  Chat: {
+    recipient_id: number;
+  };
 };
 
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'Chat'>;
@@ -47,14 +51,14 @@ const ChatScreen: React.FC = () => {
   const scrollViewRef = useRef<ScrollView>(null);
   const [newMessage, setNewMessage] = useState('');
   const [messages, setMessages] = useState<FormattedMessage[]>([]);
+  const [recipient, setRecipient] = useState<FormattedRecipient>();
   const {userInfo, userToken} = useAuth();
   const getUserInfo =
     typeof userInfo === 'string' ? JSON.parse(userInfo) : null;
   const default_avatar = `${SITE_ROOT}/uploads/2024/07/default_avatar.jpg`;
-  // Capture Conversation User ID
-  const recipient_id = route.params.recipient_id; 
-  const conversation_id = route.params.conversation_id;
-
+  // Capture Recipient User ID
+  const sender_id = getUserInfo.id;
+  const recipient_id = route.params.recipient_id;
   // Scroll to Bottom Always
   const scrollToBottom = () => {
     scrollViewRef.current?.scrollTo({y: 0, animated: false});
@@ -70,20 +74,7 @@ const ChatScreen: React.FC = () => {
           newMessage,
           userToken,
         );
-        // const messageObj = {
-        //   recipient_id: recipient_id,
-        //   created_at: timeAgo(String(new Date())),
-        //   id: messages.length + 1,
-        //   info: {
-        //     ID: getUserInfo.id,
-        //     avatar_url: getUserInfo.avatar_url,
-        //     user_display_name: getUserInfo.user_display_name,
-        //   },
-        //   sender_id: getUserInfo.id,
-        //   text: newMessage,
-        // };
         setNewMessage('');
-        //setMessages(prevMessages => [...prevMessages, messageObj]);
         scrollToBottom();
       }
     }
@@ -91,29 +82,28 @@ const ChatScreen: React.FC = () => {
   };
 
   useEffect(() => {
+    // Clear Messages
+    setMessages([]);
     // Connect to Socket
     const socket = WebSocketConnect(getUserInfo.id);
     const fetchData = async () => {
       if (userToken) {
-        if (route.params) {
-          let msg;
-          if (conversation_id) {
-            msg = await RestApiServer.fetchMessagesConversation(
-              conversation_id,
-              userToken,
-            );
-          } else {
-            msg = await RestApiServer.fetchMessages(
-              recipient_id,
-              getUserInfo.id,
-              userToken,
-            );
+        if (recipient_id) {
+          const msg = await RestApiServer.fetchMessages(
+            recipient_id,
+            sender_id,
+            userToken,
+          );
+          if (msg) {
+            if (msg.recipient) {
+              setRecipient(msg.recipient);
+              setMessages(msg.data);
+              setTimeout(() => {
+                scrollToBottom();
+              }, 1000);
+              setInterval;
+            }
           }
-          setMessages(msg);
-          setTimeout(() => {
-            scrollToBottom();
-          }, 1000);
-          setInterval;
         }
       }
       setLoading(false);
@@ -125,21 +115,18 @@ const ChatScreen: React.FC = () => {
     socket.onmessage = event => {
       if (event.data) {
         const msg = JSON.parse(event.data);
-        //console.log('Received message:', msg);
-        const messageObj = {
-          recipient_id: msg.recipient_id,
-          created_at: timeAgo(msg.created_at),
-          id: msg.length + 1,
-          info: {
-            ID: getUserInfo.id,
-            avatar_url: getUserInfo.avatar_url,
-            user_display_name: getUserInfo.user_display_name,
-          },
-          sender_id: msg.sender_id,
-          text: msg.messages,
-        };
-        setMessages(prevMessages => [...prevMessages, messageObj]);
-        scrollToBottom();
+        if (msg.event === 'messages') {
+          //console.log('Received message:', msg);
+          const messageObj = {
+            id: msg.length + 1,
+            recipient_id: msg.recipient_id,
+            sender_id: msg.sender_id,
+            message: msg.message,
+            created_at: timeAgo(msg.created_at),
+          };
+          setMessages(prevMessages => [...prevMessages, messageObj]);
+          scrollToBottom();
+        }
       }
     };
 
@@ -147,34 +134,18 @@ const ChatScreen: React.FC = () => {
       if (socket) {
         socket.close();
       }
+      setNewMessage('');
       setMessages([]);
     };
-  }, [route.params]);
+  }, [recipient_id]);
 
   const renderItem = ({item}: {item: FormattedMessage}) => (
     <View style={styles.message}>
-      {item.info.ID !== getUserInfo.id ? (
-        <>
-          <Image
-            source={{
-              uri: item.info.avatar_url || default_avatar,
-            }}
-            style={styles.profileImg}
-          />
-          <View style={{flex: 1}}>
-            <View style={{flex: 1, ...Typography.flexTop}}>
-              <View style={[Typography.card, Typography.mb0]}>
-                <Text style={Typography.size1}>{item.text}</Text>
-              </View>
-              <Text style={Typography.text4}>{timeAgo(item.created_at)}</Text>
-            </View>
-          </View>
-        </>
-      ) : (
+      {item && (
         <View style={{flex: 1}}>
           <View style={{flex: 1, ...Typography.flexBottom}}>
             <View style={[Typography.card, Typography.mb0]}>
-              <Text style={Typography.size1}>{item.text}</Text>
+              <Text style={Typography.size1}>{item.message}</Text>
             </View>
             <Text style={[Typography.text4, Typography.textEnd]}>
               {timeAgo(item.created_at)}
@@ -204,38 +175,43 @@ const ChatScreen: React.FC = () => {
           <GoBack />
         </View>
         <View style={styles.userMessage}>
-          <View style={Typography.flex}>
-            <Image
-              source={{
-                uri: messages[0]?.info?.avatar_url || default_avatar,
-              }}
-              style={styles.profileImg}
-            />
-            <View>
-              <Text
-                style={[Typography.h3, Typography.mb0, Typography.mt3]}>
-                {getUserInfo.user_display_name}
-              </Text>
-              <Text style={Typography.text4}>Active Now</Text>
+          {recipient && (
+            <View style={Typography.flex}>
+              <Image
+                source={{
+                  uri: recipient.avatar_url || default_avatar,
+                }}
+                style={styles.profileImg}
+              />
+              <View>
+                <Text style={[Typography.h3, Typography.mb0, Typography.mt3]}>
+                  {recipient.user_display_name}
+                </Text>
+                <Text style={Typography.text4}>
+                  {recipient.online ? 'Active Now' : 'Offline'}
+                </Text>
+              </View>
             </View>
-          </View>
+          )}
         </View>
       </View>
-      <KeyboardAwareScrollView contentContainerStyle={{flex: 1}} extraHeight={100}>
-        <View style={{flex: 1, paddingHorizontal:20, paddingBottom: 20}}> 
-          {messages && ( 
-                <ScrollView
-                  style={styles.scrollView}
-                  ref={scrollViewRef}
-                  onContentSizeChange={scrollToBottom}>
-                  <FlatList
-                    style={styles.listInvert}
-                    scrollEnabled={false}
-                    data={messages}
-                    renderItem={renderItem}
-                    keyExtractor={(item, index) => index.toString()}
-                  />
-                </ScrollView>  
+      <KeyboardAwareScrollView
+        contentContainerStyle={{flex: 1}}
+        extraHeight={100}>
+        <View style={{flex: 1, paddingHorizontal: 20, paddingBottom: 20}}>
+          {messages[0] && (
+            <ScrollView
+              style={styles.scrollView}
+              ref={scrollViewRef}
+              onContentSizeChange={scrollToBottom}>
+              <FlatList
+                style={styles.listInvert}
+                scrollEnabled={false}
+                data={messages}
+                renderItem={renderItem}
+                keyExtractor={(item, index) => index.toString()}
+              />
+            </ScrollView>
           )}
         </View>
         <View style={styles.inputContainer}>
@@ -263,7 +239,7 @@ const styles = StyleSheet.create({
   userMessage: {
     position: 'relative',
     zIndex: 100,
-    left: 50,
+    left: 60,
     top: 15,
   },
   listInvert: {
