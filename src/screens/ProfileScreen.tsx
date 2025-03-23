@@ -1,7 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
+  FlatList,
   Image,
+  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -11,7 +13,7 @@ import {
 import {useRoute, RouteProp} from '@react-navigation/native';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {Button, Text, TextInput, View} from '../components/Themed';
+import {Button, Text, View} from '../components/Themed';
 import ModalFull from '../components/ModalFull';
 import ProfileNav from '../components/ProfileNav';
 import Typography from '../constants/Typography';
@@ -21,11 +23,8 @@ import LocationIcon from '../constants/icons/LocationIcon';
 import HBars from '../constants/icons/HBarIcon';
 import IconSvg from '../components/IconsSvg';
 import VBarIcon from '../constants/icons/VBarIcon';
-import {useAuth} from '../context/AuthContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import RestApiServer from '../constants/RestApiServer';
 import {slugText} from '../constants/Helper';
-import {launchImageLibrary} from 'react-native-image-picker';
 import {RootAppStackParamList} from '../types/types';
 import AddIcon from '../constants/icons/AddIcon';
 import GraphArrowIcon from '../constants/icons/GraphArrowIcon';
@@ -34,15 +33,19 @@ import GraphIcon from '../constants/icons/GraphIcon';
 import FollowIcon from '../constants/icons/FollowIcon';
 import {SITE_ROOT} from '../../global';
 import MinusIcon from '../constants/icons/MinusIcon';
+import {useAuth} from '../context/AuthContext';
+import ModalListing from '../components/ModalListing';
 
 type ProfileScreenProp = NativeStackNavigationProp<RootAppStackParamList>;
 
-const ALLOWED_FILE_TYPES = ['jpg', 'jpeg', 'png', 'gif'];
-interface ImageAsset {
-  uri: string;
-  type: string;
-  fileName: string;
-  extension: string;
+type RootStackParamList = {
+  Profile: {item?: string};
+};
+
+interface CollectItem {
+  song_id: string;
+  image: string;
+  title: string;
 }
 
 interface DataItem {
@@ -56,39 +59,47 @@ interface DataItem {
   followers: number;
   following: number;
 }
-type RootStackParamList = {
-  Profile: {item?: string};
-};
 
-const ProfileScreen: React.FC = () => {
+interface ProfileProps {
+  nav: {
+    navigate: (
+      screenName: string,
+      params?: {
+        allow: boolean;
+        item?: string;
+        filter?: string;
+        redirect?: string;
+      },
+    ) => void;
+  };
+}
+const ProfileScreen: React.FC<ProfileProps> = ({nav}) => {
   const route = useRoute<RouteProp<RootStackParamList, 'Profile'>>();
   const navigation = useNavigation<ProfileScreenProp>();
   const routes = route.params;
-  const {userInfo, setLogout, setProfile, userToken} = useAuth();
+  const {userInfo, userToken} = useAuth();
   const [showProfile, setShowProfile] = useState<DataItem>();
   const [loading, setLoading] = useState(true);
   const [isFollowers, setIsFollowers] = useState(false);
   const [addFollow, setAddFollow] = useState(0);
-  const [groupBy, setGroupBy] = useState(0);
+  const [groupBy, setGroupBy] = useState('game');
   const [totalRated, setTotalRated] = useState(0);
   const [score, setScore] = useState(0);
-  const [accuracy, setAccuracy] = useState('');
+  const [accuracy, setAccuracy] = useState();
+  const [likes, setLikes] = useState<CollectItem[]>([]);
+  const [playlist, setPlaylist] = useState<CollectItem[]>([]);
   const [ranking, setRanking] = useState(0);
   const [modalLevelVisible, setModalLevelVisible] = useState(false);
   const [modalBadgesVisible, setModalBadgesVisible] = useState(false);
-  const [modalEditVisible, setModalEditVisible] = useState(false);
-  const [displayName, setDisplayName] = useState('');
-  const [password, setPassword] = useState('');
-  const [successProfileMessage, setSuccessProfileMessage] = useState('');
-  const [failedProfileMessage, setFailedProfileMessage] = useState('');
-  const [selectedImage, setSelectedImage] = useState<ImageAsset | null>(null);
+  const [modalPlaylistVisible, setModalPlaylistVisible] = useState(false);
+  const [modalLikesVisible, setModalLikesVisible] = useState(false);
   const getUserInfo =
     typeof userInfo === 'string' ? JSON.parse(userInfo) : null;
   const user_id = routes && routes.item ? routes.item : getUserInfo.id;
   const default_avatar = `${SITE_ROOT}uploads/2024/07/default_avatar.jpg`;
 
-  const handleSelection = (value: number) => {
-    setGroupBy(value);
+  const handleSelection = (type: string) => {
+    setGroupBy(type);
   };
 
   // Go to Messages
@@ -188,59 +199,21 @@ const ProfileScreen: React.FC = () => {
     },
   };
 
-  const pickImage = async () => {
-    launchImageLibrary({mediaType: 'photo', quality: 1}, response => {
-      if (response.assets && response.assets.length > 0) {
-        const image = response.assets[0];
-        if (!image.uri || !image.type || !image.fileName) {
-          setFailedProfileMessage('Invalid image file. Please try again.');
-          return;
-        }
-
-        // Extract file extension
-        const extension = image.fileName.split('.').pop()?.toLowerCase();
-
-        if (!extension || !ALLOWED_FILE_TYPES.includes(extension)) {
-          setFailedProfileMessage(
-            'Invalid image file. Please select a JPG, PNG, or GIF file.',
-          );
-          return;
-        }
-
-        setSelectedImage({
-          uri: image.uri,
-          type: image.type,
-          fileName: image.fileName,
-          extension,
-        });
-      }
+  const handlePlayerScreen = ($item: string) => {
+    nav.navigate('PlayerRating', {
+      allow: false,
+      item: $item,
+      filter: 'track',
+      redirect: 'Charts',
     });
   };
 
-  const editProfile = () => {
-    setSuccessProfileMessage('');
-    setFailedProfileMessage('');
-    setModalEditVisible(true);
+  const handleMorePlaylist = () => {
+    setModalPlaylistVisible(true);
   };
 
-  const updateProfile = async () => {
-    if (selectedImage) {
-      setSuccessProfileMessage('');
-      setFailedProfileMessage('');
-      setProfile(user_id, displayName, password, selectedImage.uri);
-      const userDataJson = await AsyncStorage.getItem('userInfo');
-      if (showProfile && userDataJson) {
-        const userData = JSON.parse(userDataJson);
-        showProfile.user_display_name = userData.user_display_name;
-        showProfile.avatar_url = userData.avatar;
-        setShowProfile(showProfile);
-        setSuccessProfileMessage('Profile has been updated.');
-      } else {
-        setFailedProfileMessage('Profile failed to updated.');
-      }
-    } else {
-      setFailedProfileMessage('Profile failed to updated.');
-    }
+  const handleMoreLikes = () => {
+    setModalLikesVisible(true);
   };
 
   useEffect(() => {
@@ -252,6 +225,40 @@ const ProfileScreen: React.FC = () => {
             getUserInfo.id,
             userToken,
           );
+          const likesData = await RestApiServer.fetchLikes(
+            getUserInfo.id,
+            userToken,
+          );
+          if (likesData && typeof likesData === 'object') {
+            const likesArray = Object.keys(likesData).map(key => {
+              const item = likesData[key];
+              return {
+                song_id: item.song_id,
+                image: item.image,
+                title: item.title,
+              };
+            });
+            setLikes(likesArray);
+          } else {
+            setLikes([]); // Set empty array if no data
+          }
+          const playlistData = await RestApiServer.fetchPlaylist(
+            getUserInfo.id,
+            userToken,
+          );
+          if (playlistData && typeof playlistData === 'object') {
+            const playlistArray = Object.keys(playlistData).map(key => {
+              const item = playlistData[key];
+              return {
+                song_id: item.song_id,
+                image: item.image,
+                title: item.title,
+              };
+            });
+            setPlaylist(playlistArray);
+          } else {
+            setPlaylist([]); // Set empty array if no data
+          }
           if (responds) {
             if (getUserInfo.id !== user_id) {
               if (responds.is_following > 0) {
@@ -261,7 +268,7 @@ const ProfileScreen: React.FC = () => {
             setAddFollow(responds.followers);
             setShowProfile(responds);
             setTotalRated(responds.votes);
-            setDisplayName(responds.user_display_name);
+            // setDisplayName(responds.user_display_name);
             setScore(responds.score);
             setAccuracy(responds.accuracy);
             setRanking(responds.rank);
@@ -273,7 +280,7 @@ const ProfileScreen: React.FC = () => {
       }
     };
     fetchData();
-  }, [showProfile?.id]);
+  }, [showProfile?.id, userInfo]);
 
   if (loading) {
     return (
@@ -337,27 +344,6 @@ const ProfileScreen: React.FC = () => {
                     )}
                   </View>
                   <View style={Typography.flex}>
-                    {showProfile.id === Number(getUserInfo.id) && (
-                      <>
-                        <TouchableOpacity onPress={editProfile}>
-                          <Text style={(Typography.text4, Typography.bold)}>
-                            EDIT
-                          </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={setLogout}>
-                          <Text
-                            style={[
-                              Typography.ms15,
-                              Typography.text4,
-                              Typography.bold,
-                            ]}>
-                            LOGOUT
-                          </Text>
-                        </TouchableOpacity>
-                      </>
-                    )}
-                  </View>
-                  <View style={Typography.flex}>
                     <TouchableOpacity
                       onPress={() => setModalBadgesVisible(true)}>
                       <Image
@@ -412,7 +398,7 @@ const ProfileScreen: React.FC = () => {
                   </View>
                 )}
                 <View>
-                  {groupBy === 0 ? (
+                  {groupBy === 'game' ? (
                     <View>
                       <Text style={[Typography.h2, Typography.semibold]}>
                         Stats
@@ -514,21 +500,85 @@ const ProfileScreen: React.FC = () => {
                     </View>
                   ) : (
                     <View>
-                      <Text style={[Typography.h2, Typography.semibold]}>
-                        Playlists
-                      </Text>
-                      <View style={Typography.card}>
-                        <Text style={[Typography.text4, Typography.sizeSm]}>
-                          Best Pop
+                      <View style={Typography.flexAroundStart}>
+                        <Text style={[Typography.h2, Typography.semibold]}>
+                          Playlists
+                        </Text>
+                        <Text
+                          style={[Typography.muted]}
+                          onPress={handleMorePlaylist}>
+                          View More {'>'}
                         </Text>
                       </View>
-                      <Text style={[Typography.h2, Typography.semibold]}>
-                        Saved Stations
-                      </Text>
                       <View style={Typography.card}>
-                        <Text style={[Typography.text4, Typography.sizeSm]}>
-                          Close New Country
+                        <FlatList
+                          data={playlist.slice(0, 3)}
+                          scrollEnabled={false}
+                          keyExtractor={(_item, index) => index.toString()}
+                          renderItem={({item, index}) => {
+                            return (
+                              <Pressable
+                                key={index}
+                                style={[Typography.flex, Typography.my]}
+                                onPress={() =>
+                                  handlePlayerScreen(item.song_id)
+                                }>
+                                <Image
+                                  source={{uri: item.image}}
+                                  style={styles.gridImage}
+                                />
+                                <Text
+                                  style={[
+                                    Typography.text,
+                                    Typography.size,
+                                    Typography.bold,
+                                  ]}>
+                                  {item.title} {item.song_id}
+                                </Text>
+                              </Pressable>
+                            );
+                          }}
+                        />
+                      </View>
+                      <View style={Typography.flexAroundStart}>
+                        <Text style={[Typography.h2, Typography.semibold]}>
+                          Likes
                         </Text>
+                        <Text
+                          style={[Typography.muted]}
+                          onPress={handleMoreLikes}>
+                          View More {'>'}
+                        </Text>
+                      </View>
+                      <View style={Typography.card}>
+                        <FlatList
+                          data={likes.slice(0, 3)}
+                          scrollEnabled={false}
+                          keyExtractor={(_item, index) => index.toString()}
+                          renderItem={({item, index}) => {
+                            return (
+                              <Pressable
+                                key={index}
+                                style={[Typography.flex, Typography.my]}
+                                onPress={() =>
+                                  handlePlayerScreen(item.song_id)
+                                }>
+                                <Image
+                                  source={{uri: item.image}}
+                                  style={styles.gridImage}
+                                />
+                                <Text
+                                  style={[
+                                    Typography.text,
+                                    Typography.size,
+                                    Typography.bold,
+                                  ]}>
+                                  {item.title} {item.song_id}
+                                </Text>
+                              </Pressable>
+                            );
+                          }}
+                        />
                       </View>
                     </View>
                   )}
@@ -539,22 +589,22 @@ const ProfileScreen: React.FC = () => {
                 <View style={styles.buttonWrapper}>
                   <Button
                     style={
-                      groupBy === 0
+                      groupBy === 'game'
                         ? [Typography.button, styles.button]
                         : [Typography.tab, styles.button]
                     }
-                    onPress={() => handleSelection(0)}
+                    onPress={() => handleSelection('game')}
                     label="Game"
                   />
                 </View>
                 <View style={styles.buttonWrapper}>
                   <Button
                     style={
-                      groupBy === 1
+                      groupBy === 'playlist'
                         ? [Typography.button, styles.button]
                         : [Typography.tab, styles.button]
                     }
-                    onPress={() => handleSelection(1)}
+                    onPress={() => handleSelection('playlist')}
                     label="Music"
                   />
                 </View>
@@ -713,60 +763,22 @@ const ProfileScreen: React.FC = () => {
                   })}
                 </View>
               </ModalFull>
-              <ModalFull
-                isVisible={modalEditVisible}
-                onClose={() => setModalEditVisible(false)}>
-                <View>
-                  <Text
-                    style={[
-                      Typography.size2,
-                      Typography.textCenter,
-                      Typography.mb,
-                    ]}>
-                    Update Profile
-                  </Text>
-                  <HBars style={Typography.mb} />
-                  <Text style={modal.label}>Change Display Name</Text>
-                  <TextInput
-                    placeholder="Display Name"
-                    value={displayName}
-                    onChangeText={text => setDisplayName(text)}
-                  />
-                  <Text style={modal.label}>Change Password</Text>
-                  <TextInput
-                    placeholder="Password"
-                    value={password}
-                    onChangeText={text => setPassword(text)}
-                  />
-                  <Text style={modal.label}>Change Bio Image</Text>
-                  <View>
-                    <Button
-                      style={[Typography.button, uploadStyle.button]}
-                      label="Upload Image"
-                      onPress={pickImage}
-                    />
-                    {selectedImage && (
-                      <Image
-                        source={{uri: selectedImage.uri}}
-                        style={uploadStyle.image}
-                      />
-                    )}
-                  </View>
-                  {successProfileMessage && (
-                    <Text style={modal.alertSuccess}>
-                      {successProfileMessage}
-                    </Text>
-                  )}
-                  {failedProfileMessage && (
-                    <Text style={modal.alertFail}>{failedProfileMessage}</Text>
-                  )}
-                  <Button
-                    style={[Typography.button, modal.buttonModalContainer]}
-                    label="Update Profile"
-                    onPress={updateProfile}
-                  />
-                </View>
-              </ModalFull>
+
+              <ModalListing
+                data={playlist}
+                navigation={navigation}
+                title="SAVED PLAYLIST"
+                isVisible={modalPlaylistVisible}
+                onClose={() => setModalPlaylistVisible(false)}
+              />
+
+              <ModalListing
+                data={likes}
+                navigation={navigation}
+                title="LIKES"
+                isVisible={modalLikesVisible}
+                onClose={() => setModalLikesVisible(false)}
+              />
             </View>
           </ScrollView>
         </SafeAreaView>
@@ -884,8 +896,8 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     marginRight: 10,
     borderRadius: 8,
-    width: 56,
-    height: 56,
+    width: 50,
+    height: 50,
   },
   badgeText: {
     fontSize: 14,
@@ -899,58 +911,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 300,
     color: '#FDF15D',
-  },
-});
-
-const modal = StyleSheet.create({
-  label: {
-    fontSize: 15,
-    fontWeight: 400,
-    marginBottom: 7,
-  },
-  buttonModalContainer: {
-    marginVertical: 0,
-  },
-  alertSuccess: {
-    marginBottom: 20,
-    padding: 10,
-    fontSize: 15,
-    backgroundColor: 'rgba(0, 148, 15, 0.6)',
-    color: '#ffffff',
-    borderRadius: 16,
-    textAlign: 'center',
-    width: '100%',
-  },
-  alertFail: {
-    marginBottom: 20,
-    padding: 10,
-    fontSize: 15,
-    backgroundColor: '#f8d7da', // Light red background
-    color: '#ffffff', // Dark red text
-    borderRadius: 16,
-    textAlign: 'center',
-    width: '100%',
-  },
-});
-
-const uploadStyle = StyleSheet.create({
-  image: {
-    width: 200,
-    height: 200,
-    marginBottom: 20,
-    borderWidth: 2,
-    borderColor: '#303030',
-  },
-  button: {
-    marginBottom: 20,
-    backgroundColor: 'rgba(0, 165, 243, 0.05)',
-    borderWidth: 2,
-    borderColor: '#1277a5',
-    borderStyle: 'dashed',
-  },
-  message: {
-    marginTop: 10,
-    color: 'blue',
   },
 });
 
