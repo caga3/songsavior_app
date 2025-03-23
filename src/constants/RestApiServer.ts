@@ -1,8 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {BASE_URL} from '../../global';
+import {Platform} from 'react-native';
 
 const endpoints = {
-  auth: '/jwt-auth/v1/token',
+  //auth: '/jwt-auth/v1/token',
+  auth: '/wp-login/v1/login',
   register: '/wp-register/v1/register',
   converations: '/messaging/v1/conversations',
   // create_converations: '/messaging/v1/conversations/create',
@@ -51,8 +53,6 @@ const makeApiRequest = async (
   try {
     const response = await fetch(`${BASE_URL}${endpointKey}`, requestOptions);
     const messageOut = await response.json();
-
-    //console.log(messageOut);
     if (messageOut.code === 'jwt_auth_invalid_token') {
       await AsyncStorage.removeItem('userToken');
       await AsyncStorage.removeItem('userInfo');
@@ -91,30 +91,79 @@ const updateProfile = async (
   $userId: number,
   $display_name: string,
   $password: string,
-  $file: string,
+  $image: any,
   token: string,
 ) => {
   const dataForm = new FormData();
-  dataForm.append('uid', $userId);
+  dataForm.append('uid', $userId.toString());
   dataForm.append('display_name', $display_name);
   dataForm.append('password', $password);
-  if ($file) {
-    const fileExtension = $file.match(/\.([a-zA-Z0-9]+)$/);
-    const filename = fileExtension
-      ? `upload_${$userId}.${fileExtension[1]}`
-      : `upload_${$userId}.jpg`;
-    dataForm.append('file', {
-      uri: $file,
-      type: ['image/png', 'image/jpg', 'image/gif', 'image/jpeg'],
-      name: filename,
-    });
+
+  dataForm.append('file', {
+    uri: Platform.OS === 'ios' ? $image.uri.replace('file://', '') : $image.uri,
+    name: $image.fileName,
+    type: $image.type || 'image/jpeg',
+  });
+  console.log(dataForm);
+
+  try {
+    const response = await fetch(
+      `https://www.songsavior.com/wp-json/profile/v1/update`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+          'Content-Type': 'multipart/form-data',
+        },
+        body: dataForm,
+      },
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Image uploaded successfully:', data);
+    } else {
+      const error = await response.text(); // Log server-side error
+      console.error('Server Error:', error);
+    }
+  } catch (err) {
+    console.error('Network Error:', err); // Improved error logging
   }
-  return await makeApiRequest(
-    'POST',
-    endpoints.profile_update,
-    dataForm,
-    token,
-  );
+
+  // console.log($image);
+  // if ($image && $image.uri) {
+  //   const fileExtension = $image.fileName?.split('.').pop() || 'jpg';
+  //   const filename = fileExtension
+  //     ? `user_profile_${$userId}.${fileExtension[1]}`
+  //     : `user_profile_${$userId}.jpg`;
+  //   dataForm.append('file', {
+  //     uri: $image.uri.startsWith('file://')
+  //       ? $image.uri
+  //       : `file://${$image.uri}`,
+  //     type: $image.type || 'image/jpeg',
+  //     name: filename,
+  //   });
+  // }
+  // console.log(dataForm);
+
+  // try {
+  //   const response = await fetch(endpoints.profile_update, {
+  //     method: 'POST',
+  //     body: dataForm,
+  //     headers: {
+  //       Authorization: `Bearer ${token}`,
+  //     },
+  //   });
+
+  //   const responseData = await response.json();
+  //   console.log('Server Response:', responseData);
+
+  //   return response.ok;
+  // } catch (error) {
+  //   console.error('Network error:', error);
+  //   return false;
+  // }
 };
 
 // Function to get a conversations
@@ -150,19 +199,6 @@ const filterConversations = async (
 //     token,
 //   );
 // };
-
-// Function to get a messages
-const fetchMessagesConversation = async (
-  conversation_id: number,
-  token: string,
-) => {
-  return await makeApiRequest(
-    'GET',
-    endpoints.messages_conversation + '?conversation_id=' + conversation_id,
-    null,
-    token,
-  );
-};
 
 // Function to get a messages
 const fetchMessages = async (
@@ -260,23 +296,29 @@ const toggleFollow = async (
   return await makeApiRequest('POST', endpoints.follow, dataForm, token);
 };
 
-const fetchLikes = async (song_id: string, user_id: number, token: string) => {
+const fetchLikes = async (user_id: number, token: string, song_id?: number) => {
   return await makeApiRequest(
     'GET',
-    endpoints.likes + '?song_id=' + song_id + '&user_id=' + user_id,
+    endpoints.likes +
+      '?user_id=' +
+      user_id +
+      (song_id ? '&song_id=' + song_id : ''),
     null,
     token,
   );
 };
 
 const fetchPlaylist = async (
-  song_id: string,
   user_id: number,
   token: string,
+  song_id?: number,
 ) => {
   return await makeApiRequest(
     'GET',
-    endpoints.likes + '?song_id=' + song_id + '&user_id=' + user_id,
+    endpoints.playlist +
+      '?user_id=' +
+      user_id +
+      (song_id ? '&song_id=' + song_id : ''),
     null,
     token,
   );
@@ -293,7 +335,7 @@ const fetchVotes = async (user_id: number, token: string) => {
 };
 // Function to get a vote
 const fetchVoteById = async (
-  songId: string,
+  songId: number,
   user_id: number,
   token: string,
 ) => {
@@ -365,8 +407,6 @@ export default {
   callRegister,
   fetchConversations,
   filterConversations,
-  //createConversation,
-  fetchMessagesConversation,
   fetchMessages,
   sendMessages,
   sendVote,

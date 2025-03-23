@@ -16,12 +16,14 @@ interface AuthContextType {
   userInfo: {};
   setLogIn: (username: string, password: string) => void;
   setLogout: () => void;
+
   setProfile: (
     user_id: number,
     display_name: string,
     password: string,
-    file: string,
-  ) => void;
+    image: any,
+  ) => Promise<boolean>;
+
   setRegister: (
     username: string,
     fullname: string,
@@ -37,7 +39,7 @@ const initialContext: AuthContextType = {
   setLogIn: () => {},
   setLogout: () => {},
   setRegister: () => {},
-  setProfile: () => {},
+  setProfile: async () => false,
 };
 
 const AuthContext = createContext<AuthContextType>(initialContext);
@@ -76,18 +78,21 @@ export const AuthProvider = ({children}: PropsWithChildren) => {
     user_id: number,
     display_name: string,
     password: string,
-    file: string,
-  ) => {
+    image: any,
+  ): Promise<boolean> => {
     const userData = await RestApiServer.updateProfile(
       user_id,
       display_name,
       password,
-      file,
+      image,
       userToken,
     );
-    if (userData && userData.id) {
+    if (userData) {
       await AsyncStorage.setItem('userInfo', JSON.stringify(userData));
       setUserInfo(JSON.stringify(userData));
+      return true;
+    } else {
+      return false;
     }
   };
 
@@ -147,6 +152,8 @@ export const AuthProvider = ({children}: PropsWithChildren) => {
       }
       if (userData) {
         setUserInfo(userData);
+      } else {
+        setLogout();
       }
     } catch (e) {
       Alert.alert('Error', `Enable to validate your account ${e}`);

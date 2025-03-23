@@ -5,7 +5,6 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootAppStackParamList} from '../types/types';
 import {Button, Text, TextInput, View} from '../components/Themed';
 import {useAuth} from '../context/AuthContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import HBars from '../constants/icons/HBarIcon';
 import IconSvg from './IconsSvg';
 import Typography from '../constants/Typography';
@@ -15,24 +14,11 @@ import ModalFull from './ModalFull';
 interface ProfileProp {
   show?: boolean;
 }
-
 interface ImageAsset {
   uri: string;
   type: string;
   fileName: string;
   extension: string;
-}
-
-interface DataItem {
-  id: number;
-  city: string;
-  country: string;
-  user_level: string;
-  user_badges: string;
-  avatar_url: string;
-  user_display_name: string;
-  followers: number;
-  following: number;
 }
 
 type ProfileScreenProp = NativeStackNavigationProp<RootAppStackParamList>;
@@ -41,10 +27,9 @@ const ALLOWED_FILE_TYPES = ['jpg', 'jpeg', 'png', 'gif'];
 
 const ProfileNav: React.FC<ProfileProp> = ({show = true}) => {
   const navigation = useNavigation<ProfileScreenProp>();
-  const {userInfo, setLogout, setProfile, userToken} = useAuth();
+  const {userInfo, setLogout, setProfile} = useAuth();
 
   const [password, setPassword] = useState('');
-  const [showProfile, setShowProfile] = useState<DataItem>();
   const [displayName, setDisplayName] = useState('');
   const [successProfileMessage, setSuccessProfileMessage] = useState('');
   const [failedProfileMessage, setFailedProfileMessage] = useState('');
@@ -62,51 +47,51 @@ const ProfileNav: React.FC<ProfileProp> = ({show = true}) => {
   };
 
   const editProfile = () => {
+    setSelectedImage(null);
     setSuccessProfileMessage('');
     setFailedProfileMessage('');
     setModalEditVisible(true);
   };
 
   const updateProfile = async () => {
-    console.log(selectedImage);
-    if (selectedImage) {
-      setSuccessProfileMessage('');
-      setFailedProfileMessage('');
-      setProfile(getUserInfo.id, displayName, password, selectedImage.uri);
-      const userDataJson = await AsyncStorage.getItem('userInfo');
-      if (showProfile && userDataJson) {
-        const userData = JSON.parse(userDataJson);
-        showProfile.user_display_name = userData.user_display_name;
-        showProfile.avatar_url = userData.avatar;
-        setShowProfile(showProfile);
-        setSuccessProfileMessage('Profile has been updated.');
-      } else {
-        setFailedProfileMessage('Profile failed to updated.');
-      }
+    setSuccessProfileMessage('');
+    setFailedProfileMessage('');
+    // Push Updates
+    const responds = await setProfile(
+      getUserInfo.id,
+      displayName,
+      password,
+      selectedImage,
+    );
+    setDisplayName('');
+    setPassword('');
+    if (responds) {
+      setSuccessProfileMessage('Profile has been updated.');
     } else {
-      setFailedProfileMessage('Profile failed to updated.');
+      setFailedProfileMessage('Profile failed to update.');
     }
   };
 
   const pickImage = async () => {
     launchImageLibrary({mediaType: 'photo', quality: 1}, response => {
-      if (response.assets && response.assets.length > 0) {
+      if (response.didCancel || response.errorMessage) {
+        setSelectedImage(null);
+        return;
+      } else if (response.assets && response.assets.length > 0) {
         const image = response.assets[0];
         if (!image.uri || !image.type || !image.fileName) {
           setFailedProfileMessage('Invalid image file. Please try again.');
+          setSelectedImage(null);
           return;
         }
-
         // Extract file extension
         const extension = image.fileName.split('.').pop()?.toLowerCase();
-
         if (!extension || !ALLOWED_FILE_TYPES.includes(extension)) {
           setFailedProfileMessage(
             'Invalid image file. Please select a JPG, PNG, or GIF file.',
           );
           return;
         }
-
         setSelectedImage({
           uri: image.uri,
           type: image.type,
@@ -156,11 +141,7 @@ const ProfileNav: React.FC<ProfileProp> = ({show = true}) => {
           <Text style={modal.label}>Display Name</Text>
           <TextInput
             placeholder="Display Name"
-            value={
-              getUserInfo && getUserInfo.user_display_name
-                ? getUserInfo.user_display_name
-                : ''
-            }
+            value={displayName}
             onChangeText={text => setDisplayName(text)}
           />
           <Text style={modal.label}>Password</Text>
@@ -261,7 +242,7 @@ const modal = StyleSheet.create({
     padding: 10,
     fontSize: 15,
     backgroundColor: '#f8d7da', // Light red background
-    color: '#ffffff', // Dark red text
+    color: '#000000', // Dark red text
     borderRadius: 16,
     textAlign: 'center',
     width: '100%',

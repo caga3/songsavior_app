@@ -118,10 +118,8 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
     try {
       if (item) {
         let playerData = [];
-        let playerId = '';
-        let playerKey = '';
+        let playerId = 0;
         const tokenData = await AsyncStorage.getItem('userToken');
-        //console.log(tokenData);
         if (filter === 'genres') {
           //     // playerData = await SevenDigitalService.searchRandomTrackByCategory(
           //     //   item,
@@ -158,21 +156,21 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
             setVoteData(votedOnSong);
           }
           const likesData = await RestApiServer.fetchLikes(
-            playerKey,
             getUserInfo.id,
             userToken,
+            playerId,
           );
-          if (likesData && likesData.length) {
+          if (likesData && likesData.likes) {
             setIsLikes(1);
           } else {
             setIsLikes(0);
           }
           const playlistData = await RestApiServer.fetchPlaylist(
-            playerKey,
             getUserInfo.id,
             userToken,
+            playerId,
           );
-          if (playlistData && playlistData.length) {
+          if (playlistData && playlistData.list) {
             setToPlaylist(1);
           } else {
             setToPlaylist(0);
@@ -312,7 +310,6 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
         userToken,
       );
       if (msg) {
-        //console.log(msg);
         setHasVoted(true);
         setVoteData(msg);
         setShowScore(true);
