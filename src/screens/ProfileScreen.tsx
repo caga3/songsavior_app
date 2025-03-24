@@ -670,7 +670,7 @@ const ProfileScreen: React.FC<ProfileProps> = ({nav}) => {
                                     Typography.size,
                                     Typography.bold,
                                   ]}>
-                                  {item.user_display_name} {item.online}
+                                  {item.user_display_name}
                                 </Text>
                               </View>
                             );

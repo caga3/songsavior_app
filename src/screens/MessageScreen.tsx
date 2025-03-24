@@ -26,6 +26,7 @@ type FormattedMessage = {
     ID: number;
     avatar_url: string;
     user_display_name: string;
+    online: boolean;
   };
   created_at: string;
 };
@@ -97,12 +98,22 @@ const MessageScreen: React.FC<Props> = ({navigation}) => {
             })
           }>
           <View style={styles.message}>
-            <Image
-              source={{
-                uri: item.recipient.avatar_url || default_avatar,
-              }}
-              style={styles.profileImg}
-            />
+            <View style={Typography.relative}>
+              <Image
+                source={{
+                  uri: item.recipient.avatar_url || default_avatar,
+                }}
+                style={styles.profileImg}
+              />
+              <View
+                style={[
+                  Typography.userState,
+                  item.recipient.online
+                    ? Typography.online
+                    : Typography.offline,
+                ]}
+              />
+            </View>
             <View style={{flex: 1}}>
               <Text style={[Typography.h3, Typography.mb0]}>
                 {item.recipient.user_display_name}

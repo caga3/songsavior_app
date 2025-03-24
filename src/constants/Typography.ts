@@ -316,6 +316,21 @@ const Typography = StyleSheet.create({
   headerWrapper: {
     paddingVertical: 10,
   },
+  userState: {
+    position: 'absolute',
+    bottom: 0,
+    right: 14,
+    borderRadius: 50,
+    borderWidth: 4,
+    width: 16,
+    height: 16,
+  },
+  online: {
+    backgroundColor: '#26A300',
+  },
+  offline: {
+    backgroundColor: '#FF6600',
+  },
 });
 
 export default Typography;

@@ -166,10 +166,14 @@ const ProfileNav: React.FC<ProfileProp> = ({show = true}) => {
             )}
           </View>
           {successProfileMessage && (
-            <Text style={modal.alertSuccess}>{successProfileMessage}</Text>
+            <View style={modal.alertSuccess}>
+              <Text style={modal.alertSuccessTxt}>{successProfileMessage}</Text>
+            </View>
           )}
           {failedProfileMessage && (
-            <Text style={modal.alertFail}>{failedProfileMessage}</Text>
+            <View style={modal.alertFail}>
+              <Text style={modal.alertFailTxt}>{failedProfileMessage}</Text>
+            </View>
           )}
           <Button
             style={[Typography.button, modal.buttonModalContainer]}
@@ -231,22 +235,26 @@ const modal = StyleSheet.create({
   alertSuccess: {
     marginBottom: 20,
     padding: 10,
-    fontSize: 15,
     backgroundColor: 'rgba(0, 148, 15, 0.6)',
-    color: '#ffffff',
     borderRadius: 16,
-    textAlign: 'center',
     width: '100%',
+  },
+  alertSuccessTxt: {
+    fontSize: 15,
+    color: '#ffffff',
+    textAlign: 'center',
   },
   alertFail: {
     marginBottom: 20,
     padding: 10,
-    fontSize: 15,
-    backgroundColor: '#f8d7da', // Light red background
-    color: '#000000', // Dark red text
+    backgroundColor: '#f8d7da',
     borderRadius: 16,
-    textAlign: 'center',
     width: '100%',
+  },
+  alertFailTxt: {
+    fontSize: 15,
+    color: '#000000',
+    textAlign: 'center',
   },
 });
 
