@@ -35,19 +35,32 @@ import {SITE_ROOT} from '../../global';
 import MinusIcon from '../constants/icons/MinusIcon';
 import {useAuth} from '../context/AuthContext';
 import ModalListing from '../components/ModalListing';
+import ModalUsers from '../components/ModalUsers';
+import StarsIcon from '../constants/icons/StarsIcon';
 
 type ProfileScreenProp = NativeStackNavigationProp<RootAppStackParamList>;
 
 type RootStackParamList = {
   Profile: {item?: string};
 };
-
 interface CollectItem {
   song_id: string;
   image: string;
   title: string;
 }
 
+interface RatedItem {
+  song_id: string;
+  vote: number;
+  image: string;
+  title: string;
+}
+interface FollowProp {
+  ID: number;
+  user_display_name: string;
+  avatar_url: string;
+  online: any;
+}
 interface DataItem {
   id: number;
   city: string;
@@ -58,6 +71,8 @@ interface DataItem {
   user_display_name: string;
   followers: number;
   following: number;
+  followings: any;
+  rated: any;
 }
 
 interface ProfileProps {
@@ -73,6 +88,27 @@ interface ProfileProps {
     ) => void;
   };
 }
+
+interface StarsIconProps {
+  rating: number;
+}
+
+const StarRating: React.FC<StarsIconProps> = ({rating}) => {
+  const maxStars = 5;
+  return (
+    <View style={Typography.flex}>
+      {Array.from({length: maxStars}, (_, index) => (
+        <StarsIcon
+          key={index}
+          fill={index < rating ? '#fdf15d' : '#717172'}
+          width="18"
+          height="18"
+        />
+      ))}
+    </View>
+  );
+};
+
 const ProfileScreen: React.FC<ProfileProps> = ({nav}) => {
   const route = useRoute<RouteProp<RootStackParamList, 'Profile'>>();
   const navigation = useNavigation<ProfileScreenProp>();
@@ -88,15 +124,20 @@ const ProfileScreen: React.FC<ProfileProps> = ({nav}) => {
   const [accuracy, setAccuracy] = useState();
   const [likes, setLikes] = useState<CollectItem[]>([]);
   const [playlist, setPlaylist] = useState<CollectItem[]>([]);
+  const [followings, setFollowings] = useState<FollowProp[]>([]);
+  const [rated, setRated] = useState<RatedItem[]>([]);
   const [ranking, setRanking] = useState(0);
   const [modalLevelVisible, setModalLevelVisible] = useState(false);
   const [modalBadgesVisible, setModalBadgesVisible] = useState(false);
   const [modalPlaylistVisible, setModalPlaylistVisible] = useState(false);
   const [modalLikesVisible, setModalLikesVisible] = useState(false);
+  const [modalFollowingVisible, setModalFollowingVisible] = useState(false);
+  const [modalRatedVisible, setModalRatedVisible] = useState(false);
   const getUserInfo =
     typeof userInfo === 'string' ? JSON.parse(userInfo) : null;
   const user_id = routes && routes.item ? routes.item : getUserInfo.id;
   const default_avatar = `${SITE_ROOT}uploads/2024/07/default_avatar.jpg`;
+  const default_song = require('../assets/images/card-image.jpg');
 
   const handleSelection = (type: string) => {
     setGroupBy(type);
@@ -216,6 +257,14 @@ const ProfileScreen: React.FC<ProfileProps> = ({nav}) => {
     setModalLikesVisible(true);
   };
 
+  const handleMoreFollowing = () => {
+    setModalFollowingVisible(true);
+  };
+
+  const handleMoreRated = () => {
+    setModalRatedVisible(true);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -265,6 +314,8 @@ const ProfileScreen: React.FC<ProfileProps> = ({nav}) => {
                 setIsFollowers(true);
               }
             }
+            setRated(responds.rated);
+            setFollowings(responds.followings);
             setAddFollow(responds.followers);
             setShowProfile(responds);
             setTotalRated(responds.votes);
@@ -298,7 +349,7 @@ const ProfileScreen: React.FC<ProfileProps> = ({nav}) => {
     <>
       {showProfile && (
         <SafeAreaView style={{flex: 1}}>
-          <ScrollView contentContainerStyle={{flexGrow: 1}}>
+          <View style={{flexGrow: 1}}>
             <Image
               source={{
                 uri: showProfile.avatar_url || default_avatar,
@@ -366,7 +417,7 @@ const ProfileScreen: React.FC<ProfileProps> = ({nav}) => {
                 </View>
               </View>
             </View>
-            <View style={[{flexGrow: 1}, styles.container]}>
+            <View style={[{flexGrow: 1}]}>
               <ScrollView style={{flex: 1, ...styles.scrollView}}>
                 {showProfile.id !== Number(getUserInfo?.id) && (
                   <View style={[Typography.flexBetween, Typography.mb]}>
@@ -524,7 +575,7 @@ const ProfileScreen: React.FC<ProfileProps> = ({nav}) => {
                                   handlePlayerScreen(item.song_id)
                                 }>
                                 <Image
-                                  source={{uri: item.image}}
+                                  source={{uri: item.image || default_song}}
                                   style={styles.gridImage}
                                 />
                                 <Text
@@ -533,13 +584,100 @@ const ProfileScreen: React.FC<ProfileProps> = ({nav}) => {
                                     Typography.size,
                                     Typography.bold,
                                   ]}>
-                                  {item.title} {item.song_id}
+                                  {item.title}
                                 </Text>
                               </Pressable>
                             );
                           }}
                         />
                       </View>
+
+                      <View style={Typography.flexAroundStart}>
+                        <Text style={[Typography.h2, Typography.semibold]}>
+                          Rated Songs
+                        </Text>
+                        <Text
+                          style={[Typography.muted]}
+                          onPress={handleMoreRated}>
+                          View More {'>'}
+                        </Text>
+                      </View>
+                      <View style={Typography.card}>
+                        <FlatList
+                          data={rated.slice(0, 3)}
+                          scrollEnabled={false}
+                          keyExtractor={(_item, index) => index.toString()}
+                          renderItem={({item, index}) => {
+                            return (
+                              <Pressable
+                                key={index}
+                                style={[Typography.flex, Typography.my]}
+                                onPress={() =>
+                                  handlePlayerScreen(item.song_id)
+                                }>
+                                <Image
+                                  source={{uri: item.image || default_song}}
+                                  style={styles.gridImage}
+                                />
+                                <View style={[Typography.flex, styles.wrap]}>
+                                  <Text
+                                    style={[
+                                      Typography.text,
+                                      Typography.size,
+                                      Typography.bold,
+                                    ]}>
+                                    {item.title}
+                                  </Text>
+                                </View>
+                                <View style={Typography.flex}>
+                                  <StarRating rating={item.vote} />
+                                </View>
+                              </Pressable>
+                            );
+                          }}
+                        />
+                      </View>
+
+                      <View style={Typography.flexAroundStart}>
+                        <Text style={[Typography.h2, Typography.semibold]}>
+                          Following
+                        </Text>
+                        <Text
+                          style={[Typography.muted]}
+                          onPress={handleMoreFollowing}>
+                          View More {'>'}
+                        </Text>
+                      </View>
+                      <View style={Typography.card}>
+                        <FlatList
+                          data={followings.slice(0, 3)}
+                          scrollEnabled={false}
+                          keyExtractor={(_item, index) => index.toString()}
+                          renderItem={({item, index}) => {
+                            return (
+                              <View
+                                key={index}
+                                style={[Typography.flex, Typography.my]}>
+                                <Image
+                                  source={{
+                                    uri: item.avatar_url || default_avatar,
+                                  }}
+                                  style={styles.gridImage}
+                                />
+                                <Text
+                                  style={[
+                                    Typography.text,
+                                    Typography.size,
+                                    Typography.bold,
+                                  ]}>
+                                  {item.user_display_name} {item.online}
+                                </Text>
+                              </View>
+                            );
+                          }}
+                        />
+                      </View>
+
                       <View style={Typography.flexAroundStart}>
                         <Text style={[Typography.h2, Typography.semibold]}>
                           Likes
@@ -564,7 +702,7 @@ const ProfileScreen: React.FC<ProfileProps> = ({nav}) => {
                                   handlePlayerScreen(item.song_id)
                                 }>
                                 <Image
-                                  source={{uri: item.image}}
+                                  source={{uri: item.image || default_song}}
                                   style={styles.gridImage}
                                 />
                                 <Text
@@ -779,8 +917,24 @@ const ProfileScreen: React.FC<ProfileProps> = ({nav}) => {
                 isVisible={modalLikesVisible}
                 onClose={() => setModalLikesVisible(false)}
               />
+
+              <ModalUsers
+                data={followings}
+                title="FOLLOWING"
+                isVisible={modalFollowingVisible}
+                onClose={() => setModalFollowingVisible(false)}
+              />
+
+              <ModalListing
+                data={rated}
+                navigation={navigation}
+                title="RATED SONGS"
+                hasVotes={true}
+                isVisible={modalRatedVisible}
+                onClose={() => setModalRatedVisible(false)}
+              />
             </View>
-          </ScrollView>
+          </View>
         </SafeAreaView>
       )}
     </>
@@ -803,8 +957,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   scrollView: {
+    paddingHorizontal: 20,
     marginTop: 0,
-    marginBottom: -20,
+    marginBottom: 10,
   },
   containerInfo: {
     marginTop: 90,
@@ -911,6 +1066,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 300,
     color: '#FDF15D',
+  },
+  wrap: {
+    width: '56%',
   },
 });
 

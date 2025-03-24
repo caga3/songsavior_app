@@ -144,6 +144,9 @@ const Typography = StyleSheet.create({
   flexHalf: {
     flex: 5,
   },
+  flexWrap: {
+    flexWrap: 'wrap',
+  },
   textCenter: {
     textAlign: 'center',
   },

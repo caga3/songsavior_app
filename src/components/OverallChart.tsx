@@ -157,7 +157,9 @@ const OverallChart: React.FC<Props> = ({nav}) => {
             </View>
           </View>
           <View style={Typography.flexBetween}>
-            <Text style={Typography.tight}>{item.artist}</Text>
+            <Text style={[Typography.tight, styles.artists]}>
+              {item.artist}
+            </Text>
             <View style={Typography.flexBetween}>
               <View style={Typography.flex}>
                 <IconSvg
@@ -238,6 +240,9 @@ const styles = StyleSheet.create({
   groupName: {
     width: '44%',
     paddingRight: 2,
+  },
+  artists: {
+    width: '80%',
   },
   category: {
     borderRadius: 8,

@@ -1,6 +1,6 @@
 {
   "name": "songsaviorapp",
-  "version": "1.08",
+  "version": "1.09",
   "private": true,
   "scripts": {
     "android": "react-native run-android",

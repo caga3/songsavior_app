@@ -87,7 +87,8 @@ export const AuthProvider = ({children}: PropsWithChildren) => {
       image,
       userToken,
     );
-    if (userData) {
+    // console.log('setProfile', userData);
+    if (userData && userData.id) {
       await AsyncStorage.setItem('userInfo', JSON.stringify(userData));
       setUserInfo(JSON.stringify(userData));
       return true;

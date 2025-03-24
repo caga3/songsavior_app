@@ -1,15 +1,11 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {BASE_URL} from '../../global';
 import {Platform} from 'react-native';
 
 const endpoints = {
-  //auth: '/jwt-auth/v1/token',
   auth: '/wp-login/v1/login',
   register: '/wp-register/v1/register',
   converations: '/messaging/v1/conversations',
-  // create_converations: '/messaging/v1/conversations/create',
   messages: '/messaging/v1/messages',
-  //messages_conversation: '/messaging/v1/messages-conversations',
   send_message: '/messaging/v1/messages/send',
   vote_id: '/ratings/v1/votes/id',
   votes: '/ratings/v1/votes',
@@ -53,10 +49,6 @@ const makeApiRequest = async (
   try {
     const response = await fetch(`${BASE_URL}${endpointKey}`, requestOptions);
     const messageOut = await response.json();
-    if (messageOut.code === 'jwt_auth_invalid_token') {
-      await AsyncStorage.removeItem('userToken');
-      await AsyncStorage.removeItem('userInfo');
-    }
     return messageOut;
   } catch (error) {
     console.error('Error fetching rest token:', error);
@@ -94,76 +86,42 @@ const updateProfile = async (
   $image: any,
   token: string,
 ) => {
+  // Create a new FormData instance
   const dataForm = new FormData();
+  // Append user data to FormData
   dataForm.append('uid', $userId.toString());
   dataForm.append('display_name', $display_name);
   dataForm.append('password', $password);
+  // Append image to FormData if available
+  if ($image) {
+    const imageUri =
+      Platform.OS === 'ios'
+        ? $image.uri.replace('file://', '')
+        : $image.uri.replace('file://', 'file=@');
+    const imageType = $image.type || 'image/jpeg';
+    const imageName = $image.fileName;
 
-  dataForm.append('file', {
-    uri: Platform.OS === 'ios' ? $image.uri.replace('file://', '') : $image.uri,
-    name: $image.fileName,
-    type: $image.type || 'image/jpeg',
-  });
-  console.log(dataForm);
-
-  try {
-    const response = await fetch(
-      `https://www.songsavior.com/wp-json/profile/v1/update`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
-          'Content-Type': 'multipart/form-data',
-        },
-        body: dataForm,
-      },
-    );
-
-    if (response.ok) {
-      const data = await response.json();
-      console.log('Image uploaded successfully:', data);
-    } else {
-      const error = await response.text(); // Log server-side error
-      console.error('Server Error:', error);
-    }
-  } catch (err) {
-    console.error('Network Error:', err); // Improved error logging
+    dataForm.append('file', {
+      uri: imageUri,
+      name: imageName,
+      type: imageType,
+    });
   }
 
-  // console.log($image);
-  // if ($image && $image.uri) {
-  //   const fileExtension = $image.fileName?.split('.').pop() || 'jpg';
-  //   const filename = fileExtension
-  //     ? `user_profile_${$userId}.${fileExtension[1]}`
-  //     : `user_profile_${$userId}.jpg`;
-  //   dataForm.append('file', {
-  //     uri: $image.uri.startsWith('file://')
-  //       ? $image.uri
-  //       : `file://${$image.uri}`,
-  //     type: $image.type || 'image/jpeg',
-  //     name: filename,
-  //   });
-  // }
-  // console.log(dataForm);
-
-  // try {
-  //   const response = await fetch(endpoints.profile_update, {
-  //     method: 'POST',
-  //     body: dataForm,
-  //     headers: {
-  //       Authorization: `Bearer ${token}`,
-  //     },
-  //   });
-
-  //   const responseData = await response.json();
-  //   console.log('Server Response:', responseData);
-
-  //   return response.ok;
-  // } catch (error) {
-  //   console.error('Network error:', error);
-  //   return false;
-  // }
+  try {
+    const response = await fetch(`${BASE_URL}${endpoints.profile_update}`, {
+      method: 'POST',
+      body: dataForm,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const messageOut = await response.json();
+    return messageOut;
+  } catch (error) {
+    console.error('Network error:', error);
+    return [];
+  }
 };
 
 // Function to get a conversations

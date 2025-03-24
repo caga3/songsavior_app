@@ -65,6 +65,7 @@ const ProfileNav: React.FC<ProfileProp> = ({show = true}) => {
     );
     setDisplayName('');
     setPassword('');
+    // console.log('PROFILENAV', responds);
     if (responds) {
       setSuccessProfileMessage('Profile has been updated.');
     } else {

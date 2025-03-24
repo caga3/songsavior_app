@@ -3,7 +3,6 @@ import {
   FlatList,
   Image,
   Modal,
-  Pressable,
   SafeAreaView,
   StyleSheet,
   TouchableOpacity,
@@ -12,54 +11,17 @@ import {
 import {Text, View} from './Themed';
 import IconSvg from './IconsSvg';
 import Typography from '../constants/Typography';
-import StarsIcon from '../constants/icons/StarsIcon';
-
-const default_song = require('../assets/images/card-image.jpg');
+import {SITE_ROOT} from '../../global';
 
 interface ModalProp {
   isVisible: boolean;
   data: any;
   title: string;
-  hasVotes?: boolean;
-  navigation: any;
   onClose: () => void;
 }
-interface StarsIconProps {
-  rating: number;
-}
 
-const StarRating: React.FC<StarsIconProps> = ({rating}) => {
-  const maxStars = 5;
-  return (
-    <View style={Typography.flex}>
-      {Array.from({length: maxStars}, (_, index) => (
-        <StarsIcon
-          key={index}
-          fill={index < rating ? '#fdf15d' : '#717172'}
-          width="18"
-          height="18"
-        />
-      ))}
-    </View>
-  );
-};
-
-const ModalListing: React.FC<ModalProp> = ({
-  isVisible,
-  data,
-  title,
-  hasVotes,
-  navigation,
-  onClose,
-}) => {
-  const handlePlayerScreen = ($item: string) => {
-    navigation.navigate('PlayerRating', {
-      allow: false,
-      item: $item,
-      filter: 'track',
-      redirect: 'Charts',
-    });
-  };
+const ModalUsers: React.FC<ModalProp> = ({isVisible, data, title, onClose}) => {
+  const default_avatar = `${SITE_ROOT}/uploads/2024/07/default_avatar.jpg`;
 
   return (
     <Modal
@@ -82,18 +44,32 @@ const ModalListing: React.FC<ModalProp> = ({
             <Text style={[Typography.h3, Typography.textCenter]}>{title}</Text>
           </View>
           <View style={styles.wrapper}>
+            <View style={[styles.tabContainer, Typography.mb]}>
+              <View style={[styles.buttonWrapper]}>
+                <Text style={[Typography.size, Typography.textCenter]}>
+                  Users
+                </Text>
+              </View>
+              <View style={[styles.buttonWrapperMuted]}>
+                <Text
+                  style={[
+                    Typography.size,
+                    Typography.textCenter,
+                    Typography.muted,
+                  ]}>
+                  Artists
+                </Text>
+              </View>
+            </View>
             <FlatList
               data={data}
               scrollEnabled={true}
               keyExtractor={(_item, index) => index.toString()}
               renderItem={({item, index}) => {
                 return (
-                  <Pressable
-                    key={index}
-                    style={[Typography.flex, Typography.mb]}
-                    onPress={() => handlePlayerScreen(item.song_id)}>
+                  <View key={index} style={[Typography.flex, Typography.mb]}>
                     <Image
-                      source={{uri: item.image || default_song}}
+                      source={{uri: item.avatar_url || default_avatar}}
                       style={styles.gridImage}
                     />
                     <View style={styles.wrap}>
@@ -103,15 +79,10 @@ const ModalListing: React.FC<ModalProp> = ({
                           Typography.size,
                           Typography.bold,
                         ]}>
-                        {item.title}
+                        {item.user_display_name} {item.online}
                       </Text>
                     </View>
-                    {hasVotes && item.vote && (
-                      <View style={Typography.flex}>
-                        <StarRating rating={item.vote} />
-                      </View>
-                    )}
-                  </Pressable>
+                  </View>
                 );
               }}
             />
@@ -160,6 +131,29 @@ const styles = StyleSheet.create({
   wrap: {
     width: '56%',
   },
+  tabContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    textAlign: 'center',
+  },
+  buttonWrapper: {
+    flex: 1,
+    margin: 4,
+    justifyContent: 'center',
+    borderRadius: 0,
+    borderColor: '#fdf15d',
+    paddingBottom: 7,
+    borderBottomWidth: 2,
+  },
+  buttonWrapperMuted: {
+    flex: 1,
+    margin: 4,
+    justifyContent: 'center',
+    borderRadius: 0,
+    borderColor: 'transparent',
+    paddingBottom: 7,
+    borderBottomWidth: 2,
+  },
 });
 
-export default ModalListing;
+export default ModalUsers;

@@ -77,6 +77,7 @@ const MessageScreen: React.FC<Props> = ({navigation}) => {
           getUserInfo.id,
           userToken,
         );
+        //console.log(msg);
         if (msg) {
           setConversations(msg);
         }
