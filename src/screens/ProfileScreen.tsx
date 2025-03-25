@@ -44,13 +44,13 @@ type RootStackParamList = {
   Profile: {item?: string};
 };
 interface CollectItem {
-  song_id: string;
+  song_id: number;
   image: string;
   title: string;
 }
 
 interface RatedItem {
-  song_id: string;
+  song_id: number;
   vote: number;
   image: string;
   title: string;
@@ -76,17 +76,15 @@ interface DataItem {
 }
 
 interface ProfileProps {
-  nav: {
-    navigate: (
-      screenName: string,
-      params?: {
-        allow: boolean;
-        item?: string;
-        filter?: string;
-        redirect?: string;
-      },
-    ) => void;
-  };
+  navigate: (
+    screenName: string,
+    params?: {
+      allow: boolean;
+      item?: number;
+      filter?: string;
+      redirect?: string;
+    },
+  ) => void;
 }
 
 interface StarsIconProps {
@@ -109,8 +107,9 @@ const StarRating: React.FC<StarsIconProps> = ({rating}) => {
   );
 };
 
-const ProfileScreen: React.FC<ProfileProps> = ({nav}) => {
+const ProfileScreen: React.FC<ProfileProps> = () => {
   const route = useRoute<RouteProp<RootStackParamList, 'Profile'>>();
+  const nav = useNavigation<ProfileProps>();
   const navigation = useNavigation<ProfileScreenProp>();
   const routes = route.params;
   const {userInfo, userToken} = useAuth();
@@ -240,12 +239,12 @@ const ProfileScreen: React.FC<ProfileProps> = ({nav}) => {
     },
   };
 
-  const handlePlayerScreen = ($item: string) => {
+  const handlePlayerScreen = ($item: number) => {
     nav.navigate('PlayerRating', {
       allow: false,
       item: $item,
       filter: 'track',
-      redirect: 'Charts',
+      redirect: 'Profile',
     });
   };
 

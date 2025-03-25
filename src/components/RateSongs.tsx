@@ -118,7 +118,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
     try {
       if (item) {
         let playerData = [];
-        let playerId = 0;
+        let songId = 0;
         const tokenData = await AsyncStorage.getItem('userToken');
         if (filter === 'genres') {
           //     // playerData = await SevenDigitalService.searchRandomTrackByCategory(
@@ -129,25 +129,26 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
               item,
               tokenData,
             );
-            playerId = playerData.id;
+            songId = playerData.song_id;
           }
         } else if (filter === 'artists') {
-          //     // playerData = await SevenDigitalService.searchRandomTrackByArtist(
-          //     //   tokenObj,
-          //     //   item,
-          //     //   getUserInfo.id,
-          //     //   userToken,
-          //     // );
-          //     // playerId = playerData.id;
+          // playerData = await SevenDigitalService.searchRandomTrackByArtist(
+          //   tokenObj,
+          //   item,
+          //   getUserInfo.id,
+          //   userToken,
+          // );
+          // playerId = playerData.id;
+          //songId = playerData.song_id;
         } else {
           if (tokenData) {
             playerData = await RestApiServer.searchTrack(item, tokenData);
           }
-          playerId = playerData.id;
+          songId = playerData.song_id;
         }
-        if (playerId) {
+        if (songId) {
           const votedOnSong = await RestApiServer.fetchVoteById(
-            playerId,
+            songId,
             getUserInfo.id,
             userToken,
           );
@@ -158,7 +159,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
           const likesData = await RestApiServer.fetchLikes(
             getUserInfo.id,
             userToken,
-            playerId,
+            songId,
           );
           if (likesData && likesData.likes) {
             setIsLikes(1);
@@ -168,7 +169,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
           const playlistData = await RestApiServer.fetchPlaylist(
             getUserInfo.id,
             userToken,
-            playerId,
+            songId,
           );
           if (playlistData && playlistData.list) {
             setToPlaylist(1);
@@ -184,23 +185,9 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
       console.error(error);
     }
   };
-  <svg
-    width="18"
-    height="13"
-    viewBox="0 0 18 13"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg">
-    <path
-      d="M14 6V12M15 1H1H15ZM1 5H10H1ZM7 9H1H7ZM11 9H17H11Z"
-      stroke="white"
-      stroke-width="1.5"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-  </svg>;
 
   const progressBar = (position: number): number => {
-    if (redirect !== 'Charts') {
+    if (redirect !== 'Charts' && redirect !== 'Profile') {
       if (position >= 60 && !isVoteReady) {
         setIsVoteReady(true);
       }
@@ -406,7 +393,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      if (redirect === 'Charts' || !hasVoted) {
+      if (redirect === 'Charts' || redirect === 'Profile' || !hasVoted) {
         setTimeout(() => {
           handlePlay();
         }, 3000);
@@ -439,7 +426,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
       {songPlayer && (
         <View style={styles.container}>
           <View style={styles.cardWraper}>
-            {redirect === 'Charts' ? (
+            {redirect === 'Charts' || redirect === 'Profile' ? (
               <Image
                 source={
                   imageUrl
@@ -460,7 +447,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
             )}
           </View>
 
-          {!hasVoted && redirect !== 'Charts' ? (
+          {!hasVoted && redirect !== 'Charts' && redirect !== 'Profile' ? (
             <View
               style={
                 isVoteReady
@@ -703,13 +690,17 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
               <IconSvg path="M4 12V9C4 8.20435 4.31607 7.44129 4.87868 6.87868C5.44129 6.31607 6.20435 6 7 6H20M20 6L17 3M20 6L17 9M20 12V15C20 15.7956 19.6839 16.5587 19.1213 17.1213C18.5587 17.6839 17.7956 18 17 18H4M4 18L7 21M4 18L7 15" />
             </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.options]} onPress={handlePlaylist}>
-              {toPlaylist ? (
-                <PlaylistMinusIcon stroke="#fdf15d" />
-              ) : (
-                <PlaylistIcon />
-              )}
-            </TouchableOpacity>
+            {hasVoted ? (
+              <TouchableOpacity style={styles.options} onPress={handlePlaylist}>
+                {toPlaylist ? (
+                  <PlaylistMinusIcon stroke="#fdf15d" />
+                ) : (
+                  <PlaylistIcon />
+                )}
+              </TouchableOpacity>
+            ) : (
+              <View style={[styles.options]}>{''}</View>
+            )}
 
             {!disablePlaying ? (
               <TouchableOpacity
@@ -730,7 +721,9 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
             <TouchableOpacity
               style={[
                 styles.options,
-                redirect === 'Charts' ? Typography.hide : '',
+                redirect === 'Charts' || redirect === 'Profile'
+                  ? Typography.hide
+                  : '',
               ]}
               onPress={handleForward}>
               <IconSvg path="M20 5V19M4 5V19L16 12L4 5Z" />

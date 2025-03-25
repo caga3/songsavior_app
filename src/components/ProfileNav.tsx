@@ -15,6 +15,7 @@ interface ProfileProp {
   show?: boolean;
 }
 interface ImageAsset {
+  image: string | undefined;
   uri: string;
   type: string;
   fileName: string;
@@ -56,51 +57,68 @@ const ProfileNav: React.FC<ProfileProp> = ({show = true}) => {
   const updateProfile = async () => {
     setSuccessProfileMessage('');
     setFailedProfileMessage('');
-    // Push Updates
-    const responds = await setProfile(
-      getUserInfo.id,
-      displayName,
-      password,
-      selectedImage,
-    );
-    setDisplayName('');
-    setPassword('');
-    // console.log('PROFILENAV', responds);
-    if (responds) {
-      setSuccessProfileMessage('Profile has been updated.');
+    if (displayName || password || selectedImage) {
+      // Push Updates
+      const responds = await setProfile(
+        getUserInfo.id,
+        displayName,
+        password,
+        selectedImage,
+      );
+      setDisplayName('');
+      setPassword('');
+      // console.log('PROFILENAV', responds);
+      if (responds) {
+        setSuccessProfileMessage('Profile has been updated.');
+      } else {
+        setFailedProfileMessage('Profile failed to update.');
+      }
     } else {
       setFailedProfileMessage('Profile failed to update.');
     }
   };
 
   const pickImage = async () => {
-    launchImageLibrary({mediaType: 'photo', quality: 1}, response => {
-      if (response.didCancel || response.errorMessage) {
-        setSelectedImage(null);
-        return;
-      } else if (response.assets && response.assets.length > 0) {
-        const image = response.assets[0];
-        if (!image.uri || !image.type || !image.fileName) {
-          setFailedProfileMessage('Invalid image file. Please try again.');
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+        quality: 1,
+        includeBase64: true,
+        maxWidth: 600,
+        maxHeight: 600,
+      },
+      response => {
+        if (response.didCancel || response.errorMessage) {
           setSelectedImage(null);
           return;
+        } else if (response.assets && response.assets.length > 0) {
+          const image = response.assets[0];
+          if (!image.uri || !image.type || !image.fileName) {
+            setFailedProfileMessage('Invalid image file. Please try again.');
+            setSelectedImage(null);
+            return;
+          }
+          // Extract file extension
+          const extension = image.fileName.split('.').pop()?.toLowerCase();
+          if (!extension || !ALLOWED_FILE_TYPES.includes(extension)) {
+            setFailedProfileMessage(
+              'Invalid image file. Please select a JPG, PNG, or GIF file.',
+            );
+            return;
+          }
+
+          // The Base64 string is available in `response.assets[0].base64`
+          const base64Image = response.assets[0].base64;
+          setSelectedImage({
+            image: base64Image,
+            uri: image.uri,
+            type: image.type,
+            fileName: image.fileName,
+            extension,
+          });
         }
-        // Extract file extension
-        const extension = image.fileName.split('.').pop()?.toLowerCase();
-        if (!extension || !ALLOWED_FILE_TYPES.includes(extension)) {
-          setFailedProfileMessage(
-            'Invalid image file. Please select a JPG, PNG, or GIF file.',
-          );
-          return;
-        }
-        setSelectedImage({
-          uri: image.uri,
-          type: image.type,
-          fileName: image.fileName,
-          extension,
-        });
-      }
-    });
+      },
+    );
   };
 
   return (

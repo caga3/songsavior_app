@@ -1,5 +1,4 @@
 import {BASE_URL} from '../../global';
-import {Platform} from 'react-native';
 
 const endpoints = {
   auth: '/wp-login/v1/login',
@@ -87,6 +86,9 @@ const updateProfile = async (
   token: string,
 ) => {
   // Create a new FormData instance
+  let $headers: Record<string, string> = {
+    Authorization: `Bearer ${token}`,
+  };
   const dataForm = new FormData();
   // Append user data to FormData
   dataForm.append('uid', $userId.toString());
@@ -94,30 +96,23 @@ const updateProfile = async (
   dataForm.append('password', $password);
   // Append image to FormData if available
   if ($image) {
-    const imageUri =
-      Platform.OS === 'ios'
-        ? $image.uri.replace('file://', '')
-        : $image.uri.replace('file://', 'file=@');
-    const imageType = $image.type || 'image/jpeg';
-    const imageName = $image.fileName;
-
-    dataForm.append('file', {
-      uri: imageUri,
-      name: imageName,
-      type: imageType,
-    });
+    dataForm.append('image', $image.image);
+    dataForm.append('extension', $image.extension);
   }
-
   try {
     const response = await fetch(`${BASE_URL}${endpoints.profile_update}`, {
       method: 'POST',
       body: dataForm,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: $headers,
     });
-    const messageOut = await response.json();
-    return messageOut;
+    if (response.ok) {
+      const messageOut = await response.json();
+      return messageOut;
+    } else {
+      const text = await response.text(); // Read raw response
+      console.log('Server Response:', text);
+      return [];
+    }
   } catch (error) {
     console.error('Network error:', error);
     return [];

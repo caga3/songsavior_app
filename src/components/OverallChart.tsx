@@ -39,7 +39,7 @@ interface Props {
       screenName: string,
       params?: {
         allow: boolean;
-        item?: string;
+        item?: number;
         filter?: string;
         redirect?: string;
       },
@@ -52,7 +52,7 @@ const OverallChart: React.FC<Props> = ({nav}) => {
   const [showChart, setShowChart] = useState<DataItem[]>([]);
   const [filteredChart, setFilteredChart] = useState<DataItem[]>([]);
 
-  const handlePlayerScreen = ($item: string) => {
+  const handlePlayerScreen = ($item: number) => {
     nav.navigate('PlayerRating', {
       allow: false,
       item: $item,
@@ -117,7 +117,7 @@ const OverallChart: React.FC<Props> = ({nav}) => {
   }, []);
 
   const renderItem: ListRenderItem<DataItem> = ({item, index}) => (
-    <Pressable onPress={() => handlePlayerScreen(item.song_id)}>
+    <Pressable onPress={() => handlePlayerScreen(item.id)}>
       <View style={styles.grid}>
         <View style={styles.group}>
           <View style={Typography.flex}>

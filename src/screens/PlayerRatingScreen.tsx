@@ -1,7 +1,10 @@
-import React, {useEffect} from 'react';
+import React, {useCallback} from 'react';
 import {SafeAreaView, ScrollView} from 'react-native';
-import {useWakeLock} from 'react-screen-wake-lock';
-import {RouteProp, useRoute} from '@react-navigation/native';
+import {
+  activateKeepAwake,
+  deactivateKeepAwake,
+} from '@sayem314/react-native-keep-awake';
+import {RouteProp, useFocusEffect, useRoute} from '@react-navigation/native';
 import {Text, View} from '../components/Themed';
 import ProfileNav from '../components/ProfileNav';
 import GoBack from '../components/GoBack';
@@ -16,10 +19,14 @@ type RootStackParamList = {
 const PlayerRatingScreen: React.FC = () => {
   const route = useRoute<RouteProp<RootStackParamList, 'Rating'>>();
   const params = route.params;
-  useWakeLock();
-  useEffect(() => {
-    return () => {};
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      activateKeepAwake();
+      return () => {
+        deactivateKeepAwake();
+      };
+    }, []),
+  );
   return (
     <SafeAreaView>
       <ScrollView>
