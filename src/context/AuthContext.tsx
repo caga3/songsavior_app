@@ -21,6 +21,7 @@ interface AuthContextType {
     user_id: number,
     display_name: string,
     password: string,
+    location: string,
     image: any,
   ) => Promise<boolean>;
 
@@ -78,12 +79,14 @@ export const AuthProvider = ({children}: PropsWithChildren) => {
     user_id: number,
     display_name: string,
     password: string,
+    location: string,
     image: any,
   ): Promise<boolean> => {
     const userData = await RestApiServer.updateProfile(
       user_id,
       display_name,
       password,
+      location,
       image,
       userToken,
     );

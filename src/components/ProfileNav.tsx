@@ -10,6 +10,7 @@ import IconSvg from './IconsSvg';
 import Typography from '../constants/Typography';
 import {launchImageLibrary} from 'react-native-image-picker';
 import ModalFull from './ModalFull';
+import LocationIcon from '../constants/icons/LocationIcon';
 
 interface ProfileProp {
   show?: boolean;
@@ -32,6 +33,7 @@ const ProfileNav: React.FC<ProfileProp> = ({show = true}) => {
 
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [location, setLocation] = useState('');
   const [successProfileMessage, setSuccessProfileMessage] = useState('');
   const [failedProfileMessage, setFailedProfileMessage] = useState('');
   const [selectedImage, setSelectedImage] = useState<ImageAsset | null>(null);
@@ -57,16 +59,18 @@ const ProfileNav: React.FC<ProfileProp> = ({show = true}) => {
   const updateProfile = async () => {
     setSuccessProfileMessage('');
     setFailedProfileMessage('');
-    if (displayName || password || selectedImage) {
+    if (displayName || password || location || selectedImage) {
       // Push Updates
       const responds = await setProfile(
         getUserInfo.id,
         displayName,
         password,
+        location,
         selectedImage,
       );
       setDisplayName('');
       setPassword('');
+      setLocation('');
       // console.log('PROFILENAV', responds);
       if (responds) {
         setSuccessProfileMessage('Profile has been updated.');
@@ -169,6 +173,21 @@ const ProfileNav: React.FC<ProfileProp> = ({show = true}) => {
             value={password}
             onChangeText={text => setPassword(text)}
           />
+          <Text style={modal.label}>Location</Text>
+          <View>
+            <LocationIcon
+              width="20"
+              height="21"
+              stroke="rgba(255,255,255,0.24)"
+              style={modal.leftIcon}
+            />
+            <TextInput
+              style={modal.iconLeftPadding}
+              value={location}
+              placeholder="Ex: Houston, TX"
+              onChangeText={text => setLocation(text)}
+            />
+          </View>
           <Text style={modal.label}>Profile Image</Text>
           <View>
             <Button
@@ -246,6 +265,15 @@ const modal = StyleSheet.create({
     fontSize: 15,
     fontWeight: 400,
     marginBottom: 7,
+  },
+  leftIcon: {
+    position: 'absolute',
+    top: 17,
+    left: 15,
+    pointerEvents: 'none',
+  },
+  iconLeftPadding: {
+    paddingLeft: 45,
   },
   buttonModalContainer: {
     marginVertical: 0,

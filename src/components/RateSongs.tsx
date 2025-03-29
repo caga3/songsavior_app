@@ -127,6 +127,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
           if (tokenData) {
             playerData = await RestApiServer.searchRandomTrackByCategory(
               item,
+              getUserInfo.id,
               tokenData,
             );
             songId = playerData.song_id;

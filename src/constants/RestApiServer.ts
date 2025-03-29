@@ -82,6 +82,7 @@ const updateProfile = async (
   $userId: number,
   $display_name: string,
   $password: string,
+  $location: string,
   $image: any,
   token: string,
 ) => {
@@ -94,6 +95,7 @@ const updateProfile = async (
   dataForm.append('uid', $userId.toString());
   dataForm.append('display_name', $display_name);
   dataForm.append('password', $password);
+  dataForm.append('location', $location);
   // Append image to FormData if available
   if ($image) {
     dataForm.append('image', $image.image);
@@ -337,10 +339,14 @@ const fetchProfileStats = async (
 };
 
 // Function to random song
-const searchRandomTrackByCategory = async (genre: string, token: string) => {
+const searchRandomTrackByCategory = async (
+  genre: string,
+  userId: number,
+  token: string,
+) => {
   return await makeApiRequest(
     'GET',
-    endpoints.songs_random + '?category=' + genre,
+    endpoints.songs_random + '?category=' + genre + '&uid=' + userId,
     null,
     token,
   );

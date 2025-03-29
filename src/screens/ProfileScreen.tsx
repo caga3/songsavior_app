@@ -63,8 +63,7 @@ interface FollowProp {
 }
 interface DataItem {
   id: number;
-  city: string;
-  country: string;
+  location: string;
   user_level: string;
   user_badges: string;
   avatar_url: string;
@@ -381,14 +380,11 @@ const ProfileScreen: React.FC<ProfileProps> = () => {
                       : ''}
                   </Text>
                   <View>
-                    {showProfile.city && (
+                    {showProfile.location && (
                       <View style={Typography.flex}>
                         <LocationIcon />
                         <Text style={[Typography.ms, Typography.text4]}>
-                          {showProfile.city}
-                          {showProfile.country
-                            ? `, ${showProfile.country}`
-                            : ''}
+                          {showProfile.location}
                         </Text>
                       </View>
                     )}
