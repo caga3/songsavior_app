@@ -1,5 +1,4 @@
 import React, {useEffect} from 'react';
-import {Platform} from 'react-native';
 import {enableScreens} from 'react-native-screens';
 import {AuthProvider} from './src/context/AuthContext';
 import AppNav from './src/navigation/AppNav';
@@ -13,15 +12,18 @@ function App() {
     const checkForUpdate = async () => {
       const currentVersion = DeviceInfo.getVersion();
       const storedVersion = await AsyncStorage.getItem('appVersion');
-      if (storedVersion !== currentVersion) {
-        await AsyncStorage.setItem('appVersion', currentVersion);
+      if (storedVersion) {
+        if (storedVersion !== currentVersion) {
+          await AsyncStorage.clear();
+          await AsyncStorage.setItem('appVersion', currentVersion);
+        }
+      } else {
         await AsyncStorage.clear();
+        await AsyncStorage.setItem('appVersion', currentVersion);
       }
     };
     // Check for Updates to Clear Data
-    if (Platform.OS === 'ios') {
-      checkForUpdate();
-    }
+    checkForUpdate();
   }, []);
   return (
     <AuthProvider>
