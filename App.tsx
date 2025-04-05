@@ -10,6 +10,7 @@ enableScreens();
 function App() {
   useEffect(() => {
     const checkForUpdate = async () => {
+      //await AsyncStorage.clear();
       const currentVersion = DeviceInfo.getVersion();
       const storedVersion = await AsyncStorage.getItem('appVersion');
       if (storedVersion) {

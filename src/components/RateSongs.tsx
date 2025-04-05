@@ -189,7 +189,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
 
   const progressBar = (position: number): number => {
     if (redirect !== 'Charts' && redirect !== 'Profile') {
-      if (position >= 60 && !isVoteReady) {
+      if (position >= 5 && !isVoteReady) {
         setIsVoteReady(true);
       }
     }
@@ -317,6 +317,15 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
     }
   };
 
+  const toggleSkipNext = () => {
+    setModalForward(false);
+    if (!showAutoPlayNext) {
+      setShowAutoPlayNext(true);
+    } else {
+      resetPlayer();
+    }
+  };
+
   const confirmNext = async () => {
     setShowScore(false);
     if (!showAutoPlayNext) {
@@ -332,7 +341,11 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
       JSON.stringify(autoPlayNext),
     );
     setShowAutoPlayNext(false);
-    resetPlayer();
+    if (autoPlayNext === 'yes') {
+      resetPlayer(true);
+    } else {
+      resetPlayer();
+    }
   };
 
   useEffect(() => {
@@ -356,8 +369,10 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
       const storedAutoPlayNext = await AsyncStorage.getItem(
         STORAGE_AUTOPLAY_KEY,
       );
-      if (storedAutoPlayNext) {
-        setAutoPlayNext(autoPlayNext); // Set the saved option
+      if (storedAutoPlayNext === 'yes') {
+        setAutoPlayNext('yes');
+      } else {
+        setAutoPlayNext('no');
       }
     };
     AssignedAutoPlayNext();
@@ -844,7 +859,7 @@ const RateSongs: React.FC<Props> = ({item, filter, redirect}) => {
                     modal.buttonModalContainer,
                     Typography.mb,
                   ]}
-                  onPress={() => setModalVisible(false)}
+                  onPress={toggleSkipNext}
                   label="Yes, Skip"
                 />
                 <Button
